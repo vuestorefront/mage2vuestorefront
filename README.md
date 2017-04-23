@@ -27,8 +27,13 @@ Config -see: config.js or use following ENV variables:
 
 Run:
 - cd src/
-- node --harmony index.js products --partitions=10
-- node --harmony index.js categories
+- node --harmony cli.js products --partitions=10
+- node --harmony cli.js products --partitions=10 --initQueue=false - run the products sync worker (product sync jobs should be populated eslewhere - it's used to run multi-tenant environment of workers)
+- node --harmony cli.js products --partitions=10 --delta=true - check products changed since last run (last run data is stored in mongodb); compared by updated_at field
+- node --harmony cli.js categories
+- node --harmony cli.js --adapter=magento --partitions=1 --skus=24-WG082-blue,24-WG082-pink products  - to pull out only selected SKUs
+- node --harmony cli.js --adapter=magento --partitions=10 productsworker  - run queue worker for pulling out individual products (jobs can be assigned by webapi.js microservice triggers)
+- node --harmony webapi.js - run localhost:3000 service endpoint for adding queue tasks
 
 Available options:
 - partitions=10 - number of concurent processes
