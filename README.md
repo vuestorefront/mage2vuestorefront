@@ -37,6 +37,11 @@ Run:
 - `node --harmony cli.js --adapter=magento --partitions=10 productsworker`  - run queue worker for pulling out individual products (jobs can be assigned by webapi.js microservice triggers)
 - `node --harmony webapi.js` - run localhost:3000 service endpoint for adding queue tasks
 
+WebAPI:
+- `node --harmony webapi.js`
+- `curl localhost:8080/api/magento/products/pull/WT09-XS-Purple` - to schedule data refresh for SKU=WT09-XS-Purple
+- `node --harmony cli.js productsworker` - to run pull request processor 
+
 Available options:
 - `partitions=10` - number of concurent processes, by default number of CPUs core given
 - `adapter=magento` - for now only Magento is supported
