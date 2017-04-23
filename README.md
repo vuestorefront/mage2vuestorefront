@@ -1,4 +1,4 @@
-# microservicesframework / datasync
+# microservices/ mage2mongo
 Magento/Shopify/YouNameIt -> MongoDB sync
 
 This is multi-process data synchronizator between Magento (and in further versions Shopify / other platforms) to local MongoDB database.
