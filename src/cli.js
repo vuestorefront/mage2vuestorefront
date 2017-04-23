@@ -69,13 +69,17 @@ cli.command('categories', function(){
 */
 cli.command('productsworker', function(){
 
+  logger.info('Starting `productsworker` worker. Waiting for jobs ...');
   let partition_count = cli.options.partitions;
 
   // TODO: separte the execution part to run in multi-tenant env
   queue.process('product', partition_count, (job,done) => {
 
-    let adapter = factory.getAdapter(cli.options.adapter, 'products'); // to avoid multi threading mongo error
-    if(job && job.skus){
+    if(job && job.data.skus){
+
+      logger.info('Starting product pull job for ' + job.data.skus.join(',') );
+
+      let adapter = factory.getAdapter(job.data.adapter ? job.data.adapter : cli.options.adapter, 'products'); // to avoid multi threading mongo error
 
       adapter.run({ skus: job.data.skus, done_callback: ()=> {
           logger.info('Task done!');

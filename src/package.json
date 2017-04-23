@@ -4,7 +4,9 @@
   "description": "Magento sync for products, categories, users and orders",
   "main": "cli.js",
   "dependencies": {
+    "body-parser": "^1.17.1",
     "command-router": "^1.0.1",
+    "express": "^4.15.2",
     "kue": "^0.11.5",
     "magento2-rest-client": "0.0.2",
     "mongodb": "^2.2.26"
