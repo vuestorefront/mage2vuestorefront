@@ -2,7 +2,7 @@
   "name": "magentosync",
   "version": "1.0.0",
   "description": "Magento sync for products, categories, users and orders",
-  "main": "index.js",
+  "main": "cli.js",
   "dependencies": {
     "command-router": "^1.0.1",
     "kue": "^0.11.5",

@@ -18,8 +18,10 @@ class AbstractAdapter{
     this.page_count = 0;
     this.page_size = 50;
     this.page = 0;
+    this.current_context = {};
 
     this.use_paging = false;
+    this.is_federated = false;
 
     this.validateConfig(this.config);
     this.processItems = this.processItems.bind(this);
@@ -30,6 +32,9 @@ class AbstractAdapter{
   }
 
 
+  getCurrentContext(){
+    return this.current_context;
+  }
 
   run (context){
 
@@ -37,6 +42,7 @@ class AbstractAdapter{
        logger.info("Connected correctly to server");
 
        this.db = db;
+       this.current_context = context;
 
        this.onDone = context.done_callback ? context.done_callback : () => {};
        this.getSourceData(context).then(this.processItems);
@@ -47,6 +53,9 @@ class AbstractAdapter{
   }
 
   prepareItems(items){
+    if(items.totalCount)
+      this.total_count = items.totalCount;
+
     if(!Array.isArray(items))
       items = new Array(items);
 
@@ -54,7 +63,7 @@ class AbstractAdapter{
   }
 
   isFederated(){
-    return false;
+    return this.is_federated;
   }
 
   processItems(items, level){
@@ -67,6 +76,10 @@ class AbstractAdapter{
     let count =  items.length;
     let index = 0;
 
+    if(count == 0){
+      logger.warn('No records to process!');
+      return this.onDone(this);
+    }
 
     let db = this.db;
     if(!db)
@@ -74,6 +87,7 @@ class AbstractAdapter{
 
     items.map( (item) => {
 
+      logger.info('Total count is: ' + this.total_count)
       logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item));
 
         db.collection(this.getCollectionName()).findAndModify(
@@ -98,9 +112,9 @@ class AbstractAdapter{
 
             if(level == 0){
 
-              if(this.use_paging  && !this.isFederated()){
+              if(this.use_paging  && !this.isFederated()){ //TODO: paging should be refactored using queueing
 
-                  if(this.page >= this.page_count){
+                  if(this.page >= (this.page_count-1)){
                     logger.info('All pages processed!');
                     db.close();
 
@@ -110,7 +124,7 @@ class AbstractAdapter{
                     this.page ++;
                     logger.debug('Switching page to ' + this.page);
 
-                    this.getSourceData({}).then(this.processItems);
+                    this.getSourceData(this.getCurrentContext()).then(this.processItems);
                 }
 
               } else {
