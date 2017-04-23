@@ -11,8 +11,12 @@ At this point synchronization works with following entities:
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
+MongoDB is used for NoSQL database
+Redis is used for KUE queue backend
 
-Start MongoDB:
+By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
+
+Start MongoDB and Redis:
 - `docker-compose up`
 
 Install:
