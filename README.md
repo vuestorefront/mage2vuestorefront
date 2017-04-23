@@ -1,7 +1,9 @@
 # microservices/ mage2mongo
 Magento/Shopify/YouNameIt -> MongoDB sync
 
-This is multi-process data synchronizator between Magento (and in further versions Shopify / other platforms) to local MongoDB database.
+For those who would love to work with Magento on backend but use NoSQL power on the frontend. Two way / real time data synchronizer.
+
+This is multi-process data synchronizer between Magento (and in further versions Shopify / other platforms) to local MongoDB database.
 
 At this point synchronization works with following entities:
 - Products
