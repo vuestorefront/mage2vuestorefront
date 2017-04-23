@@ -11,8 +11,12 @@ At this point synchronization works with following entities:
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
+MongoDB is used for NoSQL database
+Redis is used for KUE queue backend
 
-Start MongoDB:
+By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
+
+Start MongoDB and Redis:
 - `docker-compose up`
 
 Install:
@@ -36,6 +40,11 @@ Run:
 - `node --harmony cli.js --adapter=magento --partitions=1 --skus=24-WG082-blue,24-WG082-pink products`  - to pull out only selected SKUs
 - `node --harmony cli.js --adapter=magento --partitions=10 productsworker`  - run queue worker for pulling out individual products (jobs can be assigned by webapi.js microservice triggers)
 - `node --harmony webapi.js` - run localhost:3000 service endpoint for adding queue tasks
+
+WebAPI:
+- `node --harmony webapi.js`
+- `curl localhost:8080/api/magento/products/pull/WT09-XS-Purple` - to schedule data refresh for SKU=WT09-XS-Purple
+- `node --harmony cli.js productsworker` - to run pull request processor 
 
 Available options:
 - `partitions=10` - number of concurent processes, by default number of CPUs core given
