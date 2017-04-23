@@ -11,13 +11,13 @@ Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
 
 Start MongoDB:
-- docker-compose up
+- `docker-compose up`
 
 Install:
 - npm install
 
 Config -see: config.js or use following ENV variables: 
-- MAGENTO_URL
+- MAGENTO_URL`
 - MAGENTO_CONSUMER_KEY
 - MAGENTO_CONSUMER_SECRET
 - MAGENTO_ACCESS_TOKEN
