@@ -5,7 +5,7 @@ let auth = require("../auth.js")();
 let users = require("../users.js");
 let config = require("../../config.js");
 let router = express.Router();
-let jwt = require("jwt-simple");  
+let jwt = require("jwt-simple");
 
 
 router.post("/token", function(req, res) {

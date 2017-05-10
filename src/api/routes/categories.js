@@ -1,18 +1,25 @@
 'use strict';
 let express = require('express');
 let router = express.Router();
+let config = require('../../config');
+let MongoClient = require('mongodb').MongoClient;
+let q2m = require('query-to-mongo');
+let auth = require('../auth')();
 
-router.get('/categories/tree', function(req, res) {
+router.get('/browse', auth.authenticate(), function(req, res) {
 
-});
+  MongoClient.connect(config.db.url, (err, db) => {
+
+    var collection = db.collection('categories')
+    var query = q2m(req.query);
+    console.log(query);
 
 
-router.get('/categories/list', function(req, res) {
+    collection.find(query.criteria, query.options).toArray(function(err, results) {
+      res.json(results);
+    })
 
-});
-
-router.get('/categories/:id', function(req, res) {
-
+  });
 });
 
 
