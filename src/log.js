@@ -7,7 +7,7 @@ if(!global.logger) {
       transports: [
           new winston.transports.Console({
               level: 'debug',
-              handleExceptions: true,
+              handleExceptions: false,
               json: false,
               prettyPrint: true,
               colorize: true

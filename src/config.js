@@ -10,6 +10,13 @@ module.exports = {
 
   db: {
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom'
+  },
+
+  passport: {
+    jwtSecret: "MyS3cr3tK3Y",
+    jwtSession: {
+        session: false
+      }
   }
 
 }
