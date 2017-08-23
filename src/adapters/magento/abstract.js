@@ -41,10 +41,6 @@ class AbstractMagentoAdapter extends AbstractAdapter{
     throw new Error('getSourceData must be implemented');
   }
 
-  getWhereQuery(source_item){
-    return { id: source_item.id };
-  }
-
   getLabel(source_item){
     return source_item.id;
   }

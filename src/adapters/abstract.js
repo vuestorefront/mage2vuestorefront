@@ -1,6 +1,8 @@
 'use strict';
 
-let MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
+const AdapterFactory = require('./factory');
+
 
 class AbstractAdapter{
 
@@ -13,6 +15,10 @@ class AbstractAdapter{
 
   constructor(app_config){
     this.config = app_config;
+
+    let factory = new AdapterFactory(app_config);
+    this.db = factory.getAdapter('nosql', app_config.db.driver);
+    
     this.db = null;
     this.total_count = 0;
     this.page_count = 0;
@@ -31,24 +37,25 @@ class AbstractAdapter{
     throw Error('isValidFor must be implemented in specific class');
   }
 
-
   getCurrentContext(){
     return this.current_context;
   }
 
+  
+/**
+ * Run products/categories/ ... import 
+ * @param {Object} context import context with parameter such "page", "size" and other search parameters
+ */
   run (context){
 
-    MongoClient.connect(this.config.db.url, (err, db) => {
-       logger.info("Connected correctly to server");
+    this.current_context = context;
+    this.db.connect(function () {
+      logger.info("Connected correctly to server");
 
-       this.db = db;
-       this.current_context = context;
-
-       this.onDone = context.done_callback ? context.done_callback : () => {};
-       this.getSourceData(context).then(this.processItems);
-
-     });
-
+      this.onDone = this.current_context.done_callback ? this.current_context.done_callback : () => {};
+      this.getSourceData(this.current_context).then(this.processItems);
+      
+    });
 
   }
 
@@ -90,16 +97,7 @@ class AbstractAdapter{
       logger.info('Total count is: ' + this.total_count)
       logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item));
 
-        db.collection(this.getCollectionName()).findAndModify(
-        this.getWhereQuery(item), // query
-        [['_id','asc']],  // sort order
-        {$set: item }, // replacement, replaces only the field "hi"
-        { upsert: true }, // options
-        function(err, object) {
-            if (err){
-                logger.warn(err.message);  // returns error if no matching object found
-            }
-          });
+        this.db.updateDocument(this.getCollectionName(), item);
 
           if(item.childrenData && item.childrenData.length > 0){
             logger.log('--L:' + level + ' Processing child items ...');
@@ -116,7 +114,7 @@ class AbstractAdapter{
 
                   if(this.page >= (this.page_count-1)){
                     logger.info('All pages processed!');
-                    db.close();
+                    this.db.close();
 
                     this.onDone(this);
                   } else  {
@@ -129,7 +127,7 @@ class AbstractAdapter{
 
               } else {
                 logger.info('All records processed!');
-                db.close();
+                this.db.close();
 
                 return this.onDone(this);
 
