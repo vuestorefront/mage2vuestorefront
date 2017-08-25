@@ -59,7 +59,7 @@ cli.option({ // check only records modified from the last run - can be executed 
 * Sync categories
 */
 cli.command('categories', function(){
-  let adapter = factory.getAdapter(cli.options.adapter, 'categories');
+  let adapter = factory.getAdapter(cli.options.adapter, 'category');
   adapter.run({});
 
 });
@@ -79,7 +79,7 @@ cli.command('productsworker', function(){
 
       logger.info('Starting product pull job for ' + job.data.skus.join(',') );
 
-      let adapter = factory.getAdapter(job.data.adapter ? job.data.adapter : cli.options.adapter, 'products'); // to avoid multi threading mongo error
+      let adapter = factory.getAdapter(job.data.adapter ? job.data.adapter : cli.options.adapter, 'product'); // to avoid multi threading mongo error
 
       adapter.run({ skus: job.data.skus, done_callback: ()=> {
           logger.info('Task done!');
@@ -100,7 +100,7 @@ cli.command('productsworker', function(){
 */
 cli.command('products', function(){
 
-  let adapter = factory.getAdapter(cli.options.adapter, 'products');
+  let adapter = factory.getAdapter(cli.options.adapter, 'product');
   let updated_after = new Date('2016-08-02 13:46:54');
 
 
@@ -130,7 +130,7 @@ cli.command('products', function(){
       // TODO: separte the execution part to run in multi-tenant env
       queue.process('products', partition_count, (job,done) => {
 
-        let adapter = factory.getAdapter(cli.options.adapter, 'products'); // to avoid multi threading mongo error
+        let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
         if(job && job.data.page && job.data.page_size ){
           logger.info('Processing job: ' + job.data.page);
 

@@ -60,7 +60,7 @@ class AbstractAdapter{
 
   prepareItems(items){
     if(items.totalCount)
-      this.total_count = items.totalCount;
+      this.total_count = items.total_count;
 
     if(!Array.isArray(items))
       items = new Array(items);
@@ -96,7 +96,7 @@ class AbstractAdapter{
       logger.info('Total count is: ' + this.total_count)
       logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item));
 
-        this.db.updateDocument(this.getCollectionName(), item);
+        this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
 
           if(item.childrenData && item.childrenData.length > 0){
             logger.log('--L:' + level + ' Processing child items ...');

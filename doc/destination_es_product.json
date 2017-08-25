@@ -1,0 +1,122 @@
+"entity_id": "1351",
+"attribute_set_id": "10",
+"type_id": "simple",
+"sku": "6343908",
+"has_options": "0",
+"required_options": "0",
+"created_at": "2017-04-06 16:25:59",
+"updated_at": "2017-04-06 16:25:59",
+"visibility": "4",
+"price": [
+    {
+        "price": "32.5000",
+        "original_price": "34.9000",
+        "is_discount": true,
+        "customer_group_id": "0"
+    },
+    {
+        "price": "32.5000",
+        "original_price": "34.9000",
+        "is_discount": true,
+        "customer_group_id": "1"
+    },
+    {
+        "price": "32.5000",
+        "original_price": "34.9000",
+        "is_discount": true,
+        "customer_group_id": "4"
+    },
+    {
+        "price": "32.5000",
+        "original_price": "34.9000",
+        "is_discount": true,
+        "customer_group_id": "5"
+    }
+],
+"category": [
+    {
+        "category_id": 2
+    },
+    {
+        "category_id": 4,
+        "is_parent": true,
+        "name": "Książki"
+    },
+    {
+        "category_id": 26,
+        "is_parent": true,
+        "name": "biznes"
+    },
+    {
+        "category_id": 232,
+        "is_parent": true,
+        "name": " praca"
+    },
+    {
+        "category_id": 3101,
+        "name": "GRUPY"
+    },
+    {
+        "category_id": 3220,
+        "is_parent": true,
+        "name": " Donald Trump. 45. Prezydent Stanów Zjednoczonych "
+    }
+],
+"name": [
+    "Sukces mimo wszystko. Donald Trump"
+],
+"image": [
+    "/9/9/99906343908.jpg"
+],
+"ean": [
+    "9788328333772"
+],
+"pkwiu": [
+    "58.11"
+],
+"availability": [
+    "7"
+],
+"isbn": [
+    "978-83-283-3377-2"
+],
+"authors_es": [
+    "_68450_,_68449_,_68450_,_68449_"
+],
+"publishers_es": [
+    "_62556_,_62556_,_62556_,_62556_"
+],
+"producers_es": [
+    "_62556_,_62556_,_62556_,_62556_"
+],
+"status": [
+    1
+],
+"option_text_status": [
+    "Enabled"
+],
+"tax_class_id": [
+    2
+],
+"option_text_tax_class_id": [
+    "Taxable Goods"
+],
+"description": [
+"<h3>Ucz się od mistrza, a będziesz mieć świat u st&oacute;p!</h3> Kto powiedział, że cokolwiek na świecie jest poza Twoim zasięgiem? Pewnie nie zostaniesz już ani pierwszym kosmonautą, ani odkrywcą Ameryki, ale w gruncie rzeczy możesz osiągnąć niemal wszystko! Kluczem do sukcesu &mdash; Twojego i wszystkich innych ludzi &mdash; jest edukacja! Badania i wiedza, eksperymentowanie i doświadczanie: to wszystko stoi za sukcesem <strong>Donalda Trumpa</strong>. To dzięki nim ten ekscentryczny miliarder odnosi sukcesy we wszystkim, czego się dotknie. To nie magia &mdash; to twarde dane, chłodne analizy, podstawowe zasady relacji biznesowych i społecznych.<br /> <br /> W tej książce <strong>Donald Trump</strong> pokazuje nam, skąd sam czerpie wiedzę i jak wykorzystuje ją na co dzień. Dzieli się swoimi przemyśleniami, odpowiada na pytania zadawane mu na blogu i daje wskaz&oacute;wki swoim ewentualnym naśladowcom. Jeśli chcesz wspiąć się na sam szczyt ekonomicznej (lub społecznej) piramidy, jeśli nie boisz się wyzwań i ciężkiej pracy, jesteś głodny sukcesu i got&oacute;w na wiele wyrzeczeń, sprawdź, jak może Ci w tym pom&oacute;c <strong>Donald Trump</strong>. Zobacz, co naprawdę napędza świat biznesu, jak nakreślić skuteczny plan działania i nieustępliwie walczyć o swoje. Odkryj w sobie pasję i pozytywną motywację, stale poszerzaj horyzonty i nikomu nie daj się zastraszyć ani zepchnąć z obranej drogi. A przede wszystkim r&oacute;b to, co Ci sprawia przyjemność, co stanowi Twoją prawdziwą pasję, co budzi w Tobie dreszcz podniecenia. Podążaj za wskaz&oacute;wkami nowego prezydenta Stan&oacute;w Zjednoczonych, a świat stanie przed Tobą otworem! <ul> <li>Zawsze mierz wysoko.</li> <li>Stale dąż do perfekcji.</li> <li>Nie lekceważ przeczuć.</li> <li>Stawiaj na aktywność.</li> <li>Wykonuj pracę, kt&oacute;rą kochasz.</li> </ul> <h3>Odważni ludzie wyrastają ponad szklany sufit!</h3> <hr /><strong>Donald J. Trump</strong> &mdash; człowiek, kt&oacute;rego właściwie nie trzeba nikomu przedstawiać. Krezus i ekscentryk, prezes Organizacji Trumpa, nowy prezydent Stan&oacute;w Zjednoczonych. Z zawodu inwestor nieruchomości i autor bestseller&oacute;w, z zamiłowania filantrop.	"
+],
+"short_description": [
+    "Ucz się od mistrza, a będziesz mieć świat u st&oacute;p! Kto powiedział, że cokolwiek na świecie jest poza Twoim zasięgiem? Pewnie nie zostaniesz już ani pierwszym kosmonautą, ani odkrywcą Ameryki, ale w gruncie rzeczy możesz osiągnąć niemal wszystko!..."
+],
+"special_price": [
+    32.5
+],
+"stock": {
+    "is_in_stock": true,
+    "qty": 0
+}
+},
+"sort": [
+"59",
+"59"
+]
+}

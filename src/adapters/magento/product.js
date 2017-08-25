@@ -2,7 +2,7 @@
 
 let AbstractMagentoAdapter = require('./abstract');
 
-class ProductsAdapter extends AbstractMagentoAdapter{
+class ProductAdapter extends AbstractMagentoAdapter{
 
   constructor(config){
     super(config);
@@ -11,11 +11,11 @@ class ProductsAdapter extends AbstractMagentoAdapter{
   }
 
   getEntityType(){
-    return 'products';
+    return 'product';
   }
 
   getName(){
-    return 'adapters/magento/ProductsAdapter';
+    return 'adapters/magento/ProductAdapter';
   }
 
   prepareItems(items){
@@ -101,6 +101,45 @@ class ProductsAdapter extends AbstractMagentoAdapter{
     return '[(' + source_item.id +' - ' + source_item.sku + ') ' + source_item.name + ']';
   }
 
+
+  /**
+   * We're transorming the data structure of item to be compliant with Smile.fr Elastic Search Suite
+   * @param {object} item  document to be updated in elastic search
+   */
+  normalizeDocumentFormat(item) {
+        let prices = new Array();
+    
+        prices.push({
+          "price": item.price,
+        });
+    
+        for (let priceTag of item.tier_prices) {
+          prices.push({
+            "price": priceTag.value,
+            "original_price": priceTag.original_price,
+            "customer_group_id": priceTag.customerGroupId,
+            "qty": priceTag.qty
+          });
+        }
+    
+    
+        let resultItem = Object.assign(item, {
+          "price": prices, // ES stores prices differently
+          "name": [ // and names!
+            item.name
+          ],
+          // HOW TO GET product stock from Magento API call for product?
+        });
+       
+        for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
+          resultItem[customAttribute.attribute_code] = customAttribute.value;
+        }
+        resultItem.custom_attributes = null;
+        return resultItem;
+    
+      }
+      
+
 }
 
-module.exports = ProductsAdapter;
+module.exports = ProductAdapter;
