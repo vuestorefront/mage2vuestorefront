@@ -56,7 +56,10 @@ class ProductsAdapter extends AbstractMagentoAdapter{
     let query = this.getFilterQuery(context);
 
     if(context.for_total_count){ // get total counts
-      return this.api.products.list('&searchCriteria[currentPage]=1&searchCriteria[pageSize]=1');
+      return this.api.products.list('&searchCriteria[currentPage]=1&searchCriteria[pageSize]=1').catch(function(err)
+      {
+          throw new Error(err);
+      });
     } else if(context.page && context.page_size){
 
       this.use_paging = false;
@@ -68,14 +71,23 @@ class ProductsAdapter extends AbstractMagentoAdapter{
       logger.debug('Using specific paging options from adapter context: ' + context.page + ' / ' + context.page_size);
 
 
-      return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : ''));
+      return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch(function(err)
+      {
+          throw new Error(err);
+      });
 
     }else if (this.use_paging){
       this.is_federated = false; // federated execution is not compliant with paging
-      console.log('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : ''));
-      return this.api.products.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : ''));
+      logger.debug('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : ''));
+      return this.api.products.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : '')).catch(function(err)
+      {
+          throw new Error(err);
+      });
     } else
-      return this.api.products.list();
+      return this.api.products.list().catch(function(err)
+      {
+          throw new Error(err);
+      });
   }
 
 

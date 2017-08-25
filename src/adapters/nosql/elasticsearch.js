@@ -1,5 +1,6 @@
 'use strict';
 const AbstractNosqlAdapter = require('./abstract');
+const elasticsearch = require('elasticsearch');
 
 class ElasticsearchAdapter extends AbstractNosqlAdapter{
 
@@ -8,16 +9,20 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter{
     if(!config['db']['url'])
       throw Error('db.url must be set up in config');
 
+    if(!config['db']['indexName'])
+      throw Error('db.indexName must be set up in config');
+
   }
 
   constructor(app_config){
     super(app_config);
-    
+
     this.config = app_config;
     this.db = null;
     this.validateConfig(this.config);
 
     logger.debug('Elasticsearch module initialized!');
+    this.updateDocument.bind(this);
   }
 
 
@@ -33,7 +38,16 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter{
  * @param {object} item document to be updated in database
  */
   updateDocument(collectionName, item) {
-    throw new Error('Needs implementation!');
+
+    this.db.update({
+      index: this.config.db.indexName,
+      id: item.id,
+      body: {
+        // put the partial document under the `doc` key
+        upsert: Object.assign(item, {updated_at: new Date() })
+      }
+    }, function (error, response) {
+    });
   }
   
   

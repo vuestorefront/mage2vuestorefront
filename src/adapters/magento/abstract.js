@@ -10,7 +10,6 @@ class AbstractMagentoAdapter extends AbstractAdapter{
 
     let Magento2Client = require('magento2-rest-client').Magento2Client;
     this.api = Magento2Client(this.config.magento);
-
   }
 
   getEntityType(){

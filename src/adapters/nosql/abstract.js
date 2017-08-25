@@ -13,6 +13,7 @@ class AbstractNosqlAdapter{
     this.config = app_config;
     this.db = null;
     this.validateConfig(this.config);
+    this.updateDocument.bind(this);
   }
 
   /**

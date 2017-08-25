@@ -1,6 +1,9 @@
 'use strict';
 const AbstractNosqlAdapter = require('./abstract');
 
+/**
+ * @deprecated This module hasn't been updated till ElasticSearch support got introduced. The data format is not compliant with ES module
+ */
 class MongoAdapter extends AbstractNosqlAdapter{
 
   validateConfig(config){
@@ -38,7 +41,7 @@ class MongoAdapter extends AbstractNosqlAdapter{
     this.db.collection(collectionName).findAndModify(
       this.getWhereQuery(item), // query
       [['_id','asc']],  // sort order
-      {$set: item }, // replacement, replaces only the field "hi"
+      {$set: item }, // replacement, replaces only the field "hi" TODO: Apply the very same format ElasticSearch module have
       { upsert: true }, // options
       function(err, object) {
           if (err){

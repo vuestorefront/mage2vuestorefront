@@ -13,7 +13,8 @@ module.exports = {
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom' */
   
     driver: 'elasticsearch',
-    url: process.env.DATABASE_URL || 'http://localhost:9200' 
+    url: process.env.DATABASE_URL || 'http://localhost:9200',
+    'indexName': 'vue_storefront_catalog'
   },
 
   passport: {

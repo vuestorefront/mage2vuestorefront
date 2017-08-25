@@ -19,7 +19,6 @@ class AbstractAdapter{
     let factory = new AdapterFactory(app_config);
     this.db = factory.getAdapter('nosql', app_config.db.driver);
     
-    this.db = null;
     this.total_count = 0;
     this.page_count = 0;
     this.page_size = 50;
@@ -49,13 +48,13 @@ class AbstractAdapter{
   run (context){
 
     this.current_context = context;
-    this.db.connect(function () {
+    this.db.connect((function () {
       logger.info("Connected correctly to server");
 
       this.onDone = this.current_context.done_callback ? this.current_context.done_callback : () => {};
       this.getSourceData(this.current_context).then(this.processItems);
       
-    });
+    }).bind(this));
 
   }
 
