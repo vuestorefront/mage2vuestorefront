@@ -98,9 +98,9 @@ class AbstractAdapter{
 
         this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
 
-          if(item.childrenData && item.childrenData.length > 0){
+          if(item.children_data && item.children_data.length > 0){
             logger.log('--L:' + level + ' Processing child items ...');
-            this.processItems(item.childrenData, level + 1);
+            this.processItems(item.children_data, level + 1);
           }
 
           if(index == (count-1)) // page done!

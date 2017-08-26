@@ -30,6 +30,7 @@ class CategoryAdapter extends AbstractMagentoAdapter{
    * @param {object} item  document to be updated in elastic search
    */
   normalizeDocumentFormat(item) {
+    console.log(item);
     return item;
   }
 

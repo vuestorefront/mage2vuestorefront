@@ -1,0 +1,12 @@
+{
+    "id": 0,
+    "parent_id": 0,
+    "name": "string",
+    "is_active": true,
+    "position": 0,
+    "level": 0,
+    "product_count": 0,
+    "children_data": [
+      {}
+    ]
+  }
