@@ -1,6 +1,8 @@
 'use strict';
 const AbstractNosqlAdapter = require('./abstract');
 const elasticsearch = require('elasticsearch');
+const AgentKeepAlive = require('agentkeepalive');
+
 
 class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
@@ -30,7 +32,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
    * Close the nosql database connection - abstract to the driver
    */
   close() {
-    throw new Error('Needs implementation!');
+    return;
   }
 
 
@@ -41,7 +43,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   updateDocument(collectionName, item) {
 
     const itemtbu = item;
-    console.log(itemtbu);
 
     this.db.update({
       index: this.config.db.indexName,
@@ -54,11 +55,57 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
       }
     }, function (error, response) {
-      if(error)
+      if (error)
         throw new Error(error);
     });
   }
 
+
+  /**
+   * Update multiple documents in database
+   * @param {array} items to be updated
+   */
+  updateDocumentBulk(collectionName, items) {
+
+    let requests = new Array();
+    let index = 0;
+    let bulkSize = 500;
+
+    for (let doc of items) {
+      requests.push({
+        update: {
+          _index: this.config.db.indexName,
+          _id: doc.id,
+          _type: collectionName,
+        }
+      });
+
+      requests.push({
+
+        // put the partial document under the `doc` key
+        doc: doc,
+        "doc_as_upsert": true
+
+      });
+
+      if ((index % bulkSize) == 0) {
+        logger.debug('Splitting bulk query ' + index);
+        this.db.bulk({
+          body: requests
+        }, function (error, response) {
+          if (error)
+            throw new Error(error);
+        });
+
+        requests = new Array();
+      }
+
+      index++;
+    }
+
+
+
+  }
 
   /**
    * Connect / prepare driver
@@ -67,7 +114,17 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   connect(done) {
     this.db = new elasticsearch.Client({
       host: this.config.db.url,
-      log: 'trace'
+      log: 'error',
+
+      maxRetries: 10,
+      keepAlive: true,
+      maxSockets: 10,
+      minSockets: 10,
+      requestTimeout: 1800000,
+      createNodeAgent: function (connection, config) {
+        return new AgentKeepAlive(connection.makeAgentConfig(config));
+      }
+
     });
 
     done(this.db);

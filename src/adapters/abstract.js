@@ -19,6 +19,8 @@ class AbstractAdapter{
     let factory = new AdapterFactory(app_config);
     this.db = factory.getAdapter('nosql', app_config.db.driver);
     
+    this.update_document = true; // should we update database with new data from API? @see productcategory where this is disabled
+
     this.total_count = 0;
     this.page_count = 0;
     this.page_size = 50;
@@ -40,6 +42,12 @@ class AbstractAdapter{
     return this.current_context;
   }
 
+  /**
+   * Default done callback called after all main items are processed by processItems
+   */
+  defaultDoneCallback(){
+    return;
+  }
   
 /**
  * Run products/categories/ ... import 
@@ -51,13 +59,19 @@ class AbstractAdapter{
     this.db.connect((function () {
       logger.info("Connected correctly to server");
 
-      this.onDone = this.current_context.done_callback ? this.current_context.done_callback : () => {};
+      this.onDone = this.current_context.done_callback ? this.current_context.done_callback : this.defaultDoneCallback;
       this.getSourceData(this.current_context).then(this.processItems);
       
     }).bind(this));
 
   }
-
+/**
+ * Implement some item related operations - executed BEFORE saving to the database
+ * @param {Object} item 
+ */
+  preProcessItem(item){
+    return item;
+  }
   prepareItems(items){
     if(items.totalCount)
       this.total_count = items.total_count;
@@ -96,7 +110,12 @@ class AbstractAdapter{
       logger.info('Total count is: ' + this.total_count)
       logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item));
 
-        this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
+        this.preProcessItem(item);
+
+        if(this.update_document)
+          this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
+        else
+          logger.debug('Skiping database update');
 
           if(item.children_data && item.children_data.length > 0){
             logger.log('--L:' + level + ' Processing child items ...');

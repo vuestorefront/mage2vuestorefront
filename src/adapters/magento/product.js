@@ -101,6 +101,14 @@ class ProductAdapter extends AbstractMagentoAdapter{
     return '[(' + source_item.id +' - ' + source_item.sku + ') ' + source_item.name + ']';
   }
 
+  /**
+   * 
+   * @param {Object} item 
+   */
+  preProcessDocument(item){
+    // TODO: add denormalization of productcategories into product categories
+    // DO NOT use "productcategories" type but rather do search categories with assigned products
+  }
 
   /**
    * We're transorming the data structure of item to be compliant with Smile.fr Elastic Search Suite

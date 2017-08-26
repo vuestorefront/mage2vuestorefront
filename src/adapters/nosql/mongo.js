@@ -51,6 +51,16 @@ class MongoAdapter extends AbstractNosqlAdapter{
 
 
   }
+
+    /**
+   * Update multiple documents in database
+   * @param {array} items to be updated
+   */
+  updateDocumentBulk(collectionName, items) {
+    for (let doc of items) {
+      this.updateDocument(collectionName, doc); // TODO: use native Mongodb bulk update's support
+     }
+  }
   
 /**
  * Connect / prepare driver

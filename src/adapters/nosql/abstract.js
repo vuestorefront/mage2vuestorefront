@@ -28,7 +28,7 @@ class AbstractNosqlAdapter{
    * Close the nosql database connection - abstract to the driver
    */
   close(){
-    throw new Error('Needs implementation!');
+    throw new Error('close needs implementation!');
   }
 
 /**
@@ -36,15 +36,22 @@ class AbstractNosqlAdapter{
  * @param {object} item document to be updated in database
  */
   updateDocument(collectionName, item) {
-    throw new Error('Needs implementation!');
+    throw new Error('updateDocument needs implementation!');
   }
 
+  /**
+ * Update multiple documents in database
+ * @param {array} items to be updated
+ */
+  updateDocumentBulk(collectionName, items){
+    throw new Error('updateDocumentBulk needs implementation!');
+  }
   
 /**
  * Connect / prepare driver
  */
   connect (done){
-    throw new Error('Needs implementation!');
+    throw new Error('connect needs implementation!');
   }
 
 

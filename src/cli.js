@@ -65,6 +65,16 @@ cli.command('categories', function(){
 });
 
 /**
+* Sync product-category-links
+*/
+cli.command('productcategories', function(){
+  let adapter = factory.getAdapter(cli.options.adapter, 'productcategories');
+  adapter.run({});
+
+});
+
+
+/**
 * Sync products worker
 */
 cli.command('productsworker', function(){

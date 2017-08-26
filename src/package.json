@@ -4,6 +4,8 @@
   "description": "Magento sync for products, categories, users and orders",
   "main": "cli.js",
   "dependencies": {
+    "agentkeepalive": "^3.3.0",
+    "async": "^2.5.0",
     "body-parser": "^1.17.1",
     "command-router": "^1.0.1",
     "express": "^4.15.2",
@@ -11,9 +13,13 @@
     "kue": "^0.11.5",
     "magento2-rest-client": "0.0.2",
     "mongodb": "^2.2.26",
+    "node-sync": "^0.2.1",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
-    "query-to-mongo": "^0.6.2"
+    "promise-queue": "^2.2.3",
+    "query-to-mongo": "^0.6.2",
+    "queue": "^4.4.0",
+    "sha1": "^1.1.1"
   },
   "devDependencies": {},
   "scripts": {
