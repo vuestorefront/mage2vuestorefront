@@ -31,8 +31,8 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   /**
    * Close the nosql database connection - abstract to the driver
    */
-  close() {
-    return;
+  close() { // switched to global singleton
+    //this.db.close();
   }
 
 
@@ -112,20 +112,25 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
    * @param {Function} done callback to be called after connection is established
    */
   connect(done) {
-    this.db = new elasticsearch.Client({
-      host: this.config.db.url,
-      log: 'error',
 
-      maxRetries: 10,
-      keepAlive: true,
-      maxSockets: 10,
-      minSockets: 10,
-      requestTimeout: 1800000,
-      createNodeAgent: function (connection, config) {
-        return new AgentKeepAlive(connection.makeAgentConfig(config));
-      }
+    if(!global.es) {
+      this.db = new elasticsearch.Client({
+        host: this.config.db.url,
+        log: 'error',
 
-    });
+        maxRetries: 10,
+        keepAlive: true,
+        maxSockets: 10,
+        minSockets: 10,
+        requestTimeout: 1800000,
+        createNodeAgent: function (connection, config) {
+          return new AgentKeepAlive(connection.makeAgentConfig(config));
+        }
+
+      });
+      global.es = this.db;
+    } else 
+      this.db = global.es;
 
     done(this.db);
   }

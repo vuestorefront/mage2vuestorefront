@@ -3,12 +3,18 @@
 let AbstractMagentoAdapter = require('./abstract');
 
 let sha1 = require('sha1');
-var queue = require('queue')
+let queue = require('queue')
+let util = require('util');
+let q = queue({ concurrency: 4 });
 
-var q = queue({ concurrency: 4 });
+const ProductCategoriesModes = {
+  SEPARATE_ELASTICSEARCH: 1,
+  UPDATE_CATEGORY: 2,
+  SEPARATE_REDIS: 3
+}
 
+const CacheKeys = require('./cache_keys');
 
-const MAX_PRODUCTS_IN_CAT = 100000;
 
 /**
  * This adapter retrieves and stores all product / category links from Magento2
@@ -21,7 +27,9 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     this.update_document = false; // this adapter works on categories but doesn't update them itself but is focused on category links instead!
     this.preProcessItem = this.preProcessItem.bind(this);
     this._storeCatLinks = this._storeCatLinks.bind(this);
-    this.store_separate_productcategories = false; // if this option is true then store separate productcategories
+
+
+    this.mode = ProductCategoriesModes.SEPARATE_REDIS;
 
     this.catLinkQueue = new Array();
   }
@@ -51,29 +59,48 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
    */
   _storeCatLinks(item, result) {
     let index = 0;
-    let length = result.length; 
+    let length = result.length;
 
 
-    if (this.store_separate_productcategories) {
-      for (let catLink of result) {
 
-        //      logger.debug('(' +index +'/' + length +  ') Storing categoryproduct link for ' + catLink.sku +' - ' + catLink.category_id);
-        catLink.id = catLink.category_id * MAX_PRODUCTS_IN_CAT + index;
+    switch (this.mode) {
 
-        index++;
+      case ProductCategoriesModes.SEPARATE_ELASTICSEARCH: {
+        for (let catLink of result) {
 
-        catLink = this.normalizeDocumentFormat(catLink);
+          //      logger.debug('(' +index +'/' + length +  ') Storing categoryproduct link for ' + catLink.sku +' - ' + catLink.category_id);
+          catLink.id = catLink.category_id * MAX_PRODUCTS_IN_CAT + index;
+
+          index++;
+
+          catLink = this.normalizeDocumentFormat(catLink);
+        }
+
+        logger.debug('Performing bulk update ...');
+        this.db.updateDocumentBulk('productcategories', result); // TODO: add support for BULK operations and DELETE 
       }
 
-      logger.debug('Performing bulk update ...');
-      this.db.updateDocumentBulk('productcategories', result); // TODO: add support for BULK operations and DELETE 
-    } else {
+      case ProductCategoriesModes.UPDATE_CATEGORY: {
+        // TODO: update products to set valid category
+        item.products = result;
+        this.db.updateDocument('category', item);
+        logger.debug('Updating category object for ' + item.id);
 
-      // TODO: update products to set valid category
-      item.products = result;
-      this.db.updateDocument('category', item); 
-      logger.debug('Updating category object for ' + item.id);
+      }
 
+      default: // update in redis = ProductCategoriesModes.SEPARATE_REDIS
+        {
+
+          logger.debug('Storing category assigments in REDIS cache');
+
+
+          for (let catLink of result) {
+            const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, catLink.sku); // store under SKU of the product the categories assigned
+
+            this.cache.sadd(key, catLink.category_id); // add categories to sets
+
+          }
+        }
     }
   }
 
@@ -83,12 +110,16 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
    */
   preProcessItem(item) {
 
-    let inst = this;
-    q.push(function () {
-      return inst.api.categoryProducts.list(item.id).then(inst._storeCatLinks.bind(inst, item)).catch(function (err) {
-        logger.error(err);
+    return new Promise((function (done, reject) {
+      let inst = this;
+      q.push(function () {
+        return inst.api.categoryProducts.list(item.id).then(inst._storeCatLinks.bind(inst, item)).catch(function (err) {
+          logger.error(err);
+        });
       });
-    });
+
+      done(item);
+    }).bind(this));
 
   }
 

@@ -1,5 +1,6 @@
 'use strict';
 
+
 class AbstractNosqlAdapter{
 
   validateConfig(config){

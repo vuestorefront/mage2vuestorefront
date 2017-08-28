@@ -1,8 +1,8 @@
 version: '2'
 services:
-  es1:
+  esm1:
     image: elasticsearch:2.4.6
-    container_name: es1
+    container_name: esm1
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -18,13 +18,14 @@ services:
       - 9200:9200
     networks:
       - esnet
-  es2:
+  esm2:
     image: elasticsearch:2.4.6
+    container_name: esm2
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=es1"
+      - "discovery.zen.ping.unicast.hosts=esm1"
     ulimits:
       memlock:
         soft: -1

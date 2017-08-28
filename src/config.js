@@ -14,7 +14,12 @@ module.exports = {
   
     driver: 'elasticsearch',
     url: process.env.DATABASE_URL || 'http://localhost:9200',
-    'indexName': 'vue_storefront_catalog'
+    indexName: 'vue_storefront_catalog'
+  },
+
+  redis: {
+    host: '127.0.0.1',
+    port: 6379
   },
 
   passport: {

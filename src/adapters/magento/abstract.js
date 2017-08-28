@@ -1,7 +1,6 @@
 'use strict';
 
 let AbstractAdapter = require('../abstract');
-
 class AbstractMagentoAdapter extends AbstractAdapter{
 
 
