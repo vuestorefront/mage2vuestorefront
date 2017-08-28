@@ -27,7 +27,7 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     this.update_document = false; // this adapter works on categories but doesn't update them itself but is focused on category links instead!
     this.preProcessItem = this.preProcessItem.bind(this);
     this._storeCatLinks = this._storeCatLinks.bind(this);
-
+    this._productHisto = new Set();
 
     this.mode = ProductCategoriesModes.SEPARATE_REDIS;
 
@@ -91,17 +91,19 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
       default: // update in redis = ProductCategoriesModes.SEPARATE_REDIS
         {
 
-          logger.debug('Storing category assigments in REDIS cache');
-
+          logger.debug('Storing category assigments in REDIS cache for ' + item.id);
 
           for (let catLink of result) {
-            const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, catLink.sku); // store under SKU of the product the categories assigned
+            const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, catLink.sku); // store under SKU of the product the categories assigned
 
             this.cache.sadd(key, catLink.category_id); // add categories to sets
-
+            this._productHisto.add(catLink.sku);
           }
         }
     }
+
+    logger.info('The task count still is = ' + this.tasks_count);
+   
   }
 
   /**
@@ -112,13 +114,15 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
 
     return new Promise((function (done, reject) {
       let inst = this;
-      q.push(function () {
-        return inst.api.categoryProducts.list(item.id).then(inst._storeCatLinks.bind(inst, item)).catch(function (err) {
+//      q.push(function () {
+       inst.api.categoryProducts.list(item.id).then(function(result) { inst._storeCatLinks.bind(inst)(item, result); done(item); }).catch(function (err) {
           logger.error(err);
+          done(item);
         });
-      });
+  //    });
 
-      done(item);
+      
+      
     }).bind(this));
 
   }
@@ -127,7 +131,15 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
    * Default done callback called after all main items are processed by processItems
    */
   defaultDoneCallback() {
-    logger.info('Please wait while product links are getting processed and stored ... ');
+    logger.info('Renaming the cache key to production! ');
+
+    for(let sku of this._productHisto){
+      const origKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, sku); 
+      const destKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, sku); 
+      logger.debug(util.format('Moving %s to %s', origKey, destKey));
+
+      this.cache.rename(origKey, destKey);
+    }
 
     q.start(function (err) {
       if (err) throw err

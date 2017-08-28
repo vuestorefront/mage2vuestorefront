@@ -69,7 +69,7 @@ class AbstractAdapter {
     this.db.connect((function () {
       logger.info("Connected correctly to server");
 
-      this.onDone = this.current_context.done_callback ? this.current_context.done_callback : this.defaultDoneCallback;
+      this.onDone = this.current_context.done_callback ? (function() { this.defaultDoneCallback(); this.current_context.done_callback()} ).bind(this) : this.defaultDoneCallback;
       this.getSourceData(this.current_context).then(this.processItems);
 
     }).bind(this));
