@@ -141,10 +141,10 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
       this.cache.rename(origKey, destKey);
     }
 
-    q.start(function (err) {
+  /*  q.start(function (err) {
       if (err) throw err
       logger.info('all done:', results)
-    });
+    });*/
   }
 
 
