@@ -19,7 +19,7 @@ services:
     networks:
       - esnet
   esm2:
-    image: elasticsearch:2.4.6
+    image: elasticsearch:5.5
     container_name: esm2
     environment:
       - cluster.name=docker-cluster

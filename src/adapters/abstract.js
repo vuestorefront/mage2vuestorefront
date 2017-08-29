@@ -18,10 +18,10 @@ class AbstractAdapter {
 
     let factory = new AdapterFactory(app_config);
     this.db = factory.getAdapter('nosql', app_config.db.driver);
-    
-    if(global.cache == null){ 
+
+    if (global.cache == null) {
       this.cache = Redis.createClient(this.config.redis); // redis client
-      this.cache.on('error', function(err){ // workaround for https://github.com/NodeRedis/node_redis/issues/713
+      this.cache.on('error', function (err) { // workaround for https://github.com/NodeRedis/node_redis/issues/713
         global.cache = Redis.createClient(this.config.redis); // redis client
       });
       global.cache = this.cache;
@@ -66,10 +66,16 @@ class AbstractAdapter {
   run(context) {
 
     this.current_context = context;
+
+    if (!(this.current_context.transaction_key))
+      this.current_context.transaction_key = new Date().getTime(); // the key used to filter out records NOT ADDED by this import
+
+
     this.db.connect((function () {
       logger.info("Connected correctly to server");
+      logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
 
-      this.onDone = this.current_context.done_callback ? (function() { this.defaultDoneCallback(); this.current_context.done_callback()} ).bind(this) : this.defaultDoneCallback;
+      this.onDone = this.current_context.done_callback ? (function () { this.defaultDoneCallback(); this.current_context.done_callback() }).bind(this) : this.defaultDoneCallback;
       this.getSourceData(this.current_context).then(this.processItems);
 
     }).bind(this));
@@ -81,6 +87,17 @@ class AbstractAdapter {
    */
   preProcessItem(item) {
     return new Promise(function (done, reject) { done(); });
+  }
+
+  /**
+   * Remove records from database other than specific transaction_key
+   * @param {int} transaction_key
+   */
+  cleanUp(transaction_key) {
+    this.db.connect((function () {
+      logger.info('Cleaning up with tsk = ' + transaction_key);
+      this.db.cleanupByTransactionkey(this.getCollectionName(), transaction_key);
+    }).bind(this));
   }
 
   prepareItems(items) {
@@ -126,8 +143,10 @@ class AbstractAdapter {
       this.preProcessItem(item).then((function (item) {
 
         this.tasks_count--;
-        
-        logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item));
+
+        item.tsk = this.getCurrentContext().transaction_key; // transaction key for items that can be then cleaned up
+
+        logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item) + ' with tsk = ' + item.tsk);
         logger.info('Tasks count = ' + this.tasks_count);
 
         if (this.update_document)
@@ -168,7 +187,7 @@ class AbstractAdapter {
                   this.getSourceData(this.getCurrentContext()).then(this.processItems);
                 }
 
-              } 
+              }
 
             }
           }

@@ -60,6 +60,34 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     });
   }
 
+  /**
+  * Remove records other than <record>.tsk = "transactionKey"
+  * @param {String} collectionName
+  * @param {int} transactionKey transaction key - which is usualy a timestamp
+  */
+  cleanupByTransactionkey(collectionName, transactionKey) {
+
+    if (transactionKey) {
+      this.db.deleteByQuery({ // requires ES 5.5
+        index: this.config.db.indexName,
+        conflicts: 'proceed',
+        type: collectionName,
+         body: {
+          query: {
+            bool: {
+              must_not: {
+                term: { tsk: transactionKey }
+              }
+            }
+          }
+        }
+      }, function (error, response) {
+        if (error) throw new Error(error);
+        logger.info(response);
+      });
+    }
+  }
+
 
   /**
    * Update multiple documents in database
@@ -113,7 +141,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
    */
   connect(done) {
 
-    if(!global.es) {
+    if (!global.es) {
       this.db = new elasticsearch.Client({
         host: this.config.db.url,
         log: 'error',
@@ -123,13 +151,14 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
         maxSockets: 10,
         minSockets: 10,
         requestTimeout: 1800000,
+       
         createNodeAgent: function (connection, config) {
           return new AgentKeepAlive(connection.makeAgentConfig(config));
         }
 
       });
       global.es = this.db;
-    } else 
+    } else
       this.db = global.es;
 
     done(this.db);

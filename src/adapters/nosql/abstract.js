@@ -47,6 +47,15 @@ class AbstractNosqlAdapter{
   updateDocumentBulk(collectionName, items){
     throw new Error('updateDocumentBulk needs implementation!');
   }
+
+   /**
+   * Remove records other than <record>.tsk = "transactionKey"
+   * @param {String} collectionName
+   * @param {int} transactionKey transaction key - which is usualy a timestamp
+   */
+  cleanupByTransactionkey(collectionName, transactionKey){
+    throw new Error('cleanupByTransactionkey needs implementation!');
+  }
   
 /**
  * Connect / prepare driver

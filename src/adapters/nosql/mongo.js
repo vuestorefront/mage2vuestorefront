@@ -52,6 +52,18 @@ class MongoAdapter extends AbstractNosqlAdapter{
 
   }
 
+   /**
+   * Remove records other than <record>.tsk = "transactionKey"
+   * @param {String} collectionName
+   * @param {int} transactionKey transaction key - which is usualy a timestamp
+   */
+  cleanupByTransactionkey(collectionName, transactionKey){
+    this.db.collection(collectionName).remove({tsk: transactionKey},function(err, obj) {
+      if (err) throw err;
+      logger.info(obj.result.n + " document(s) deleted");
+    });
+  }
+
     /**
    * Update multiple documents in database
    * @param {array} items to be updated
