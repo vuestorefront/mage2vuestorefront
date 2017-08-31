@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Webhook API to add specific products or categories to be synchronized by the service
+ */
 
 let config = require('./config');
 let logger = require('./log');
