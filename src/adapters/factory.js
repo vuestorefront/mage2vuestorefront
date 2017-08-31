@@ -6,19 +6,18 @@ class AdapterFactory {
     this.config = app_config;
   }
 
-   getAdapter(platform_type, entity_type){
+   getAdapter(adapter_type, driver){
 
-    let adapter_class = require('./' + platform_type + '/' + entity_type);
+    let adapter_class = require('./' + adapter_type + '/' + driver);
 
     if(!adapter_class)
-      throw new Error('Invalid adapter ' + platform_type + ' / ' + entity_type);
+      throw new Error('Invalid adapter ' + adapter_type + ' / ' + driver);
     else{
-
 
       let adapter_instance = new adapter_class(this.config);
 
-      if(!(typeof adapter_instance.isValidFor == 'function') || !adapter_instance.isValidFor(entity_type))
-        throw new Error('Not valid adapter class or adapter is not valid for ' + entity_type);
+      if((typeof adapter_instance.isValidFor == 'function') && !adapter_instance.isValidFor(driver))
+        throw new Error('Not valid adapter class or adapter is not valid for ' + driver);
 
       return adapter_instance;
 

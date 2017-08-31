@@ -1,0 +1,154 @@
+{
+    "vue_storefront_catalog": {
+        "mappings": {
+            "product": {
+                "properties": {
+                    "actors_es": {
+                        "type": "string"
+                    },
+                    "attribute_set_id": {
+                        "type": "string"
+                    },
+                    "authors_es": {
+                        "type": "string"
+                    },
+                    "availability": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "properties": {
+                            "category_id": {
+                                "type": "long"
+                            },
+                            "is_parent": {
+                                "type": "boolean"
+                            },
+                            "is_virtual": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "position": {
+                                "type": "long"
+                            }
+                        }
+                    },
+                    "composers_es": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "directors_es": {
+                        "type": "string"
+                    },
+                    "ean": {
+                        "type": "string"
+                    },
+                    "entity_id": {
+                        "type": "string"
+                    },
+                    "has_options": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "type": "string"
+                    },
+                    "is_new": {
+                        "type": "long"
+                    },
+                    "is_preorder": {
+                        "type": "long"
+                    },
+                    "isbn": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "option_text_is_new": {
+                        "type": "string"
+                    },
+                    "option_text_is_preorder": {
+                        "type": "string"
+                    },
+                    "option_text_status": {
+                        "type": "string"
+                    },
+                    "option_text_tax_class_id": {
+                        "type": "string"
+                    },
+                    "performers_es": {
+                        "type": "string"
+                    },
+                    "pkwiu": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "properties": {
+                            "customer_group_id": {
+                                "type": "string"
+                            },
+                            "is_discount": {
+                                "type": "boolean"
+                            },
+                            "original_price": {
+                                "type": "string"
+                            },
+                            "price": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "producers_es": {
+                        "type": "string"
+                    },
+                    "publishers_es": {
+                        "type": "string"
+                    },
+                    "required_options": {
+                        "type": "string"
+                    },
+                    "short_description": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "special_price": {
+                        "type": "double"
+                    },
+                    "status": {
+                        "type": "long"
+                    },
+                    "stock": {
+                        "properties": {
+                            "is_in_stock": {
+                                "type": "boolean"
+                            },
+                            "qty": {
+                                "type": "long"
+                            }
+                        }
+                    },
+                    "tax_class_id": {
+                        "type": "long"
+                    },
+                    "type_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "visibility": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
