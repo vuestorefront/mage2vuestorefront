@@ -8,6 +8,8 @@ module.exports = {
     accessTokenSecret: process.env.MAGENTO_ACCESS_TOKEN_SECRET || '00y9dl4vpxgcef3gn5mntbxtylowjcc9',
   },
 
+  kue: {}, // default KUE config works on local redis instance
+
   db: {
 /*    driver: 'mongo',
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom' */

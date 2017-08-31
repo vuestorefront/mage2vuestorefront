@@ -17,7 +17,7 @@ let cluster = require('cluster')
 let numCPUs = require('os').cpus().length;
 
 let kue = require('kue');
-let queue = kue.createQueue();
+let queue = kue.createQueue(config.kue); 
 
 /**
  * Re-index categories
@@ -65,10 +65,12 @@ function commandProductCategories(next, reject) {
     done_callback: () => {
 
       if(!next) {
-        logger.info('Task done!');
         logger.info('Task done! Exiting in 30s ...');
         setTimeout(process.exit, 30000); // let ES commit all changes made
-      } else next();
+      } else {
+        logger.debug('Stepping to next action');
+        next();
+      }
     }
   });
 }
@@ -199,8 +201,9 @@ function commandFullreindex() {
    [
     new Promise(commandCategories), //1. It stores categories in redis cache
     new Promise(commandProductCategories) // 2. It stores product/cateogry links in redis cache
-   ], function(results){
-    commandProducts(); //3. It indexes all the products
+   ]).then(function(results){
+     logger.info('Starting full products reindex!');
+     commandProducts(); //3. It indexes all the products
    });
 }
 

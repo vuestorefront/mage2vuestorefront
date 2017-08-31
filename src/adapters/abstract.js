@@ -75,7 +75,7 @@ class AbstractAdapter {
       logger.info("Connected correctly to server");
       logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
 
-      this.onDone = this.current_context.done_callback ? (function () { this.defaultDoneCallback(); this.current_context.done_callback() }).bind(this) : this.defaultDoneCallback;
+      this.onDone = this.current_context.done_callback ? (function () { this.defaultDoneCallback(); this.current_context.done_callback(); }).bind(this) : this.defaultDoneCallback;
       this.getSourceData(this.current_context).then(this.processItems);
 
     }).bind(this));

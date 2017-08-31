@@ -136,10 +136,12 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     for(let sku of this._productHisto){
       const origKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, sku); 
       const destKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, sku); 
-      logger.debug(util.format('Moving %s to %s', origKey, destKey));
+      //logger.debug(util.format('Moving %s to %s', origKey, destKey));
 
       this.cache.rename(origKey, destKey);
     }
+
+    logger.info('Publishing cache keys to production finished!');
 
   /*  q.start(function (err) {
       if (err) throw err
