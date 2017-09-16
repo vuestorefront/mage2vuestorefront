@@ -181,7 +181,17 @@ function commandProducts() {
   } else {
     logger.info('Running in SPM (Single Process Mode)');
 
-    let context = { updated_after: updated_after };
+    let context = { updated_after: updated_after,
+      done_callback: () => {
+        
+              if(cli.options.removeNonExistient){
+                adapter.cleanUp(tsk);
+              }
+              logger.info('Task done! Exiting in 30s ...');
+              setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+            }
+
+          };
 
     if (cli.options.skus) {
       context.skus = cli.options.skus.split(','); // update individual producs
@@ -204,6 +214,9 @@ function commandFullreindex() {
    ]).then(function(results){
      logger.info('Starting full products reindex!');
      commandProducts(); //3. It indexes all the products
+   }).catch(function (err) {
+     logger.error(err);
+     process.exit(1)
    });
 }
 
@@ -326,6 +339,12 @@ cli.command('cleanup', function () {
 cli.on('notfound', function (action) {
   logger.error('I don\'t know how to: ' + action)
   process.exit(1)
+});
+
+
+process.on('unhandledRejection', (reason, p) => {
+  logger.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
 });
 
 

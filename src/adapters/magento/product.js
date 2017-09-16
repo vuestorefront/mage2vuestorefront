@@ -164,26 +164,19 @@ class ProductAdapter extends AbstractMagentoAdapter {
   normalizeDocumentFormat(item) {
     let prices = new Array();
 
-    prices.push({
-      "price": item.price,
-    });
-
-    for (let priceTag of item.tier_prices) {
+    /*for (let priceTag of item.tier_prices) {
       prices.push({
         "price": priceTag.value,
         "original_price": priceTag.original_price,
         "customer_group_id": priceTag.customerGroupId,
         "qty": priceTag.qty
       });
-    }
+    }*/
 
 
     let resultItem = Object.assign(item, {
-      "price": prices, // ES stores prices differently
-      "name": [ // and names!
-        item.name
-      ],
-      // HOW TO GET product stock from Magento API call for product?
+//      "price": prices, // ES stores prices differently
+// TODO: HOW TO GET product stock from Magento API call for product?
     });
 
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope

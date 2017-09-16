@@ -76,7 +76,12 @@ class AbstractAdapter {
       logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
 
       this.onDone = this.current_context.done_callback ? (function () { this.defaultDoneCallback(); this.current_context.done_callback(); }).bind(this) : this.defaultDoneCallback;
-      this.getSourceData(this.current_context).then(this.processItems);
+
+      let exitCallback = this.onDone;
+      this.getSourceData(this.current_context).catch( function(err) {
+        logger.error(err);
+        exitCallback();
+      }).then(this.processItems);
 
     }).bind(this));
 
@@ -102,6 +107,9 @@ class AbstractAdapter {
 
   prepareItems(items) {
 
+    if(!items)
+      return items;
+
     if (items.total_count)
       this.total_count = items.total_count;
 
@@ -120,6 +128,12 @@ class AbstractAdapter {
     if (isNaN(level))
       level = 0;
     items = this.prepareItems(items);
+
+
+    if(!items){
+      logger.error('No items given to processItems call!');
+      return;
+    }
 
     let count = items.length;
     let index = 0;
@@ -159,7 +173,7 @@ class AbstractAdapter {
           this.processItems(item.children_data, level + 1);
         }
 
-        if (this.tasks_count == 0) { // this is the last item!
+        if (this.tasks_count == 0 && !this.use_paging) { // this is the last item!
           logger.info(' No tasks to process. All records processed!');
           this.db.close();
 
@@ -184,7 +198,7 @@ class AbstractAdapter {
                   this.page++;
                   logger.debug('Switching page to ' + this.page);
 
-                  this.getSourceData(this.getCurrentContext()).then(this.processItems);
+                  this.getSourceData(this.getCurrentContext()).then(this.processItems).catch(function(err)  { throw new Error(err); } );
                 }
 
               }
@@ -196,6 +210,8 @@ class AbstractAdapter {
         index++;
       }).bind(this)).catch(function (reason) {
         logger.error(reason);
+        return this.onDone(this);
+        
       });
 
     })
