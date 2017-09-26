@@ -1,6 +1,8 @@
 # mage2nosql
 For those who would love to work with Magento on backend but use NoSQL power on the frontend. Two way / real time data synchronizer.
 
+Some details about the rationale and our goals here: https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka
+
 It synchronizes all the products, categories and links between products and categories.
 
 This is multi-process data synchronizer between Magento (and in further versions Shopify / other platforms) to local MongoDB AND ElasticSearch databases.
