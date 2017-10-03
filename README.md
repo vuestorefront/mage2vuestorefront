@@ -25,6 +25,7 @@ Start Elasticsearch and Redis:
 - `docker-compose up`
 
 Install:
+- `cd src/`
 - `npm install`
 
 Config -see: config.js or use following ENV variables: 
