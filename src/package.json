@@ -21,7 +21,8 @@
     "query-to-mongo": "^0.6.2",
     "queue": "^4.4.0",
     "redis-jsonify": "^1.0.1",
-    "sha1": "^1.1.1"
+    "sha1": "^1.1.1",
+    "elasticsearch" : ""
   },
   "devDependencies": {},
   "scripts": {
