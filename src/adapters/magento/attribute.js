@@ -8,20 +8,35 @@ class CategoryAdapter extends AbstractMagentoAdapter {
 
 
   getEntityType() {
-    return 'category';
+    return 'attribute';
   }
 
   getName() {
-    return 'adapters/magento/CategoryAdapter';
+    return 'adapters/magento/AttributeAdapter';
   }
 
 
   getSourceData(context) {
-    return this.api.categories.list();
+    return this.api.attributes.list();
   }
 
+  /** Regarding Magento2 api docs and reality we do have an exception here that items aren't listed straight in the response but under "items" key */
+  prepareItems(items) {
+
+    if(!items)
+      return items;
+ 
+    if (items.total_count)
+      this.total_count = items.total_count;
+    
+    if(items.items)
+      items = items.items; // this is an exceptional behavior for Magento2 api  for attributes
+
+    return items;
+  }  
+
   getLabel(source_item) {
-    return '[(' + source_item.id + ') ' + source_item.name + ']';
+    return '[(' + source_item.attribute_code + ') ' + source_item.default_frontend_label + ']';
   }
 
   isFederated() {
@@ -31,12 +46,13 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   preProcessItem(item) {
 
     return new Promise((function (done, reject) {
-
+      
       if(item) {
-        
+
+        item.id = item.attribute_id;
         // store the item into local redis cache
-        const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
-        logger.debug(util.format('Storing category data to cache under: %s', key));
+        const key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_code);
+        logger.debug(util.format('Storing attribute data to cache under: %s', key));
         this.cache.set(key, JSON.stringify(item));
       }
 

@@ -1,0 +1,1 @@
+MAGENTO_URL=http://rapid.test.divante.pl/rest MAGENTO_CONSUMER_KEY=aiksd4lw6a9v24ltnhhgrq95ugqkjhlq MAGENTO_CONSUMER_SECRET=l89flylve3k5k6nmndoeggjudn6rst8a MAGENTO_ACCESS_TOKEN=8rnexri6vq4hmb9hhysj0xatrlj5siax MAGENTO_ACCESS_TOKEN_SECRET=ra31vbsogwrc2op0gyha1efapyneckhe node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
