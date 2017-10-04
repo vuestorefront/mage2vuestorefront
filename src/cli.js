@@ -42,6 +42,29 @@ function commandCategories(next, reject) {
   });
 }
 
+/**
+ * Re-index attributes
+ */
+function commandAttributes(next, reject) {
+  let adapter = factory.getAdapter(cli.options.adapter, 'attribute');
+  let tsk = new Date().getTime();
+
+  adapter.run({
+    transaction_key: tsk,
+    done_callback: () => {
+
+      if(cli.options.removeNonExistient){
+        adapter.cleanUp(tsk);
+      }
+
+      if(!next){
+        logger.info('Task done! Exiting in 30s ...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      } else next();
+    }
+  });
+}
+
 function commandCleanup(){
   let adapter = factory.getAdapter(cli.options.adapter, cli.options.cleanupType);
   let tsk = cli.options.transactionKey;
@@ -303,6 +326,13 @@ cli.command('fullreindex', function () {
 */
 cli.command('categories', function () {
   commandCategories();
+});
+
+/**
+* Sync attributes
+*/
+cli.command('attributes', function () {
+  commandAttributes();
 });
 
 /**

@@ -153,7 +153,6 @@ class AbstractAdapter {
 
     items.map((item) => {
 
-
       this.preProcessItem(item).then((function (item) {
 
         this.tasks_count--;

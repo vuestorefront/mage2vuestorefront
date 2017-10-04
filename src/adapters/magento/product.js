@@ -22,6 +22,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
   }
 
   prepareItems(items) {
+
+    if(!items)
+      return null;
+
     this.total_count = items.total_count;
 
     if (this.use_paging) {
