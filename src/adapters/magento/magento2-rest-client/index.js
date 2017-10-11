@@ -6,6 +6,8 @@ var attributes = require('./lib/attributes');
 var products = require('./lib/products');
 var productMedia = require('./lib/product_media');
 var categoryProducts = require('./lib/category_products');
+var configurableChildren = require('./lib/configurable_children');
+var configurableOptions = require('./lib/configurable_options');
 
 
 const MAGENTO_API_VERSION = 'V1';
@@ -22,6 +24,8 @@ module.exports.Magento2Client = function (options) {
     instance.products = products(client);
     instance.productMedia = productMedia(client);
     instance.categoryProducts = categoryProducts(client);
+    instance.configurableChildren = configurableChildren(client);
+    instance.configurableOptions = configurableOptions(client);
     
     return instance;
 }

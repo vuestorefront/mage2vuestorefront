@@ -148,8 +148,45 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }
 
           Promise.all(catPromises).then(function (values) {
-            item.category = values;
-            done(item);
+            item.category = values; // here we get configurable options
+
+            if(item.type_id == 'configurable' || item.type_id == 'bundle'){
+              logger.info('Geting product options for ' + item.sku);
+              
+              //      q.push(function () {
+              inst.api.configurableChildren.list(item.sku).then(function(result) { 
+                
+
+                item.configurable_children = new Array()
+                for(let prOption of result) {
+                  item.configurable_children.push({
+                    sku: prOption.sku,
+                    name: prOption.name,
+                    price: prOption.price,
+                    custom_attributes: prOption.custom_attributes
+                  });
+                  if(item.price  == 0) // if price is zero fix it with first children
+                    item.price = prOption.price;
+                }
+
+                inst.api.configurableOptions.list(item.sku).then(function(result) { 
+                  item.configurable_options = result;
+
+                  done(item);
+                }).catch(function (err) {
+                  logger.error(err);
+                  done(item);
+                })
+
+               }).catch(function (err) {
+                logger.error(err);
+                done(item);
+              });
+              
+              
+            } else {
+              done(item);
+            }
           });
 
         }
