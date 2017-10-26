@@ -10,6 +10,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
   constructor(config) {
     super(config);
     this.use_paging = true;
+    this.stock_sync = true;
+    this.category_sync = true;
+    this.configurable_sync = true;
     this.is_federated = true; // by default use federated behaviour
   }
 
@@ -60,6 +63,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
   getSourceData(context) {
 
     let query = this.getFilterQuery(context);
+
+    if(typeof context.stock_sync !== 'undefined')
+      this.stock_sync = context.stock_sync;
+
+    if(typeof context.category_sync !== 'undefined')
+      this.category_sync = context.category_sync;
+      
+    if(typeof context.configurable_sync !== 'undefined')
+      this.configurable_sync = context.configurable_sync;
 
     if (context.for_total_count) { // get total counts
       return this.api.products.list('&searchCriteria[currentPage]=1&searchCriteria[pageSize]=1').catch(function (err) {
@@ -115,11 +127,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
       const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
 
-      item.category = new Array();
+      if(inst.category_sync)
+        item.category = new Array();
 
       const inst = this;
-
-
       this.cache.smembers(key, function (err, categories) {
         if (categories == null) {
           done(item);
@@ -148,13 +159,25 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }
 
           Promise.all(catPromises).then(function (values) {
-            item.category = values; // here we get configurable options
+            if(inst.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
+              item.category = values; // here we get configurable options
 
-            if(item.type_id == 'configurable' || item.type_id == 'bundle'){
+            let subSyncPromises = []
+
+            if(inst.stock_sync) {
+              logger.info('Geting stock items for ' + item.sku);
+              subSyncPromises.push(inst.api.stockItems.list(item.sku).then(function(result) { 
+                console.log(result)
+                return item
+              }))
+                
+            }
+
+            if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
               logger.info('Geting product options for ' + item.sku);
               
               //      q.push(function () {
-              inst.api.configurableChildren.list(item.sku).then(function(result) { 
+              subSyncPromises.push(inst.api.configurableChildren.list(item.sku).then(function(result) { 
                 
 
                 item.configurable_children = new Array()
@@ -172,21 +195,23 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 inst.api.configurableOptions.list(item.sku).then(function(result) { 
                   item.configurable_options = result;
 
-                  done(item);
+                  return(item);
                 }).catch(function (err) {
                   logger.error(err);
-                  done(item);
+                  return(item);
                 })
 
                }).catch(function (err) {
                 logger.error(err);
-                done(item);
-              });
+                return(item);
+              }));
               
               
-            } else {
-              done(item);
-            }
+            } 
+
+            Promise.all(subSyncPromises).then(items=> {
+              done(item) // all subpromises return refernce to the product
+            });
           });
 
         }
