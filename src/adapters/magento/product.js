@@ -125,98 +125,110 @@ class ProductAdapter extends AbstractMagentoAdapter {
       // TODO: add denormalization of productcategories into product categories
       // DO NOT use "productcategories" type but rather do search categories with assigned products
 
-      const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
+      let subSyncPromises = []
 
-      if(inst.category_sync)
-        item.category = new Array();
+// TODO: Refactor the following to "Chain of responsibility"
+// STOCK SYNC      
+      if(inst.stock_sync) {
+        logger.info('Product sub-stage 1: Geting stock items for ' + item.sku);
+        subSyncPromises.push(inst.api.stockItems.list(item.sku).then(function(result) { 
+          console.log(result) // TODO: store stock items in redis for quick checks via API?
+          return item
+        }))
+      }
 
-      const inst = this;
-      this.cache.smembers(key, function (err, categories) {
-        if (categories == null) {
-          done(item);
-        }
-        else {
+// CONFIGURABLE AND BUNDLE SYNC
+      if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
+        logger.info('Product sub-stage 2: Geting product options for ' + item.sku);
+        
+        //      q.push(function () {
+        subSyncPromises.push(inst.api.configurableChildren.list(item.sku).then(function(result) { 
+          
 
-          let catPromises = new Array();
-          for (let catId of categories) {
-
-            catPromises.push(
-              new Promise(function (resolve, reject) {
-
-                let cat = inst.cache.get(util.format(CacheKeys.CACHE_KEY_CATEGORY, catId), function (err, serializedCat) {
-                  let cat = JSON.parse(serializedCat); // category object
-                  if (cat != null) {
-                    resolve({
-                      category_id: cat.id,
-                      name: cat.name
-                    })
-                  } else
-                    resolve(null);
-                });
-
-              }));
-
+          item.configurable_children = new Array()
+          for(let prOption of result) {
+            item.configurable_children.push({
+              sku: prOption.sku,
+              name: prOption.name,
+              price: prOption.price,
+              custom_attributes: prOption.custom_attributes
+            });
+            if(item.price  == 0) // if price is zero fix it with first children
+              item.price = prOption.price;
           }
 
-          Promise.all(catPromises).then(function (values) {
-            if(inst.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
-              item.category = values; // here we get configurable options
+          inst.api.configurableOptions.list(item.sku).then(function(result) { 
+            item.configurable_options = result;
 
-            let subSyncPromises = []
+            return(item);
+          }).catch(function (err) {
+            logger.error(err);
+            return(item);
+          })
 
-            if(inst.stock_sync) {
-              logger.info('Geting stock items for ' + item.sku);
-              subSyncPromises.push(inst.api.stockItems.list(item.sku).then(function(result) { 
-                console.log(result)
-                return item
-              }))
-                
+          }).catch(function (err) {
+          logger.error(err);
+          return(item);
+        }));
+        
+        
+      } 
+
+// CATEGORIES SYNC      
+      subSyncPromises.push(new Promise((resolve, reject) => {
+        logger.info('Product sub-stage 3: Geting product categories for ' + item.sku);
+        
+        const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
+
+        if(inst.category_sync) {
+          item.category = new Array();
+
+          const inst = this;
+          this.cache.smembers(key, function (err, categories) {
+            if (categories == null) {
+              resolve(item);
+            }
+            else {
+
+              let catPromises = new Array();
+              for (let catId of categories) {
+
+                catPromises.push(
+                  new Promise(function (resolve, reject) {
+
+                    let cat = inst.cache.get(util.format(CacheKeys.CACHE_KEY_CATEGORY, catId), function (err, serializedCat) {
+                      let cat = JSON.parse(serializedCat); // category object
+                      if (cat != null) {
+                        resolve({
+                          category_id: cat.id,
+                          name: cat.name
+                        })
+                      } else
+                        resolve(null);
+                    });
+
+                  }));
+
+              }
+
+              Promise.all(catPromises).then(function (values) {
+                if(inst.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
+                  item.category = values; // here we get configurable options
+                  resolve(item)
+              });
+
             }
 
-            if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
-              logger.info('Geting product options for ' + item.sku);
-              
-              //      q.push(function () {
-              subSyncPromises.push(inst.api.configurableChildren.list(item.sku).then(function(result) { 
-                
-
-                item.configurable_children = new Array()
-                for(let prOption of result) {
-                  item.configurable_children.push({
-                    sku: prOption.sku,
-                    name: prOption.name,
-                    price: prOption.price,
-                    custom_attributes: prOption.custom_attributes
-                  });
-                  if(item.price  == 0) // if price is zero fix it with first children
-                    item.price = prOption.price;
-                }
-
-                inst.api.configurableOptions.list(item.sku).then(function(result) { 
-                  item.configurable_options = result;
-
-                  return(item);
-                }).catch(function (err) {
-                  logger.error(err);
-                  return(item);
-                })
-
-               }).catch(function (err) {
-                logger.error(err);
-                return(item);
-              }));
-              
-              
-            } 
-
-            Promise.all(subSyncPromises).then(items=> {
-              done(item) // all subpromises return refernce to the product
-            });
-          });
-
+          })
         }
+      }))
 
-      })
+
+      Promise.all(subSyncPromises).then(items=> {
+        logger.info('Product sub-stages done for ' + item.sku);
+        done(item) // all subpromises return refernce to the product
+      });
+      
 
     }).bind(this));
 
