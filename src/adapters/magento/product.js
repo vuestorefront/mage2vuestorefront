@@ -5,6 +5,18 @@ const util = require('util');
 const CacheKeys = require('./cache_keys');
 const Redis = require('redis');
 
+/*
+ * serial executes Promises sequentially.
+ * @param {funcs} An array of funcs that return promises.
+ * @example
+ * const urls = ['/url1', '/url2', '/url3']
+ * serial(urls.map(url => () => $.ajax(url)))
+ *     .then(console.log.bind(console))
+ */
+const serial = funcs =>
+funcs.reduce((promise, func) =>
+    promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([]))
+
 class ProductAdapter extends AbstractMagentoAdapter {
 
   constructor(config) {
@@ -120,7 +132,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
    * @param {Object} item 
    */
   preProcessItem(item) {
-
+    const inst = this;
+    
     return new Promise((function (done, reject) {
       // TODO: add denormalization of productcategories into product categories
       // DO NOT use "productcategories" type but rather do search categories with assigned products
@@ -131,10 +144,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
 // STOCK SYNC      
       if(inst.stock_sync) {
         logger.info('Product sub-stage 1: Geting stock items for ' + item.sku);
-        subSyncPromises.push(inst.api.stockItems.list(item.sku).then(function(result) { 
-          console.log(result) // TODO: store stock items in redis for quick checks via API?
+        subSyncPromises.push(() => { return inst.api.stockItems.list(item.sku).then(function(result) { 
+          item.stock = result
+
+          const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
+          logger.debug(util.format('Storing stock data to cache under: %s', key));
+          inst.cache.set(key, JSON.stringify(result));
+            
           return item
-        }))
+        })})
       }
 
 // CONFIGURABLE AND BUNDLE SYNC
@@ -142,7 +160,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
         logger.info('Product sub-stage 2: Geting product options for ' + item.sku);
         
         //      q.push(function () {
-        subSyncPromises.push(inst.api.configurableChildren.list(item.sku).then(function(result) { 
+        subSyncPromises.push(() => { return inst.api.configurableChildren.list(item.sku).then(function(result) { 
           
 
           item.configurable_children = new Array()
@@ -169,13 +187,13 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }).catch(function (err) {
           logger.error(err);
           return(item);
-        }));
+        })});
         
         
       } 
 
 // CATEGORIES SYNC      
-      subSyncPromises.push(new Promise((resolve, reject) => {
+      subSyncPromises.push(() => { return new Promise((resolve, reject) => {
         logger.info('Product sub-stage 3: Geting product categories for ' + item.sku);
         
         const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
@@ -183,7 +201,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
         if(inst.category_sync) {
           item.category = new Array();
 
-          const inst = this;
           this.cache.smembers(key, function (err, categories) {
             if (categories == null) {
               resolve(item);
@@ -221,13 +238,24 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
           })
         }
-      }))
+      })})
 
-
-      Promise.all(subSyncPromises).then(items=> {
-        logger.info('Product sub-stages done for ' + item.sku);
-        done(item) // all subpromises return refernce to the product
+      serial(subSyncPromises)
+      .then((res) => { 
+        logger.info('Product sub-stages done for ' + item.sku)
+        return done(item) // all subpromises return refernce to the product
+      }).catch(err=> {
+        logger.error(err);
+        return done(item)
       });
+
+      /* Promise.all(subSyncPromises).then(items=> {
+        logger.info('Product sub-stages done for ' + item.sku);
+        return done(item) // all subpromises return refernce to the product
+      }).catch(err=> {
+        logger.error(err);
+        return done(item)
+      }); */
       
 
     }).bind(this));
