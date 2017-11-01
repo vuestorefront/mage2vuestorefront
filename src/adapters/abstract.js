@@ -197,7 +197,7 @@ class AbstractAdapter {
                   this.page++;
                   logger.debug('Switching page to ' + this.page);
 
-                  this.getSourceData(this.getCurrentContext()).then(this.processItems).catch(function(err)  { throw new Error(err); } );
+                  this.getSourceData(this.getCurrentContext()).then(this.processItems).catch(function(err)  { logger.error(err); } );
                 }
 
               }

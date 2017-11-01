@@ -8,6 +8,7 @@ var productMedia = require('./lib/product_media');
 var categoryProducts = require('./lib/category_products');
 var configurableChildren = require('./lib/configurable_children');
 var configurableOptions = require('./lib/configurable_options');
+var stockItems = require('./lib/stock_items');
 
 
 const MAGENTO_API_VERSION = 'V1';
@@ -26,6 +27,7 @@ module.exports.Magento2Client = function (options) {
     instance.categoryProducts = categoryProducts(client);
     instance.configurableChildren = configurableChildren(client);
     instance.configurableOptions = configurableOptions(client);
+    instance.stockItems = stockItems(client);
     
     return instance;
 }
