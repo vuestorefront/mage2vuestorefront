@@ -51,9 +51,14 @@ class CategoryAdapter extends AbstractMagentoAdapter {
 
         item.id = item.attribute_id;
         // store the item into local redis cache
-        const key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_code);
+        let key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_code);
         logger.debug(util.format('Storing attribute data to cache under: %s', key));
         this.cache.set(key, JSON.stringify(item));
+
+        key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_id); // store under attribute id as an second option
+        logger.debug(util.format('Storing attribute data to cache under: %s', key));
+        this.cache.set(key, JSON.stringify(item));
+        
       }
 
       return done(item);

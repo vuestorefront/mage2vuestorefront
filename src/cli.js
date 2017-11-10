@@ -232,6 +232,7 @@ function commandProducts() {
 function commandFullreindex() {
   Promise.all(
    [
+    new Promise(commandAttributes), // 0. It stores attributes in redis cache
     new Promise(commandCategories), //1. It stores categories in redis cache
     new Promise(commandProductCategories) // 2. It stores product/cateogry links in redis cache
    ]).then(function(results){
