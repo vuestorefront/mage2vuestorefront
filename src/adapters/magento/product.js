@@ -160,7 +160,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
         logger.info('Product sub-stage 2: Geting product options for ' + item.sku);
         
         //      q.push(function () {
-        subSyncPromises.push(() => { return inst.api.configurableChildren.list(item.sku).then(function(result) { 
+        subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
           
 
           item.configurable_children = new Array()
@@ -175,20 +175,44 @@ class ProductAdapter extends AbstractMagentoAdapter {
               item.price = prOption.price;
           }
 
-          inst.api.configurableOptions.list(item.sku).then(function(result) { 
-            item.configurable_options = result;
+            inst.api.configurableOptions.list(item.sku).then(function(result) { 
+              item.configurable_options = result;
 
-            return(item);
-          }).catch(function (err) {
-            logger.error(err);
-            return(item);
-          })
+            
+              let subPromises = []
+              for (let option of item.configurable_options) {
+                let atrKey = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, option.attribute_id);
+  
+                subPromises.push(new Promise (function (resolve, reject) { 
+                  logger.info('Configurable options for ' + atrKey)
+                  inst.cache.get(atrKey, function (err, serializedAtr) {
+                    let atr = JSON.parse(serializedAtr); // category object
+                    if (atr != null) {
+                      logger.info('Product options for ' + atr.attribute_code + ' for ' + item.sku + ' set');
+                      item[atr.attribute_code + '_options'] = option.values.map((el) => { return el.value_index } )
+                    }
+                    resolve(item)  
+                  })
+                }))
+              }
+  
+              Promise.all(subPromises).then(function (res) {
+                logger.info('Configurable options expanded!')
+                opResolve(item)                  
+              })
+                            
+            }).catch(function (err) {
+              logger.error(err);
+              opResolve(item)                  
+            })
 
           }).catch(function (err) {
           logger.error(err);
-          return(item);
-        })});
-        
+          opResolve(item)                  
+        })})
+
+      })
+
         
       } 
 
@@ -248,16 +272,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
         logger.error(err);
         return done(item)
       });
-
-      /* Promise.all(subSyncPromises).then(items=> {
-        logger.info('Product sub-stages done for ' + item.sku);
-        return done(item) // all subpromises return refernce to the product
-      }).catch(err=> {
-        logger.error(err);
-        return done(item)
-      }); */
-      
-
     }).bind(this));
 
 
