@@ -8,6 +8,8 @@ var productMedia = require('./lib/product_media');
 var categoryProducts = require('./lib/category_products');
 var configurableChildren = require('./lib/configurable_children');
 var configurableOptions = require('./lib/configurable_options');
+var taxRates = require('./lib/tax_rates');
+var taxRules = require('./lib/tax_rules');
 var stockItems = require('./lib/stock_items');
 
 
@@ -28,6 +30,8 @@ module.exports.Magento2Client = function (options) {
     instance.configurableChildren = configurableChildren(client);
     instance.configurableOptions = configurableOptions(client);
     instance.stockItems = stockItems(client);
+    instance.taxRates = taxRates(client);
+    instance.taxRules = taxRules(client);
     
     return instance;
 }

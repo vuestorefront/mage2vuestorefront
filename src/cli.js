@@ -43,6 +43,29 @@ function commandCategories(next, reject) {
 }
 
 /**
+ * Re-index tax rulles
+ */
+function commandTaxRules(next, reject) {
+  let adapter = factory.getAdapter(cli.options.adapter, 'taxrule');
+  let tsk = new Date().getTime();
+
+  adapter.run({
+    transaction_key: tsk,
+    done_callback: () => {
+
+      if(cli.options.removeNonExistient){
+        adapter.cleanUp(tsk);
+      }
+
+      if(!next){
+        logger.info('Task done! Exiting in 30s ...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      } else next();
+    }
+  });
+}
+
+/**
  * Re-index attributes
  */
 function commandAttributes(next, reject) {
@@ -328,6 +351,14 @@ cli.command('fullreindex', function () {
 cli.command('categories', function () {
   commandCategories();
 });
+
+/**
+* Sync categories
+*/
+cli.command('taxrule', function () {
+  commandTaxRules();
+});
+
 
 /**
 * Sync attributes

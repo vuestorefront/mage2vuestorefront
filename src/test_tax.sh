@@ -1,0 +1,1 @@
+MAGENTO_URL=http://magento2-sales3.test.divante.pl/rest MAGENTO_CONSUMER_KEY=1t0lvc4c2geiirq6mqk9mo361epgglqi MAGENTO_CONSUMER_SECRET=hyoaiqhy3sm44vt5p1omx2m27r2sraja MAGENTO_ACCESS_TOKEN=xtp4bdkm6tieru77cdytyqyc8wqd7s80 MAGENTO_ACCESS_TOKEN_SECRET=r130wlm1dfkhe3egw9xg7xacqyu5v0mq  node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
