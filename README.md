@@ -1,5 +1,7 @@
-# mage2nosql
+# mage2vuestorefront
 For those who would love to work with Magento on backend but use NoSQL power on the frontend. Two way / real time data synchronizer.
+
+It's part of [vue-storefront project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
 
 Some details about the rationale and our goals here: https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka
 
