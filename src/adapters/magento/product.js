@@ -167,6 +167,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
           for(let prOption of result) {
             item.configurable_children.push({
               sku: prOption.sku,
+              id: prOption.id,
+              status: prOption.status,
+              visibility: prOption.visibility,
               name: prOption.name,
               price: prOption.price,
               custom_attributes: prOption.custom_attributes
