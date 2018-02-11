@@ -301,7 +301,7 @@ cli.option({
 
 cli.option({
   name: 'partitions',
-  default: numCPUs,
+  default: 1,
   type: Number
 });
 
