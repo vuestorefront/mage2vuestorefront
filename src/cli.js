@@ -157,6 +157,7 @@ function commandProductsworker() {
 function commandProducts() {
   let adapter = factory.getAdapter(cli.options.adapter, 'product');
   let updated_after = new Date(cli.options.updated_after);
+  let tsk = new Date().getTime();
 
 
   if (cli.options.partitions > 1 && adapter.isFederated()) // standard case
@@ -228,6 +229,7 @@ function commandProducts() {
     logger.info('Running in SPM (Single Process Mode)');
 
     let context = { updated_after: updated_after,
+      transaction_key: tsk,
       done_callback: () => {
         
               if(cli.options.removeNonExistient){

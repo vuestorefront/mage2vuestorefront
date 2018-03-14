@@ -165,15 +165,23 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
           item.configurable_children = new Array()
           for(let prOption of result) {
-            item.configurable_children.push({
+            let confChild = {
               sku: prOption.sku,
               id: prOption.id,
               status: prOption.status,
               visibility: prOption.visibility,
               name: prOption.name,
               price: prOption.price,
-              custom_attributes: prOption.custom_attributes
-            });
+              // custom_attributes: prOption.custom_attributes
+            };
+
+            if (prOption.custom_attributes) {
+              for (let opt of prOption.custom_attributes) {
+                confChild[opt.attribute_code] = opt.value
+              }
+            }          
+
+            item.configurable_children.push(confChild);
             if(item.price  == 0) // if price is zero fix it with first children
               item.price = prOption.price;
           }
@@ -191,6 +199,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   inst.cache.get(atrKey, function (err, serializedAtr) {
                     let atr = JSON.parse(serializedAtr); // category object
                     if (atr != null) {
+                      option.attribute_code = atr.attribute_code;
                       logger.info('Product options for ' + atr.attribute_code + ' for ' + item.sku + ' set');
                       item[atr.attribute_code + '_options'] = option.values.map((el) => { return el.value_index } )
                     }
