@@ -151,8 +151,8 @@ function commandProductsworker() {
 }
 
 /**
- * Re-index products. It can reindex products based on "updateAfter=" cmdline parameter, it can be parametrized by "partitionSize" - page size of resuts, "partitions" - number of parallel processes. 
- * It can also index individual SKUs (cmdline paramtere name skus= comma separated product SKUs)
+ * Re-index products. It can re-index products based on "updateAfter=" cmdline parameter, it can be parametrized by "partitionSize" - page size of resuts, "partitions" - number of parallel processes.
+ * It can also index individual SKUs (cmdline parameter name skus = comma separated product SKUs)
  */
 function commandProducts() {
   let adapter = factory.getAdapter(cli.options.adapter, 'product');
@@ -250,11 +250,32 @@ function commandProducts() {
 
 }
 
+/**
+ * Initial Index: Creates all required indexes including tax rules.
+ */
+function commandInitialIndex() {
+  commandTaxRules();
+
+  Promise.all(
+    [
+      new Promise(commandAttributes), // 0. It stores attributes in redis cache
+      new Promise(commandCategories), //1. It stores categories in redis cache
+      new Promise(commandProductCategories) // 2. It stores product/cateogry links in redis cache
+    ]).then(function(results){
+    logger.info('Starting the initial products index!');
+    commandProducts(); //3. It indexes all the products
+  }).catch(function (err) {
+    logger.error(err);
+    process.exit(1)
+  });
+}
+
 
 /**
- * Full reindex; The sequence is important becasue commands operate on some cachce resources - especially for product/category assigments
+ * Full Re-index: The sequence is important because commands operate on some cache resources - especially for product/category assignments
+ * NOTE: This is not the initial index and please run initialindex first.
  */
-function commandFullreindex() {
+function commandFullReindex() {
   Promise.all(
    [
     new Promise(commandAttributes), // 0. It stores attributes in redis cache
@@ -286,7 +307,7 @@ cli.option({
 
 
 /**
- * used by "categories" and "products" actions. Means that products and categories that are non existient in specific API feed are removed from Mongo/ElasticSearch
+ * used by "categories" and "products" actions. Means that products and categories that are non existent in specific API feed are removed from Mongo/ElasticSearch
  */
 cli.option({
   name: 'removeNonExistient',
@@ -337,13 +358,22 @@ cli.option({ // check only records modified from the last run - can be executed 
   type: String
 });
 
+/**
+ * Reindex products, categories and productcategorylinks
+ */
+cli.command('initialindex', function () {
+  cli.options.removeNonExistient = true; // as it's full reindex so we'll remove products and categories non existing in the feed from database
+  commandInitialIndex();
+})
+
+
 
 /**
  * Reindex products, categories and productcategorylinks
  */
 cli.command('fullreindex', function () {
   cli.options.removeNonExistient = true; // as it's full reindex so we'll remove products and categories non existing in the feed from database
-  commandFullreindex();
+  commandFullReindex();
 })
 
 
@@ -357,7 +387,7 @@ cli.command('categories', function () {
 /**
 * Sync categories
 */
-cli.command('taxrule', function () {
+cli.command('taxrules', function () {
   commandTaxRules();
 });
 
