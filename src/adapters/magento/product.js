@@ -23,6 +23,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     super(config);
     this.use_paging = true;
     this.stock_sync = true;
+    this.media_sync = true;
     this.category_sync = true;
     this.configurable_sync = true;
     this.is_federated = true; // by default use federated behaviour
@@ -154,10 +155,27 @@ class ProductAdapter extends AbstractMagentoAdapter {
           return item
         })})
       }
+// MEDIA SYNC
+      if(inst.media_sync){
+        logger.info('Product sub-stage 2: Geting media gallery' + item.sku);
+        subSyncPromises.push(() => { return inst.api.productMedia.list(item.sku).then(function(result) { 
+          let media_gallery = []
+          for (let mediaItem in result){
+            media_gallery.push({
+              image: mediaItem.file,
+              pos: mediaItem.position,
+              typ: mediaItem.media_type,
+              lab: mediaItem.label
+            })
+          }
+          item.media_gallery = media_gallery
+          return item
+        })})        
+      }
 
 // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
-        logger.info('Product sub-stage 2: Geting product options for ' + item.sku);
+        logger.info('Product sub-stage 3: Geting product options for ' + item.sku);
         
         //      q.push(function () {
         subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
@@ -230,7 +248,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
 // CATEGORIES SYNC      
       subSyncPromises.push(() => { return new Promise((resolve, reject) => {
-        logger.info('Product sub-stage 3: Geting product categories for ' + item.sku);
+        logger.info('Product sub-stage 4: Geting product categories for ' + item.sku);
         
         const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
 
