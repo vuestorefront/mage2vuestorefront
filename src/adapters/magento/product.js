@@ -160,7 +160,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
         logger.info('Product sub-stage 2: Geting media gallery' + item.sku);
         subSyncPromises.push(() => { return inst.api.productMedia.list(item.sku).then(function(result) { 
           let media_gallery = []
-          for (let mediaItem in result){
+          for (let mediaItem of result){
             media_gallery.push({
               image: mediaItem.file,
               pos: mediaItem.position,
