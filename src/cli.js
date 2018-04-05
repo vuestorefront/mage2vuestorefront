@@ -4,7 +4,7 @@ var CommandRouter = require('command-router');
 let AdapterFactory = require('./adapters/factory');
 
 
-const TIME_TO_EXIT = 30000; // wait 30s before quiting after task is done
+const TIME_TO_EXIT = process.env.TIME_TO_EXIT ?? 30000; // wait 30s before quiting after task is done
 
 let cli = CommandRouter();
 let config = require('./config');
@@ -112,7 +112,7 @@ function commandProductCategories(next, reject) {
 
       if(!next) {
         logger.info('Task done! Exiting in 30s ...');
-        setTimeout(process.exit, 30000); // let ES commit all changes made
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else {
         logger.debug('Stepping to next action');
         next();
