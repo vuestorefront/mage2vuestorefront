@@ -32,7 +32,7 @@ class AbstractAdapter {
     this.total_count = 0;
     this.page_count = 0;
     this.page_size = 50;
-    this.page = 0;
+    this.page = 1;
     this.current_context = {};
 
     this.use_paging = false;
@@ -187,7 +187,7 @@ class AbstractAdapter {
 
               if (this.use_paging && !this.isFederated()) { //TODO: paging should be refactored using queueing
 
-                if (this.page >= (this.page_count - 1)) {
+                if (this.page >= (this.page_count)) {
                   logger.info('All pages processed!');
                   this.db.close();
 

@@ -177,7 +177,7 @@ function commandProducts() {
       if (cli.options.initQueue) {
         logger.info('Propagating job queue ... ');
 
-        for (let i = 0; i < page_count; i++) {
+        for (let i = 1; i <= page_count; i++) {
           logger.debug('Adding job for: ' + i + ' / ' + page_count + ', page_size = ' + page_size);
           queue.createJob('products', { page_size: page_size, page: i, updated_after: updated_after }).save();
         }
