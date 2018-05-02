@@ -23,6 +23,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     super(config);
     this.use_paging = true;
     this.stock_sync = true;
+    this.custom_sync = true;
     this.media_sync = true;
     this.category_sync = true;
     this.configurable_sync = true;
@@ -173,9 +174,21 @@ class ProductAdapter extends AbstractMagentoAdapter {
         })})        
       }
 
+// CUSTOM OPTIONS SYNC
+      if(inst.custom_sync){
+        logger.info('Product sub-stage 3: Geting product custom options' + item.sku);
+        subSyncPromises.push(() => { return inst.api.customOptions.list(item.sku).then(function(result) { 
+          if(result && result.length > 0) {
+            item.custom_options = result
+            logger.info('Found custom options for', item.sku, result.length)
+          }
+          return item
+        })})        
+      }      
+
 // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
-        logger.info('Product sub-stage 3: Geting product options for ' + item.sku);
+        logger.info('Product sub-stage 4: Geting product options for ' + item.sku);
         
         //      q.push(function () {
         subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
