@@ -186,9 +186,21 @@ class ProductAdapter extends AbstractMagentoAdapter {
         })})        
       }      
 
+// BUNDLE OPTIONS SYNC
+      if(inst.custom_sync && item.type_id == 'bundle'){
+        logger.info('Product sub-stage 4: Geting bundle custom options' + item.sku);
+        subSyncPromises.push(() => { return inst.api.bundleOptions.list(item.sku).then(function(result) { 
+          if(result && result.length > 0) {
+            item.bundle_options = result
+            logger.info('Found bundle options for', item.sku, result.length)
+          }
+          return item
+        })})        
+      }          
+
 // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
-        logger.info('Product sub-stage 4: Geting product options for ' + item.sku);
+        logger.info('Product sub-stage 5: Geting product options for ' + item.sku);
         
         //      q.push(function () {
         subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
@@ -261,7 +273,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
 // CATEGORIES SYNC      
       subSyncPromises.push(() => { return new Promise((resolve, reject) => {
-        logger.info('Product sub-stage 4: Geting product categories for ' + item.sku);
+        logger.info('Product sub-stage 6: Geting product categories for ' + item.sku);
         
         const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
 

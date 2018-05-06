@@ -9,6 +9,7 @@ var categoryProducts = require('./lib/category_products');
 var configurableChildren = require('./lib/configurable_children');
 var configurableOptions = require('./lib/configurable_options');
 var customOptions = require('./lib/custom_options');
+var bundleOptions = require('./lib/bundle_options');
 var taxRates = require('./lib/tax_rates');
 var taxRules = require('./lib/tax_rules');
 var stockItems = require('./lib/stock_items');
@@ -34,6 +35,7 @@ module.exports.Magento2Client = function (options) {
     instance.taxRates = taxRates(client);
     instance.taxRules = taxRules(client);
     instance.customOptions = customOptions(client);
+    instance.bundleOptions = bundleOptions(client);
     
     return instance;
 }
