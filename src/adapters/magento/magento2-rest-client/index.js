@@ -13,6 +13,7 @@ var bundleOptions = require('./lib/bundle_options');
 var taxRates = require('./lib/tax_rates');
 var taxRules = require('./lib/tax_rules');
 var stockItems = require('./lib/stock_items');
+var productLinks = require('./lib/product_links');
 
 
 const MAGENTO_API_VERSION = 'V1';
@@ -36,6 +37,7 @@ module.exports.Magento2Client = function (options) {
     instance.taxRules = taxRules(client);
     instance.customOptions = customOptions(client);
     instance.bundleOptions = bundleOptions(client);
+    instance.productLinks = productLinks(client);
     
     return instance;
 }

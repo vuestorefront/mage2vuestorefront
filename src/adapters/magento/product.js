@@ -26,6 +26,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.custom_sync = true;
     this.media_sync = true;
     this.category_sync = true;
+    this.links_sync = true;
     this.configurable_sync = true;
     this.is_federated = true; // by default use federated behaviour
   }
@@ -198,9 +199,43 @@ class ProductAdapter extends AbstractMagentoAdapter {
         })})        
       }          
 
+// PRODUCT LINKS
+if(inst.links_sync){
+  logger.info('Product sub-stage 5: Geting product links' + item.sku);
+  item.links = {}
+  
+  subSyncPromises.push(() => {  return new Promise (function(opResolve, opReject) {
+      return inst.api.productLinks.types().then(function(result) { 
+      if(result && result.length > 0) {
+        let subPromises = []
+        for (const linkType of result) {
+          logger.info('Getting the product links', item.sku, linkType.name)
+          subPromises.push(inst.api.productLinks.list(item.sku, linkType.name).then(function(links) { 
+            if(links && links.length > 0) {
+              item.links[linkType] = links.map((r) => { return { sku: r.linked_product_sku, pos: r.position } })
+              logger.info('Found related products for', item.sku, item.links[linkType.name])
+            }
+            return item
+          }))
+        }
+        Promise.all(subPromises).then(function (res) {
+          logger.info('Product links expanded!')
+          opResolve(item)                  
+        }).catch(function(err) {
+          logger.error(err)
+          opResolve(item)
+        })
+      } else {
+        opResolve (item)
+      }
+      return item
+    })
+  })})
+}          
+
 // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
-        logger.info('Product sub-stage 5: Geting product options for ' + item.sku);
+        logger.info('Product sub-stage 6: Geting product options for ' + item.sku);
         
         //      q.push(function () {
         subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
