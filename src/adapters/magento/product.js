@@ -212,7 +212,7 @@ if(inst.links_sync){
           logger.info('Getting the product links', item.sku, linkType.name)
           subPromises.push(inst.api.productLinks.list(item.sku, linkType.name).then(function(links) { 
             if(links && links.length > 0) {
-              item.links[linkType] = links.map((r) => { return { sku: r.linked_product_sku, pos: r.position } })
+              item.links[linkType.name] = links.map((r) => { return { sku: r.linked_product_sku, pos: r.position } })
               logger.info('Found related products for', item.sku, item.links[linkType.name])
             }
             return item
