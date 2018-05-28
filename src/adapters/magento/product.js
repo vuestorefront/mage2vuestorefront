@@ -199,8 +199,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
         })})        
       }          
 
-// PRODUCT LINKS
-if(inst.links_sync){
+// PRODUCT LINKS - as it seems magento returns these links anyway in the "product_links"
+/* if(inst.links_sync){
   logger.info('Product sub-stage 5: Geting product links' + item.sku);
   item.links = {}
   
@@ -231,7 +231,7 @@ if(inst.links_sync){
       return item
     })
   })})
-}          
+} */        
 
 // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
