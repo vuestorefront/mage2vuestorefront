@@ -28,6 +28,7 @@ function commandCategories(next, reject) {
 
   adapter.run({
     transaction_key: tsk,
+    extendedCategories: cli.options.extendedCategories,
     done_callback: () => {
 
       if(cli.options.removeNonExistient){
@@ -290,6 +291,12 @@ cli.option({
  */
 cli.option({
   name: 'removeNonExistient',
+  default: false,
+  type: Boolean
+});
+
+cli.option({
+  name: 'extendedCategories',
   default: false,
   type: Boolean
 });

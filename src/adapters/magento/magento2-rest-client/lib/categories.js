@@ -7,6 +7,11 @@ module.exports = function (restClient) {
         return restClient.get('/categories');
     }
     
+    module.getSingle = function (categoryId) {
+        var endpointUrl = util.format('/categories/%d', categoryId);
+        return restClient.get(endpointUrl);
+    }
+    
     module.create = function (categoryAttributes) {
         return restClient.post('/categories', categoryAttributes);
     }

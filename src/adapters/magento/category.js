@@ -6,6 +6,12 @@ const util = require('util');
 
 class CategoryAdapter extends AbstractMagentoAdapter {
 
+  constructor(config) {
+    super(config);
+    this.preProcessItem = this.preProcessItem.bind(this);
+    this._addSingleCategoryData = this._addSingleCategoryData.bind(this);
+    this.extendedCategories = false;
+  }
 
   getEntityType() {
     return 'category';
@@ -15,8 +21,8 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     return 'adapters/magento/CategoryAdapter';
   }
 
-
   getSourceData(context) {
+    this.extendedCategories = context.extendedCategories;
     return this.api.categories.list();
   }
 
@@ -28,21 +34,34 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     return false;
   }
 
+  _addSingleCategoryData(item, result) {
+    item.extendedCategoryData = result;
+  }
+
   preProcessItem(item) {
 
-    return new Promise((function (done, reject) {
+    if(!item){
+      return done(item);
+    }
 
-      if(item) {
-        
-        // store the item into local redis cache
-        const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
-        logger.debug(util.format('Storing category data to cache under: %s', key));
-        this.cache.set(key, JSON.stringify(item));
+    return new Promise((function (done, reject) {
+      let inst = this;
+      if(inst.extendedCategories === true){
+        inst.api.categories.getSingle(item.id).then(function(result) { 
+          inst._addSingleCategoryData.bind(inst)(item, result); 
+          const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
+          inst.cache.set(key, JSON.stringify(item));
+          done(item); 
+        }).catch(function (err) {
+          logger.error(err);
+          done(item);
+        });
+      } else {
+        return done(item);
       }
 
-      return done(item);
-    }).bind(this));
 
+    }).bind(this));
   }
 
   /**
