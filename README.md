@@ -3,6 +3,8 @@ For those who would love to work with Magento on backend but use NoSQL power on 
 
 It's part of [vue-storefront project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
 
+**Installation / integration manual for Vue Storefront conectivity: https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2**
+
 Some details about the rationale and our goals here: https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka
 
 It synchronizes all the products, categories and links between products and categories.
