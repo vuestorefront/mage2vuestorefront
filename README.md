@@ -25,7 +25,7 @@ Redis is used for KUE queue backend
 By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
 
 
-**Tutorial on installation / integration [manual for Vue Storefront conectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
+**Tutorial on installation / integration [manual for Vue Storefront connectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
 
 
 ## How to perform full / initial import for Vue Storefront
