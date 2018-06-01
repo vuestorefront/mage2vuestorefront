@@ -39,17 +39,18 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   preProcessItem(item) {
-
-    if(!item){
-      return done(item);
-    }
-
+    let inst = this;
     return new Promise((function (done, reject) {
-      let inst = this;
+
+      if(!item){
+        return done(item);
+      }
+      
       if(inst.extendedCategories === true){
         inst.api.categories.getSingle(item.id).then(function(result) { 
           inst._addSingleCategoryData.bind(inst)(item, result); 
           const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
+          logger.debug(util.format('Storing extended category data to cache under: %s', key));
           inst.cache.set(key, JSON.stringify(item));
           done(item); 
         }).catch(function (err) {
@@ -57,6 +58,9 @@ class CategoryAdapter extends AbstractMagentoAdapter {
           done(item);
         });
       } else {
+        const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
+        logger.debug(util.format('Storing category data to cache under: %s', key));
+        this.cache.set(key, JSON.stringify(item));
         return done(item);
       }
 
