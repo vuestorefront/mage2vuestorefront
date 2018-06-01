@@ -94,6 +94,24 @@ cd vue-storefront-api
 npm run db new -- --indexName=vue_storefront_catalog
 ```
 
+### Delta indexer
+
+After initial setup and full-reindex You may want to add indexer to the `crontab` to index only modified product records.
+This is fairly easy - You just need to add the following command to crontab:
+
+```bash
+node --harmony cli.js productsdelta --partitions=1
+```
+
+This command will execute full reindex at first call - and then will be storing the last index date in the `.lastIndex.json` and downloading only these products which have `updated_at` > last index date.
+
+Please note: Magento2 has a bug with altering `updated_at` field. Please install [a fix for that](https://github.com/codepeak/magento2-productfix) before using this method: 
+
+```bash
+composer require codepeak/magento2-productfix
+php bin/magento cache:flush
+```
+
 ### Multistore setup
 
 Multiwebsite support starts with the ElasticSearch indexing. Basically - each store has it's own ElasticSearch index and should be populated separately using [mage2vuestorefront](https://github.com/DivanteLtd/mage2vuestorefront) tool.
