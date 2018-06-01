@@ -12,6 +12,7 @@ router.post('/products/update', function(req, res) { // TODO: add api key middle
 
   let skus_array = req.body.sku;
 
+  console.log('Incoming pull request for', skus_array)
   if(skus_array.length > 0){
     let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
 
