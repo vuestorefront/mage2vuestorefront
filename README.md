@@ -2,18 +2,20 @@
 For those who would love to work with Magento on backend but use NoSQL power on the frontend. Two way / real time data synchronizer.
 
 It's part of [vue-storefront project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
+Some details about the rationale and our goals [here](https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka)
 
-**Installation / integration manual for Vue Storefront conectivity: https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2**
+**Installation / integration [manual for Vue Storefront conectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
 
-Some details about the rationale and our goals here: https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka
 
-It synchronizes all the products, categories and links between products and categories.
+It synchronizes all the products, attributes, taxrules, categories and links between products and categories.
 
 This is multi-process data synchronizer between Magento (and in further versions Shopify / other platforms) to local MongoDB AND ElasticSearch databases.
 
 At this point synchronization works with following entities:
 - Products
 - Categories
+- Taxrules
+- Attributes
 - Product-to-categories
 
 Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this databse to be used in PWA/JS webapps.
@@ -64,6 +66,6 @@ Available options:
 - `partitions=10` - number of concurent processes, by default number of CPUs core given
 - `adapter=magento` - for now only Magento is supported
 - `delta` - sync products changed from last run
-- command names: `products` / `categories` / `productsworker` / `productcategories`
+- command names: `products` / `attributes` / `taxrule` / `categories` / `productsworker` / `productcategories`
 
 
