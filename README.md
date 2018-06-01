@@ -4,7 +4,7 @@ For those who would love to work with Magento on backend but use NoSQL power on 
 It's part of [vue-storefront project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
 Some details about the rationale and our goals [here](https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka)
 
-**Installation / integration [manual for Vue Storefront conectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
+**Installation / integration [manual for Vue Storefront connectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
 
 
 It synchronizes all the products, attributes, taxrules, categories and links between products and categories.
@@ -22,7 +22,7 @@ Categories and Product-to-categories links are additionaly stored in Redis cache
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
-MongoDB OR ElastiCsearch is used for NoSQL database
+MongoDB OR Elasticsearch is used for NoSQL database
 Redis is used for KUE queue backend
 
 By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
