@@ -18,7 +18,7 @@ let cluster = require('cluster')
 let numCPUs = require('os').cpus().length;
 
 let kue = require('kue');
-let queue = kue.createQueue(config.kue); 
+let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis })); 
 
 /**
  * Re-index categories
