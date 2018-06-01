@@ -19,7 +19,7 @@ Categories and Product-to-categories links are additionaly stored in Redis cache
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
-MongoDB OR ElastiCsearch is used for NoSQL database
+MongoDB OR ElasticSearch is used for NoSQL database
 Redis is used for KUE queue backend
 
 By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
