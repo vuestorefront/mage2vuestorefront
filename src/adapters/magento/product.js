@@ -4,6 +4,7 @@ let AbstractMagentoAdapter = require('./abstract');
 const util = require('util');
 const CacheKeys = require('./cache_keys');
 const Redis = require('redis');
+const moment = require('moment')
 
 /*
  * serial executes Promises sequentially.
@@ -55,7 +56,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
   getFilterQuery(context) {
 
-    let query = ''; console.log(typeof context.updated_after);
+    let query = ''; 
 
     if (context.skus)// pul individual products
     {
@@ -67,9 +68,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
         'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(context.skus.join(',')) + '&' +
         'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
 
-    } else if (context.updated_after && typeof context.updated_after == 'Date') {
+    } else if (context.updated_after && typeof context.updated_after == 'object') {
       query += 'searchCriteria[filter_groups][0][filters][0][field]=updated_at&' +
-        'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(context.updated_after.getTime()) + '&' +
+        'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(moment(context.updated_after).utc().format()) + '&' +
         'searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
     }
     return query;

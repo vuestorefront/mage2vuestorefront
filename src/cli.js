@@ -10,7 +10,8 @@ let cli = CommandRouter();
 let config = require('./config');
 let logger = require('./log');
 let factory = new AdapterFactory(config);
-
+const jsonFile = require('jsonfile')
+const INDEX_META_PATH = '.lastIndex.json'
 
 // for partitioning purposes
 let cluster = require('cluster')
@@ -155,9 +156,17 @@ function commandProductsworker() {
  * Re-index products. It can reindex products based on "updateAfter=" cmdline parameter, it can be parametrized by "partitionSize" - page size of resuts, "partitions" - number of parallel processes. 
  * It can also index individual SKUs (cmdline paramtere name skus= comma separated product SKUs)
  */
-function commandProducts() {
+function commandProducts(updatedAfter = null) {
   let adapter = factory.getAdapter(cli.options.adapter, 'product');
-  let updated_after = new Date(cli.options.updated_after);
+  if (!updatedAfter) {
+    if (cli.options.updatedAfter) {
+      updatedAfter = new Date(cli.options.updatedAfter);
+    }
+  }
+
+  if (updatedAfter) {
+    logger.info('Delta indexer started for', updatedAfter)
+  }
   let tsk = new Date().getTime();
 
 
@@ -167,7 +176,7 @@ function commandProducts() {
 
     logger.info('Running in MPM (Multi Process Mode) with partitions count = ' + partition_count);
 
-    adapter.getTotalCount({ updated_after: updated_after }).then((result) => {
+    adapter.getTotalCount({ updated_after: updatedAfter }).then((result) => {
 
       let total_count = result.total_count;
       let page_size = cli.options.partitionSize;
@@ -180,7 +189,7 @@ function commandProducts() {
 
         for (let i = 1; i <= page_count; i++) {
           logger.debug('Adding job for: ' + i + ' / ' + page_count + ', page_size = ' + page_size);
-          queue.createJob('products', { page_size: page_size, page: i, updated_after: updated_after }).save();
+          queue.createJob('products', { page_size: page_size, page: i, updated_after: updatedAfter }).save();
         }
       } else {
         logger.info('Not propagating queue - only worker mode!');
@@ -194,7 +203,7 @@ function commandProducts() {
           logger.info('Processing job: ' + job.data.page);
 
           adapter.run({
-            transaction_key: transaction_key, page_size: job.data.page_size, page: job.data.page, updated_after: job.data.updated_after, done_callback: () => {
+            transaction_key: transaction_key, page_size: job.data.page_size, page: job.data.page, updated_after: job.data.updatedAfter, done_callback: () => {
               logger.info('Task done!');
               return done();
             }
@@ -229,7 +238,7 @@ function commandProducts() {
   } else {
     logger.info('Running in SPM (Single Process Mode)');
 
-    let context = { updated_after: updated_after,
+    let context = { updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
         
@@ -259,11 +268,12 @@ function commandFullreindex() {
   Promise.all(
    [
     new Promise(commandAttributes), // 0. It stores attributes in redis cache
-    new Promise(commandCategories), //1. It stores categories in redis cache
-    new Promise(commandProductCategories) // 2. It stores product/cateogry links in redis cache
+    new Promise(commandTaxRules), // 1. It indexes the taxRules
+    new Promise(commandCategories), //2. It stores categories in redis cache
+    new Promise(commandProductCategories) // 3. It stores product/cateogry links in redis cache
    ]).then(function(results){
      logger.info('Starting full products reindex!');
-     commandProducts(); //3. It indexes all the products
+     commandProducts(); //4. It indexes all the products
    }).catch(function (err) {
      logger.error(err);
      process.exit(1)
@@ -322,7 +332,7 @@ cli.option({
 
 cli.option({
   name: 'updatedAfter',
-  default: '1970-01-01 00:00:00',
+  default: '',
   type: String
 });
 
@@ -332,11 +342,6 @@ cli.option({
   type: Boolean
 });
 
-cli.option({ // check only records modified from the last run - can be executed for example in cron to pull out the fresh data from Magento
-  name: 'delta',
-  default: true,
-  type: Boolean
-});
 
 cli.option({ // check only records modified from the last run - can be executed for example in cron to pull out the fresh data from Magento
   name: 'skus',
@@ -397,6 +402,31 @@ cli.command('productsworker', function () {
 */
 cli.command('products', function () {
   commandProducts();
+});
+
+/**
+* Sync delta
+*/
+cli.command('productsdelta', function () {
+  let indexMeta = { lastIndexDate: new Date() }
+  let updatedAfter = null
+  try {
+      indexMeta = jsonFile.readFileSync(INDEX_META_PATH)
+      updatedAfter = new Date(indexMeta.lastIndexDate)
+  } catch (err){
+      console.log('Seems like first time run!')
+      updatedAfter = null // full reindex
+  }
+
+  commandProducts(updatedAfter);
+
+  try {
+    indexMeta.lastIndexDate = new Date()
+    jsonFile.writeFile(INDEX_META_PATH, indexMeta)
+  } catch (err){
+    console.log('Error writing index meta!', err)
+  }
+  
 });
 
 /**
