@@ -225,6 +225,10 @@ npm run db rebuild -- --indexName=vue_storefront_catalog
 
 More on <a href="https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Multistore%20setup.md">how to setup Vue Storefront in the Multistore mode</a>.
 
+### Indexing configurable products attributes for filters
+
+If You like to have Category filter working with configurable products - You need to expand the `product.configurable_children.attrName` to `product.attrName_options` array. This is automatically done by [mage2vuestorefront](https://github.com/DivanteLtd/mage2vuestorefront) for all attributes set as `product.configurable_options` (by default: color, size). If You like to add additional fields like `manufacturer` to the filters You need to expand `product.manufacturer_options` field. The easiest way to do so is to set `config.product.expandConfigurableFilters` to `['manufacturer']` and re-run the `mage2vuestorefront` indexer.
+
 
 ## Advanced usage
 
