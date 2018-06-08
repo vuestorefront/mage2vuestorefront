@@ -143,6 +143,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       // DO NOT use "productcategories" type but rather do search categories with assigned products
 
       let subSyncPromises = []
+      const config = inst.config
 
 // TODO: Refactor the following to "Chain of responsibility"
 // STOCK SYNC      
@@ -263,6 +264,24 @@ class ProductAdapter extends AbstractMagentoAdapter {
             item.configurable_children.push(confChild);
             if(item.price  == 0) // if price is zero fix it with first children
               item.price = prOption.price;
+          }
+
+// EXPAND CONFIGURABLE CHILDREN ATTRS          
+          if (config.product && config.product.expandConfigurableFilters) {
+            for (const attrToExpand of config.product.expandConfigurableFilters){
+              const expandedSet = new Set()
+              if (item[attrToExpand]) {
+                expandedSet.add(item[attrToExpand])
+              }
+              for (const confChild of item.configurable_children) {
+                if (confChild[attrToExpand]) {
+                  expandedSet.add(confChild[attrToExpand])
+                }
+              }
+              if (expandedSet.size > 0) {
+                item[attrToExpand + '_options'] = Array.from(expandedSet)
+              }
+            }
           }
 
             inst.api.configurableOptions.list(item.sku).then(function(result) { 

@@ -8,6 +8,10 @@ module.exports = {
     accessTokenSecret: process.env.MAGENTO_ACCESS_TOKEN_SECRET || '00y9dl4vpxgcef3gn5mntbxtylowjcc9',
   },
 
+  product: {
+    expandConfigurableFilters: ['manufacturer']
+  },
+
   kue: {}, // default KUE config works on local redis instance. See KUE docs for non standard redis connections
 
   db: {
