@@ -307,7 +307,7 @@ cli.option({
 
 cli.option({
   name: 'extendedCategories',
-  default: false,
+  default: true,
   type: Boolean
 });
 
