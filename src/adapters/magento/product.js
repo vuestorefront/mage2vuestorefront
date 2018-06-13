@@ -104,6 +104,18 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 delete productAdditionalInfo.price_info.extension_attributes
                 product = Object.assign(product, productAdditionalInfo.price_info)
               }
+
+              if (product.configurable_children && product.configurable_children.length > 0){
+                for(let subproduct of product.configurable_children) {
+                  const subProductAdditionalInfo = renderedProducts.items.find(p => p.id === subproduct.id)
+    
+                  if (subProductAdditionalInfo && subProductAdditionalInfo.price_info) {
+                    delete subProductAdditionalInfo.price_info.formatted_prices
+                    delete subProductAdditionalInfo.price_info.extension_attributes
+                    subproduct = Object.assign(subproduct, subProductAdditionalInfo.price_info)
+                  }
+                }                
+              }
             }
             resolve(result)
           })
