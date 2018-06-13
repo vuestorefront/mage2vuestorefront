@@ -105,7 +105,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 product = Object.assign(product, productAdditionalInfo.price_info)
               }
 
-              if (product.configurable_children && product.configurable_children.length > 0){
+              if (product.configurable_children && product.configurable_children.length > 0){ // TODO: move it to product processor as we don't have configurable_children access in here
                 for(let subproduct of product.configurable_children) {
                   const subProductAdditionalInfo = renderedProducts.items.find(p => p.id === subproduct.id)
     
