@@ -98,9 +98,12 @@ class ProductAdapter extends AbstractMagentoAdapter {
           this.api.products.renderList(query, inst.config.magento.storeId, inst.config.magento.currencyCode).then(renderedProducts => {
             for(let product of result.items) {
               const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
-              delete productAdditionalInfo.price_info.formatted_prices
-              delete productAdditionalInfo.price_info.extension_attributes
-              product = Object.assign(product, productAdditionalInfo.price_info)
+
+              if (productAdditionalInfo && productAdditionalInfo.price_info) {
+                delete productAdditionalInfo.price_info.formatted_prices
+                delete productAdditionalInfo.price_info.extension_attributes
+                product = Object.assign(product, productAdditionalInfo.price_info)
+              }
             }
             resolve(result)
           })
