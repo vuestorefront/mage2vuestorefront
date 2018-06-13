@@ -8,6 +8,12 @@ module.exports = function (restClient) {
         var endpointUrl = util.format('/products?%s', query);
         return restClient.get(endpointUrl);
     }
+    
+    module.renderList = function (searchCriteria, storeId = 1, currencyCode = 'USD') {
+        var query = 'searchCriteria=' + searchCriteria;
+        var endpointUrl = util.format('/products-render-info?%s&storeId=%d&currencyCode=' + encodeURIComponent(currencyCode), query, storeId);
+        return restClient.get(endpointUrl);
+    }
 
     module.create = function (productAttributes) {
         return restClient.post('/products', productAttributes);

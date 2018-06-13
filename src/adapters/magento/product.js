@@ -5,6 +5,7 @@ const util = require('util');
 const CacheKeys = require('./cache_keys');
 const Redis = require('redis');
 const moment = require('moment')
+const _ = require('lodash')
 
 /*
  * serial executes Promises sequentially.
@@ -77,6 +78,42 @@ class ProductAdapter extends AbstractMagentoAdapter {
   }
 
   getSourceData(context) {
+    if (this.config.product.synchronizeCatalogSpecialPrices) {
+      const inst = this
+      return new Promise((resolve, reject) => {
+        
+        this.getProductSourceData(context).then((result) => {
+          // download rendered list items
+          const products = result.items
+          let skus = products.map((p) => { return p.sku })
+
+          if (products.length === 1) { // single product - download child data
+            const childSkus = _.flattenDeep(products.map((p) => { return (p.configurable_children) ? p.configurable_children.map((cc) => { return cc.sku }) : null }))
+            skus = _.union(skus, childSkus)
+          }        
+          const query = '&searchCriteria[filter_groups][0][filters][0][field]=sku&' +
+          'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(skus.join(',')) + '&' +
+          'searchCriteria[filter_groups][0][filters][0][condition_type]=in';          
+
+          this.api.products.renderList(query, inst.config.magento.storeId, inst.config.magento.currencyCode).then(renderedProducts => {
+            for(let product of result.items) {
+              const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
+              delete productAdditionalInfo.price_info.formatted_prices
+              delete productAdditionalInfo.price_info.extension_attributes
+              product = Object.assign(product, productAdditionalInfo.price_info)
+            }
+            resolve(result)
+          })
+        })
+
+
+      })
+    } else {
+      return this.getProductSourceData(context)
+    }
+  }
+
+  getProductSourceData(context) {
 
     let query = this.getFilterQuery(context);
 

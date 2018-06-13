@@ -14,6 +14,7 @@
     "jsonfile": "^4.0.0",
     "jwt-simple": "^0.5.1",
     "kue": "^0.11.5",
+    "lodash": "^4.17.10",
     "magento2-rest-client": "0.0.2",
     "moment": "^2.22.2",
     "mongodb": "^2.2.26",
