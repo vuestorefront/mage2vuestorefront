@@ -96,25 +96,20 @@ class ProductAdapter extends AbstractMagentoAdapter {
           'searchCriteria[filter_groups][0][filters][0][condition_type]=in';          
 
           this.api.products.renderList(query, inst.config.magento.storeId, inst.config.magento.currencyCode).then(renderedProducts => {
+            context.renderedProducts = renderedProducts
             for(let product of result.items) {
               const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
 
               if (productAdditionalInfo && productAdditionalInfo.price_info) {
                 delete productAdditionalInfo.price_info.formatted_prices
                 delete productAdditionalInfo.price_info.extension_attributes
+                delete productAdditionalInfo.price_info.special_price
                 product = Object.assign(product, productAdditionalInfo.price_info)
-              }
 
-              if (product.configurable_children && product.configurable_children.length > 0){ // TODO: move it to product processor as we don't have configurable_children access in here
-                for(let subproduct of product.configurable_children) {
-                  const subProductAdditionalInfo = renderedProducts.items.find(p => p.id === subproduct.id)
-    
-                  if (subProductAdditionalInfo && subProductAdditionalInfo.price_info) {
-                    delete subProductAdditionalInfo.price_info.formatted_prices
-                    delete subProductAdditionalInfo.price_info.extension_attributes
-                    subproduct = Object.assign(subproduct, subProductAdditionalInfo.price_info)
-                  }
-                }                
+                if (product.final_price < product.price) {
+                  product.special_price = product.final_price
+                }
+                
               }
             }
             resolve(result)
@@ -311,7 +306,22 @@ class ProductAdapter extends AbstractMagentoAdapter {
               for (let opt of prOption.custom_attributes) {
                 confChild[opt.attribute_code] = opt.value
               }
-            }          
+            }
+            const context = inst.current_context
+            if (context.renderedProducts && context.renderedProducts.items.length) {
+              const renderedProducts = context.renderedProducts
+              const subProductAdditionalInfo = renderedProducts.items.find(p => p.id === confChild.id)
+
+              if (subProductAdditionalInfo && subProductAdditionalInfo.price_info) {
+                delete subProductAdditionalInfo.price_info.formatted_prices
+                delete subProductAdditionalInfo.price_info.extension_attributes
+                delete subProductAdditionalInfo.price_info.special_price // always empty :-(
+                confChild = Object.assign(confChild, subProductAdditionalInfo.price_info)
+                if (confChild.final_price < confChild.price) {
+                  confChild.special_price = confChild.final_price
+                }
+              }
+            }
 
             item.configurable_children.push(confChild);
             if(item.price  == 0) // if price is zero fix it with first children
