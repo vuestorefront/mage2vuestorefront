@@ -69,9 +69,9 @@ class CategoryAdapter extends AbstractMagentoAdapter {
           if (item.children_data && item.children_data.length) {
 
             const _extendSingleCategory = function (catToExtend) {
-              inst.api.categories.getSingle(catToExtend.id).then(function(result) { 
+              return inst.api.categories.getSingle(catToExtend.id).then(function(result) { 
                 Object.assign(catToExtend, _normalizeExtendedData(result))
-                logger.info('Subcategory data extended for children object', catToExtend.id)
+                logger.info('Subcategory data extended for children object', catToExtend.id, item.id)
               }).catch(function(err) {
                 logger.error(err)
               })              
