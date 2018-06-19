@@ -78,7 +78,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
   }
 
   getSourceData(context) {
-    if (this.config.product.synchronizeCatalogSpecialPrices) {
+    if (this.config.product && this.config.product.synchronizeCatalogSpecialPrices) {
       const inst = this
       return new Promise((resolve, reject) => {
         
