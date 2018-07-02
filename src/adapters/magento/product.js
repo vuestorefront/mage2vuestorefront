@@ -109,11 +109,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 if (product.final_price < product.price) {
                   product.special_price = product.final_price
                 }
-                if (product.sku === 'joga') { 
-                  console.log(product)
-                  console.log(productAdditionalInfo)
-                  process.exit(-1)
-                }
                 
               }
             }
