@@ -109,6 +109,11 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 if (product.final_price < product.price) {
                   product.special_price = product.final_price
                 }
+                if (product.sku === 'joga') { 
+                  console.log(product)
+                  console.log(productAdditionalInfo)
+                  process.exit(-1)
+                }
                 
               }
             }
@@ -212,12 +217,14 @@ class ProductAdapter extends AbstractMagentoAdapter {
         subSyncPromises.push(() => { return inst.api.productMedia.list(item.sku).then(function(result) { 
           let media_gallery = []
           for (let mediaItem of result){
-            media_gallery.push({
-              image: mediaItem.file,
-              pos: mediaItem.position,
-              typ: mediaItem.media_type,
-              lab: mediaItem.label
-            })
+            if (!mediaItem.disabled) {
+              media_gallery.push({
+                image: mediaItem.file,
+                pos: mediaItem.position,
+                typ: mediaItem.media_type,
+                lab: mediaItem.label
+              })
+            }
           }
           item.media_gallery = media_gallery
           return item
