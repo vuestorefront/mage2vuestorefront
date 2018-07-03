@@ -109,6 +109,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 if (product.final_price < product.price) {
                   product.special_price = product.final_price
                 }
+
+                if(inst.config.product.renderCatalogRegularPrices) {
+                  product.price = product.regular_price
+                }
                 
               }
             }
@@ -322,6 +326,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 if (confChild.final_price < confChild.price) {
                   confChild.special_price = confChild.final_price
                 }
+                if(config.product.renderCatalogRegularPrices) {
+                  confChild.price = confChild.regular_price
+                }
+                
               }
             }
 
