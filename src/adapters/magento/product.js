@@ -103,7 +103,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               if (productAdditionalInfo && productAdditionalInfo.price_info) {
                 delete productAdditionalInfo.price_info.formatted_prices
                 delete productAdditionalInfo.price_info.extension_attributes
-                delete productAdditionalInfo.price_info.special_price
+                // delete productAdditionalInfo.price_info.special_price
                 product = Object.assign(product, productAdditionalInfo.price_info)
 
                 if (product.final_price < product.price) {
@@ -321,7 +321,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               if (subProductAdditionalInfo && subProductAdditionalInfo.price_info) {
                 delete subProductAdditionalInfo.price_info.formatted_prices
                 delete subProductAdditionalInfo.price_info.extension_attributes
-                delete subProductAdditionalInfo.price_info.special_price // always empty :-(
+                // delete subProductAdditionalInfo.price_info.special_price // always empty :-(
                 confChild = Object.assign(confChild, subProductAdditionalInfo.price_info)
                 if (confChild.final_price < confChild.price) {
                   confChild.special_price = confChild.final_price
