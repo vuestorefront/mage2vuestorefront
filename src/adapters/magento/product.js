@@ -427,7 +427,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
                         name: cat.name
                       })
                     } else
-                      resolve(null);
+                      resolve({
+                        category_id: catId
+                      });
                   });
 
                 }));
@@ -443,7 +445,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }
           if (item.category_ids && Array.isArray(item.category_ids) && item.category_ids.length > 0) {
             const catIdsArray = item.category_ids.map(item => { return parseInt(item)})
-            console.log('Using category_ids binding for', item.sku, catIdsArray)
+            logger.info('Using category_ids binding for', item.sku, catIdsArray)
             catBinder(catIdsArray)
           } else {
             this.cache.smembers(key, function (err, categories) {
