@@ -407,42 +407,51 @@ class ProductAdapter extends AbstractMagentoAdapter {
         if(inst.category_sync) {
           item.category = new Array();
 
-          this.cache.smembers(key, function (err, categories) {
-            if (categories == null) {
-              resolve(item);
+          const catBinder = function (categories) {
+
+            let catPromises = new Array();
+            for (let catId of categories) {
+
+              catPromises.push(
+                new Promise(function (resolve, reject) {
+
+                  let cat = inst.cache.get(util.format(CacheKeys.CACHE_KEY_CATEGORY, catId), function (err, serializedCat) {
+                    let cat = JSON.parse(serializedCat); // category object
+                    if (cat != null) {
+                      resolve({
+                        category_id: cat.id,
+                        name: cat.name
+                      })
+                    } else
+                      resolve(null);
+                  });
+
+                }));
+
             }
-            else {
 
-              let catPromises = new Array();
-              for (let catId of categories) {
+            Promise.all(catPromises).then(function (values) {
+              if(inst.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
+                item.category = values; // here we get configurable options
+                resolve(item)
+            });
 
-                catPromises.push(
-                  new Promise(function (resolve, reject) {
+          }
 
-                    let cat = inst.cache.get(util.format(CacheKeys.CACHE_KEY_CATEGORY, catId), function (err, serializedCat) {
-                      let cat = JSON.parse(serializedCat); // category object
-                      if (cat != null) {
-                        resolve({
-                          category_id: cat.id,
-                          name: cat.name
-                        })
-                      } else
-                        resolve(null);
-                    });
-
-                  }));
-
+          if (item.category_ids) {
+            logger.info('Using category_ids binding for', item.sku, item.category_ids)
+            catBinder(item.category_ids)
+          } else {
+            this.cache.smembers(key, function (err, categories) {
+              if (categories == null) {
+                resolve(item);
+              }
+              else {
+                catBinder(categories)
               }
 
-              Promise.all(catPromises).then(function (values) {
-                if(inst.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
-                  item.category = values; // here we get configurable options
-                  resolve(item)
-              });
-
-            }
-
-          })
+            })
+          }
         }
       })})
 
