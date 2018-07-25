@@ -188,6 +188,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
    */
   preProcessItem(item) {
     const inst = this;
+    for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
+      item[customAttribute.attribute_code] = customAttribute.value;
+    }
+    item.custom_attributes = null;    
     
     return new Promise((function (done, reject) {
       // TODO: add denormalization of productcategories into product categories
@@ -437,10 +441,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
             });
 
           }
-
-          if (item.category_ids) {
-            const catIdsArray = item.category_ids.map(item => { return parseInt(item) })
-            logger.info('Using category_ids binding for', item.sku, catIdsArray)
+          if (item.category_ids && Array.isArray(item.category_ids) && item.category_ids.length > 0) {
+            const catIdsArray = item.category_ids.map(item => { return parseInt(item)})
+            console.log('Using category_ids binding for', item.sku, catIdsArray)
             catBinder(catIdsArray)
           } else {
             this.cache.smembers(key, function (err, categories) {
@@ -490,11 +493,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
 //      "price": prices, // ES stores prices differently
 // TODO: HOW TO GET product stock from Magento API call for product?
     });
-
-    for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
-      resultItem[customAttribute.attribute_code] = customAttribute.value;
-    }
-    resultItem.custom_attributes = null;
     return resultItem;
 
   }
