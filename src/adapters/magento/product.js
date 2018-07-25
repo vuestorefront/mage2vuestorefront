@@ -439,8 +439,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }
 
           if (item.category_ids) {
-            logger.info('Using category_ids binding for', item.sku, item.category_ids)
-            catBinder(item.category_ids)
+            const catIdsArray = item.category_ids.map(item => { return parseInt(item) })
+            logger.info('Using category_ids binding for', item.sku, catIdsArray)
+            catBinder(catIdsArray)
           } else {
             this.cache.smembers(key, function (err, categories) {
               if (categories == null) {
