@@ -43,7 +43,7 @@ You must install `vue-storefront-api` locally. You may install it using the Vue 
 
 ```bash
 git clone https://github.com/DivanteLtd/vue-storefront-api
-cd vue-storefornt-api
+cd vue-storefront-api
 npm install
 npm run migrate
 docker-compose up -d
