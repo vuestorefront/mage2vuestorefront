@@ -18,7 +18,7 @@ let cluster = require('cluster')
 let numCPUs = require('os').cpus().length;
 
 let kue = require('kue');
-let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis })); 
+let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
 
 /**
  * Re-index categories
@@ -94,14 +94,14 @@ function commandCleanup(){
   let adapter = factory.getAdapter(cli.options.adapter, cli.options.cleanupType);
   let tsk = cli.options.transactionKey;
 
-  if(tsk){ 
+  if(tsk){
     logger.info('Cleaning up for TRANSACTION KEY = ' + tsk);
     adapter.connect
     adapter.cleanUp(tsk);
-  } else 
+  } else
   logger.error('No "transactionKey" given as a parameter');
 
-  
+
 }
 
 /**
@@ -153,7 +153,7 @@ function commandProductsworker() {
 }
 
 /**
- * Re-index products. It can reindex products based on "updateAfter=" cmdline parameter, it can be parametrized by "partitionSize" - page size of resuts, "partitions" - number of parallel processes. 
+ * Re-index products. It can reindex products based on "updateAfter=" cmdline parameter, it can be parametrized by "partitionSize" - page size of resuts, "partitions" - number of parallel processes.
  * It can also index individual SKUs (cmdline paramtere name skus= comma separated product SKUs)
  */
 function commandProducts(updatedAfter = null) {
@@ -222,12 +222,12 @@ function commandProducts(updatedAfter = null) {
               if(cli.options.removeNonExistient){
                 logger.info('CleaningUp products!');
                 let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
-                adapter.cleanUp(transaction_key);              
+                adapter.cleanUp(transaction_key);
               }
-              
+
               logger.info('Queue processed. Exiting!');
               setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-      
+
             }
           });
         }, 2000);
@@ -241,7 +241,7 @@ function commandProducts(updatedAfter = null) {
     let context = { updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
-        
+
               if(cli.options.removeNonExistient){
                 adapter.cleanUp(tsk);
               }
@@ -260,6 +260,49 @@ function commandProducts(updatedAfter = null) {
 
 }
 
+/**
+ * Re-index cms blocks
+ */
+function commandBlock(next, reject) {
+  let adapter = factory.getAdapter(cli.options.adapter, 'block');
+  let tsk = new Date().getTime();
+
+  adapter.run({
+    transaction_key: tsk,
+    done_callback: () => {
+      if (cli.options.removeNonExistient) {
+        adapter.cleanUp(tsk);
+      }
+
+      if(!next){
+        logger.info('Task done! Exiting in 30s ...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      } else next();
+    }
+  })
+}
+
+/**
+ * Re-index cms pages
+ */
+function commandPage(next, reject) {
+  let adapter = factory.getAdapter(cli.options.adapter, 'page');
+  let tsk = new Date().getTime();
+
+  adapter.run({
+    transaction_key: tsk,
+    done_callback: () => {
+      if (cli.options.removeNonExistient) {
+        adapter.cleanUp(tsk);
+      }
+
+      if(!next){
+        logger.info('Task done! Exiting in 30s ...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      } else next();
+    }
+  })
+}
 
 /**
  * Full reindex; The sequence is important becasue commands operate on some cachce resources - especially for product/category assigments
@@ -426,7 +469,21 @@ cli.command('productsdelta', function () {
   } catch (err){
     console.log('Error writing index meta!', err)
   }
-  
+
+});
+
+/**
+* Sync cms blocks
+*/
+cli.command('block', function () {
+  commandBlock();
+});
+
+/**
+* Sync cms blocks
+*/
+cli.command('page', function () {
+  commandPage();
 });
 
 /**
