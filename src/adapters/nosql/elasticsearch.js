@@ -2,6 +2,7 @@
 const AbstractNosqlAdapter = require('./abstract');
 const elasticsearch = require('elasticsearch');
 const AgentKeepAlive = require('agentkeepalive');
+const AgentKeepAliveHttps = require('agentkeepalive').HttpsAgent;
 
 
 class ElasticsearchAdapter extends AbstractNosqlAdapter {
@@ -151,8 +152,11 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
         maxSockets: 10,
         minSockets: 10,
         requestTimeout: 1800000,
-       
+
         createNodeAgent: function (connection, config) {
+          if (connection.useSsl) {
+            return new AgentKeepAliveHttps(connection.makeAgentConfig(config));
+          }
           return new AgentKeepAlive(connection.makeAgentConfig(config));
         }
 
