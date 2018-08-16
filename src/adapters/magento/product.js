@@ -309,6 +309,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               visibility: prOption.visibility,
               name: prOption.name,
               price: prOption.price,
+              tier_prices: prOption.tier_prices
               // custom_attributes: prOption.custom_attributes
             };
 
