@@ -9,12 +9,10 @@ WORKDIR /var/www
 # copy all app codes to work directory
 COPY src/ .
 
-RUN yarn install --production=false --no-cache
+RUN yarn install --production=false
 
 # expose port 8080 for app
 EXPOSE 8080
-
-RUN ls
 
 COPY src/mage2vsf.sh /usr/local/bin/
 
