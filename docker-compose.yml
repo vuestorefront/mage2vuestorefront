@@ -9,9 +9,9 @@ services:
       - redis
     env_file: src/default.env
     ports:
-      - '9999:9999'
+      - '8080:8080'
     expose:
-      - 9999
+      - 8080
   es1:
     image: elasticsearch:5.5
     container_name: es1
