@@ -9,12 +9,10 @@ WORKDIR /var/www
 # copy all app codes to work directory
 COPY . .
 
-COPY .env-sample /var/www/.env
-
 RUN yarn install --production=false --no-cache
 
-# expose port 9090 for express app
-EXPOSE 9090
+# expose port 8080 for app
+EXPOSE 8080
 
 COPY mage2vsf.sh /usr/local/bin/
 
