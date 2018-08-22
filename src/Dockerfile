@@ -14,6 +14,8 @@ RUN yarn install --production=false --no-cache
 # expose port 8080 for app
 EXPOSE 8080
 
+RUN ls
+
 COPY mage2vsf.sh /usr/local/bin/
 
 # start app
