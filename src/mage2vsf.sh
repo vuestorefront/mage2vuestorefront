@@ -1,3 +1,3 @@
 #!/bin/sh
 set -e
-yarn run webapi & yarn run worker
+sleep 10s && yarn run webapi & yarn run worker
