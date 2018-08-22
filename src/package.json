@@ -29,7 +29,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webapi": "node --harmony webapi.js",
+    "worker": "node --harmony cli.js productsworker"
   },
   "author": "Piotr Karwatka",
   "license": "MIT"
