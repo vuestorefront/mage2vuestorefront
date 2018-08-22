@@ -13,11 +13,11 @@ services:
     expose:
       - 8080
   es1:
-    build: docker/elasticsearch/
+    image: elasticsearch:5.5
     container_name: es1
-    env_file: docker/elasticsearch/default.env
-    volumes:
-      - 'esdat1:/usr/share/elasticsearch/data'
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     restart: unless-stopped
     networks:
       default:
