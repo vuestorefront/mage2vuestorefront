@@ -1,55 +1,40 @@
-version: '2'
+version: '2.0'
 services:
-  esm1:
-    image: elasticsearch:2.4.6
-    container_name: esm1
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
-    volumes:
-      - esdat1:/usr/share/elasticsearch/data
+  app:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    depends_on:
+      - es1
+      - redis
+    env_file: src/default.env
     ports:
-      - 9200:9200
+      - '8080:8080'
+    expose:
+      - 8080
+  es1:
+    build: docker/elasticsearch/
+    container_name: es1
+    env_file: docker/elasticsearch/default.env
+    volumes:
+      - 'esdat1:/usr/share/elasticsearch/data'
+    restart: unless-stopped
     networks:
-      - esnet
-  esm2:
-    image: elasticsearch:5.5
-    container_name: esm2
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=esm1"
+      default:
+        aliases:
+          - elasticsearch
+    ports:
+      - '9200:9200'
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 1g
-    volumes:
-      - esdat2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-  
   redis:
-    image: redis
-
+    image: 'redis:4-alpine'
+    restart: unless-stopped
     ports:
-      - "6379:6379"      
-
+      - '6379:6379'
 
 volumes:
   esdat1:
-    driver: local
-  esdat2:
-    driver: local
-
-networks:
-  esnet:
-
 
