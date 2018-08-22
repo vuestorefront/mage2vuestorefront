@@ -7,7 +7,7 @@ RUN mkdir -p /var/www
 WORKDIR /var/www
 
 # copy all app codes to work directory
-COPY . .
+COPY src/ .
 
 RUN yarn install --production=false --no-cache
 
@@ -16,7 +16,7 @@ EXPOSE 8080
 
 RUN ls
 
-COPY mage2vsf.sh /usr/local/bin/
+COPY src/mage2vsf.sh /usr/local/bin/
 
 # start app
 ENTRYPOINT ["mage2vsf.sh"]
