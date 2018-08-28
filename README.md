@@ -14,6 +14,7 @@ At this point synchronization works with following entities:
 - Taxrules
 - Attributes
 - Product-to-categories
+- Reviews (require custom module Divante/ReviewApi to work)
 
 Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this databse to be used in PWA/JS webapps.
 
@@ -74,6 +75,7 @@ node --harmony cli.js productcategories --partitions=1
 node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
 node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
 node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js reviews
 ```
 
 Please note:

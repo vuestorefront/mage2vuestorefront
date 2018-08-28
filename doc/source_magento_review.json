@@ -1,0 +1,19 @@
+{
+  "id": 0,
+  "title": "string",
+  "detail": "string",
+  "nickname": "string",
+  "ratings": [{
+    "id": 0,
+    "review_id": 0,
+    "attribute_code": "string",
+    "value": 0
+  }],
+  "customer_id": null,
+  "review_entity": "product",
+  "review_type": 0,
+  "review_status": 0,
+  "created_at": "string",
+  "entity_pk_value": 0,
+  "stores": []
+}
