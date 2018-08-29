@@ -1,8 +1,9 @@
 'use strict';
 
+require('dotenv').config()
+
 var CommandRouter = require('command-router');
 let AdapterFactory = require('./adapters/factory');
-
 
 const TIME_TO_EXIT = process.env.TIME_TO_EXIT ? process.env.TIME_TO_EXIT : 30000; // wait 30s before quiting after task is done
 
