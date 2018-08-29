@@ -13,12 +13,35 @@ let factory = new AdapterFactory(config);
 const jsonFile = require('jsonfile')
 const INDEX_META_PATH = '.lastIndex.json'
 
+
 // for partitioning purposes
 let cluster = require('cluster')
 let numCPUs = require('os').cpus().length;
 
 let kue = require('kue');
-let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis })); 
+let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
+
+function commandReviews(next, reject) {
+    let adapter = factory.getAdapter(cli.options.adapter, 'review');
+    let tsk = new Date().getTime();
+
+    adapter.cleanUp(tsk);
+
+    adapter.run({
+        transaction_key: tsk,
+        done_callback: () => {
+
+            if(cli.options.removeNonExistient){
+                adapter.cleanUp(tsk);
+            }
+
+            if(!next){
+                logger.info('Task done! Exiting in 30s ...');
+                setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+            } else next();
+        }
+    });
+}
 
 /**
  * Re-index categories
@@ -222,12 +245,12 @@ function commandProducts(updatedAfter = null) {
               if(cli.options.removeNonExistient){
                 logger.info('CleaningUp products!');
                 let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
-                adapter.cleanUp(transaction_key);              
+                adapter.cleanUp(transaction_key);
               }
-              
+
               logger.info('Queue processed. Exiting!');
               setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-      
+
             }
           });
         }, 2000);
@@ -241,7 +264,7 @@ function commandProducts(updatedAfter = null) {
     let context = { updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
-        
+
               if(cli.options.removeNonExistient){
                 adapter.cleanUp(tsk);
               }
@@ -358,6 +381,9 @@ cli.command('fullreindex', function () {
   commandFullreindex();
 })
 
+cli.command('reviews', function() {
+    commandReviews();
+});
 
 /**
 * Sync categories

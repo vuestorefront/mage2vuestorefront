@@ -4,7 +4,7 @@ let AbstractMagentoAdapter = require('./abstract');
 const CacheKeys = require('./cache_keys');
 const util = require('util');
 
-class CategoryAdapter extends AbstractMagentoAdapter {
+class AttributeAdapter extends AbstractMagentoAdapter {
 
 
   getEntityType() {
@@ -20,7 +20,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     return this.api.attributes.list();
   }
 
-  /** Regarding Magento2 api docs and reality we do have an exception here that items aren't listed straight in the response but under "items" key */
+  /**  Regarding Magento2 api docs and reality we do have an exception here that items aren't listed straight in the response but under "items" key */
   prepareItems(items) {
 
     if(!items)
@@ -76,4 +76,4 @@ class CategoryAdapter extends AbstractMagentoAdapter {
 
 }
 
-module.exports = CategoryAdapter;
+module.exports = AttributeAdapter;
