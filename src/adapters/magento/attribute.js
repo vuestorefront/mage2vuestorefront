@@ -20,7 +20,6 @@ class AttributeAdapter extends AbstractMagentoAdapter {
 
   /**  Regarding Magento2 api docs and reality we do have an exception here that items aren't listed straight in the response but under "items" key */
   prepareItems(items) {
-
     if(!items)
       return items;
  
@@ -31,10 +30,10 @@ class AttributeAdapter extends AbstractMagentoAdapter {
       items = items.items; // this is an exceptional behavior for Magento2 api  for attributes
 
     return items;
-  }  
+  }
 
   getLabel(source_item) {
-    return '[(' + source_item.attribute_code + ') ' + source_item.default_frontend_label + ']';
+    return `[(${source_item.attribute_code}) ${source_item.default_frontend_label}]`;
   }
 
   isFederated() {
@@ -42,11 +41,8 @@ class AttributeAdapter extends AbstractMagentoAdapter {
   }
 
   preProcessItem(item) {
-
-    return new Promise((function (done, reject) {
-      
-      if(item) {
-
+    return new Promise((done, reject) => {
+      if (item) {
         item.id = item.attribute_id;
         // store the item into local redis cache
         let key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_code);
@@ -56,12 +52,10 @@ class AttributeAdapter extends AbstractMagentoAdapter {
         key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_id); // store under attribute id as an second option
         logger.debug(`Storing attribute data to cache under: ${key}`);
         this.cache.set(key, JSON.stringify(item));
-        
       }
 
       return done(item);
-    }).bind(this));
-
+    });
   }
 
   /**
@@ -71,7 +65,6 @@ class AttributeAdapter extends AbstractMagentoAdapter {
   normalizeDocumentFormat(item) {
     return item;
   }
-
 }
 
 module.exports = AttributeAdapter;
