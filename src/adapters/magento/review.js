@@ -18,12 +18,12 @@ class ReviewAdapter extends AbstractMagentoAdapter {
 
   getSourceData(context) {
     if (this.use_paging) {
-      return this.api.reviews.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : '')).catch(function (err) {
+      return this.api.reviews.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : '')).catch((err) => {
         throw new Error(err);
       });
     }
 
-    return this.api.reviews.list().catch(function (err) {
+    return this.api.reviews.list().catch((err) => {
       throw new Error(err);
     });
   }
@@ -59,7 +59,7 @@ class ReviewAdapter extends AbstractMagentoAdapter {
   preProcessItem(item) {
     logger.debug(item);
     //
-    return new Promise((function (done, reject) {
+    return new Promise((done, reject) => {
       if (item) {
         item.product_id = item.entity_pk_value;
 
@@ -70,7 +70,7 @@ class ReviewAdapter extends AbstractMagentoAdapter {
       }
 
       return done(item);
-    }).bind(this));
+    });
   }
 
   /**
