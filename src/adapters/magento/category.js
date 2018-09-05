@@ -47,23 +47,22 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     item = Object.assign(item, _normalizeExtendedData(result));
   }
 
-  _extendSingleCategory(catToExtend) {
+  _extendSingleCategory(rootId, catToExtend) {
     return this.api.categories.getSingle(catToExtend.id).then(function(result) { 
       Object.assign(catToExtend, _normalizeExtendedData(result))
-      logger.info('Subcategory data extended for children object', catToExtend.id, item.id)
+      logger.info(`Subcategory data extended for ${rootId}, children object ${catToExtend.id}`)
     }).catch(function(err) {
       logger.error(err)
     });
   }
 
-  _extendChildrenCategories(arr, result, subpromises) {
-    for (let i = 0, length = arr.length; i < length; i++) {
-      const value = arr[i];
-      if (Array.isArray(value.children_data)) {
-        this._extendChildrenCategories(value.children_data, result, subpromises);
-        subpromises.push(this._extendSingleCategory(value));
+  _extendChildrenCategories(rootId, children, result, subpromises) {
+    for (const child of children) {
+      if (Array.isArray(child.children_data)) {
+        this._extendChildrenCategories(rootId, child.children_data, result, subpromises);
+        subpromises.push(this._extendSingleCategory(rootId, child));
       } else {
-        subpromises.push(this._extendSingleCategory(value));
+        subpromises.push(this._extendSingleCategory(rootId, child));
       }
     }
     return result;
@@ -87,7 +86,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
 
           const subpromises = []
           if (item.children_data && item.children_data.length) {
-            this._extendChildrenCategories(item.children_data, result, subpromises)
+            this._extendChildrenCategories(item.id, item.children_data, result, subpromises)
             
             Promise.all(subpromises).then(function (results) {
               done(item)
