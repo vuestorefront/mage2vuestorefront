@@ -195,7 +195,7 @@ class AbstractAdapter {
                   logger.debug(`Switching page to ${this.page}`);
 
                   this.getSourceData(this.getCurrentContext())
-                    .then(this.processItems)
+                    .then(this.processItems.bind(this))
                     .catch((err) => {
                       logger.error(err);
                     });
