@@ -12,7 +12,6 @@ let factory = new AdapterFactory(config);
 const jsonFile = require('jsonfile')
 const INDEX_META_PATH = '.lastIndex.json'
 
-
 // for partitioning purposes
 let cluster = require('cluster')
 let numCPUs = require('os').cpus().length;
@@ -21,25 +20,24 @@ let kue = require('kue');
 let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
 
 function commandReviews(next, reject) {
-    let adapter = factory.getAdapter(cli.options.adapter, 'review');
-    let tsk = new Date().getTime();
+  let adapter = factory.getAdapter(cli.options.adapter, 'review');
+  let tsk = new Date().getTime();
 
-    adapter.cleanUp(tsk);
+  adapter.cleanUp(tsk);
 
-    adapter.run({
-        transaction_key: tsk,
-        done_callback: () => {
+  adapter.run({
+    transaction_key: tsk,
+    done_callback: () => {
+      if (cli.options.removeNonExistent) {
+        adapter.cleanUp(tsk);
+      }
 
-            if(cli.options.removeNonExistent){
-                adapter.cleanUp(tsk);
-            }
-
-            if(!next){
-                logger.info('Task done! Exiting in 30s ...');
-                setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-            } else next();
-        }
-    });
+      if (!next) {
+        logger.info('Task done! Exiting in 30s ...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      } else next();
+    }
+  });
 }
 
 /**
@@ -53,13 +51,12 @@ function commandCategories(next, reject) {
     transaction_key: tsk,
     extendedCategories: cli.options.extendedCategories,
     done_callback: () => {
-
-      if(cli.options.removeNonExistent){
+      if (cli.options.removeNonExistent) {
         adapter.cleanUp(tsk);
       }
 
-      if(!next){
-        logger.info('Task done! Exiting in 30s ...');
+      if (!next) {
+        logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else next();
     }
@@ -76,13 +73,12 @@ function commandTaxRules(next, reject) {
   adapter.run({
     transaction_key: tsk,
     done_callback: () => {
-
-      if(cli.options.removeNonExistent){
+      if (cli.options.removeNonExistent) {
         adapter.cleanUp(tsk);
       }
 
-      if(!next){
-        logger.info('Task done! Exiting in 30s ...');
+      if (!next) {
+        logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else next();
     }
@@ -99,31 +95,29 @@ function commandAttributes(next, reject) {
   adapter.run({
     transaction_key: tsk,
     done_callback: () => {
-
-      if(cli.options.removeNonExistent){
+      if (cli.options.removeNonExistent) {
         adapter.cleanUp(tsk);
       }
 
-      if(!next){
-        logger.info('Task done! Exiting in 30s ...');
+      if (!next) {
+        logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else next();
     }
   });
 }
 
-function commandCleanup(){
+function commandCleanup() {
   let adapter = factory.getAdapter(cli.options.adapter, cli.options.cleanupType);
   let tsk = cli.options.transactionKey;
 
-  if(tsk){ 
+  if (tsk) {
     logger.info('Cleaning up for TRANSACTION KEY = ' + tsk);
     adapter.connect
     adapter.cleanUp(tsk);
-  } else 
-  logger.error('No "transactionKey" given as a parameter');
-
-  
+  } else {
+    logger.error('No "transactionKey" given as a parameter');
+  }
 }
 
 /**
@@ -191,9 +185,7 @@ function commandProducts(updatedAfter = null) {
   }
   let tsk = new Date().getTime();
 
-
-  if (cli.options.partitions > 1 && adapter.isFederated()) // standard case
-  {
+  if (cli.options.partitions > 1 && adapter.isFederated()) { // standard case
     let partition_count = cli.options.partitions;
 
     logger.info('Running in MPM (Multi Process Mode) with partitions count = ' + partition_count);
@@ -229,19 +221,17 @@ function commandProducts(updatedAfter = null) {
               logger.info('Task done!');
               return done();
             }
-
           });
         } else return done();
 
       });
 
-      if (cli.options.initQueue) // if this is not true it meant that process is runing to process the queue in the loop and shouldnt be "killed"
-      {
+      if (cli.options.initQueue) { // if this is not true it meant that process is runing to process the queue in the loop and shouldnt be "killed"
         setInterval(function () {
           queue.inactiveCount(function (err, total) { // others are activeCount, completeCount, failedCount, delayedCount
             if (total == 0) {
 
-              if(cli.options.removeNonExistent){
+              if (cli.options.removeNonExistent) {
                 logger.info('CleaningUp products!');
                 let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
                 adapter.cleanUp(transaction_key);
@@ -249,7 +239,6 @@ function commandProducts(updatedAfter = null) {
 
               logger.info('Queue processed. Exiting!');
               setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-
             }
           });
         }, 2000);
@@ -260,18 +249,18 @@ function commandProducts(updatedAfter = null) {
   } else {
     logger.info('Running in SPM (Single Process Mode)');
 
-    let context = { updated_after: updatedAfter,
+    let context = {
+      updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
+        if (cli.options.removeNonExistent) {
+          adapter.cleanUp(tsk);
+        }
+        logger.info('Task done! Exiting in 30s...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+      }
 
-              if(cli.options.removeNonExistent){
-                adapter.cleanUp(tsk);
-              }
-              logger.info('Task done! Exiting in 30s ...');
-              setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-            }
-
-          };
+    };
 
     if (cli.options.skus) {
       context.skus = cli.options.skus.split(','); // update individual producs
@@ -279,27 +268,24 @@ function commandProducts(updatedAfter = null) {
 
     adapter.run(context);
   }
-
 }
-
 
 /**
  * Full reindex; The sequence is important becasue commands operate on some cachce resources - especially for product/category assigments
  */
 function commandFullreindex() {
-  Promise.all(
-   [
+  Promise.all([
     new Promise(commandAttributes), // 0. It stores attributes in redis cache
     new Promise(commandTaxRules), // 1. It indexes the taxRules
     new Promise(commandCategories), //2. It stores categories in redis cache
     new Promise(commandProductCategories) // 3. It stores product/cateogry links in redis cache
-   ]).then(function(results){
-     logger.info('Starting full products reindex!');
-     commandProducts(); //4. It indexes all the products
-   }).catch(function (err) {
-     logger.error(err);
-     process.exit(1)
-   });
+  ]).then(function(results){
+    logger.info('Starting full products reindex!');
+    commandProducts(); //4. It indexes all the products
+  }).catch(function (err) {
+    logger.error(err);
+    process.exit(1)
+  });
 }
 
 cli.option({
@@ -317,7 +303,6 @@ cli.option({
   type: String
 });
 
-
 /**
  * used by "categories" and "products" actions. Means that products and categories that are non existient in specific API feed are removed from Mongo/ElasticSearch
  */
@@ -332,7 +317,6 @@ cli.option({
   default: true,
   type: Boolean
 });
-
 
 cli.option({
   name: 'transactionKey',
@@ -364,13 +348,11 @@ cli.option({
   type: Boolean
 });
 
-
 cli.option({ // check only records modified from the last run - can be executed for example in cron to pull out the fresh data from Magento
   name: 'skus',
   default: '',
   type: String
 });
-
 
 /**
  * Reindex products, categories and productcategorylinks
@@ -398,7 +380,6 @@ cli.command('taxrule', function () {
   commandTaxRules();
 });
 
-
 /**
 * Sync attributes
 */
@@ -413,14 +394,12 @@ cli.command('productcategories', function () {
   commandProductCategories();
 });
 
-
 /**
 * Sync products worker
 */
 cli.command('productsworker', function () {
   commandProductsworker();
 });
-
 
 /**
 * Sync products
@@ -436,11 +415,11 @@ cli.command('productsdelta', function () {
   let indexMeta = { lastIndexDate: new Date() }
   let updatedAfter = null
   try {
-      indexMeta = jsonFile.readFileSync(INDEX_META_PATH)
-      updatedAfter = new Date(indexMeta.lastIndexDate)
-  } catch (err){
-      console.log('Seems like first time run!')
-      updatedAfter = null // full reindex
+    indexMeta = jsonFile.readFileSync(INDEX_META_PATH)
+    updatedAfter = new Date(indexMeta.lastIndexDate)
+  } catch (err) {
+    console.log('Seems like first time run!')
+    updatedAfter = null // full reindex
   }
 
   commandProducts(updatedAfter);
@@ -448,10 +427,9 @@ cli.command('productsdelta', function () {
   try {
     indexMeta.lastIndexDate = new Date()
     jsonFile.writeFile(INDEX_META_PATH, indexMeta)
-  } catch (err){
+  } catch (err) {
     console.log('Error writing index meta!', err)
   }
-  
 });
 
 /**
@@ -472,7 +450,6 @@ process.on('unhandledRejection', (reason, p) => {
   logger.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
   // application specific logging, throwing an error, or other logic here
 });
-
 
 // RUN
 cli.parse(process.argv);
