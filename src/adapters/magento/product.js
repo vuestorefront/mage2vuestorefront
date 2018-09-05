@@ -104,7 +104,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   product.special_price = product.final_price
                 }
 
-                if (inst.config.product.renderCatalogRegularPrices) {
+                if (this.config.product.renderCatalogRegularPrices) {
                   product.price = product.regular_price
                 }
               }
