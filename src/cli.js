@@ -188,7 +188,7 @@ function commandProducts(updatedAfter = null) {
   if (cli.options.partitions > 1 && adapter.isFederated()) { // standard case
     let partition_count = cli.options.partitions;
 
-    logger.info('Running in MPM (Multi Process Mode) with partitions count = ' + partition_count);
+    logger.info(`Running in MPM (Multi Process Mode) with partitions count = ${partition_count}`);
 
     adapter.getTotalCount({ updated_after: updatedAfter }).then((result) => {
 
@@ -199,10 +199,10 @@ function commandProducts(updatedAfter = null) {
       let transaction_key = new Date().getTime();
 
       if (cli.options.initQueue) {
-        logger.info('Propagating job queue ... ');
+        logger.info('Propagating job queue... ');
 
         for (let i = 1; i <= page_count; i++) {
-          logger.debug('Adding job for: ' + i + ' / ' + page_count + ', page_size = ' + page_size);
+          logger.debug(`Adding job for: ${i} / ${page_count}, page_size = ${page_size}`);
           queue.createJob('products', { page_size: page_size, page: i, updated_after: updatedAfter }).save();
         }
       } else {
@@ -211,10 +211,9 @@ function commandProducts(updatedAfter = null) {
 
       // TODO: separte the execution part to run in multi-tenant env
       queue.process('products', partition_count, (job, done) => {
-
         let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
         if (job && job.data.page && job.data.page_size) {
-          logger.info('Processing job: ' + job.data.page);
+          logger.info(`Processing job: ${job.data.page}`);
 
           adapter.run({
             transaction_key: transaction_key, page_size: job.data.page_size, page: job.data.page, updated_after: job.data.updatedAfter, done_callback: () => {
@@ -223,12 +222,11 @@ function commandProducts(updatedAfter = null) {
             }
           });
         } else return done();
-
       });
 
       if (cli.options.initQueue) { // if this is not true it meant that process is runing to process the queue in the loop and shouldnt be "killed"
-        setInterval(function () {
-          queue.inactiveCount(function (err, total) { // others are activeCount, completeCount, failedCount, delayedCount
+        setInterval(() => {
+          queue.inactiveCount((err, total) => { // others are activeCount, completeCount, failedCount, delayedCount
             if (total == 0) {
 
               if (cli.options.removeNonExistent) {
@@ -243,7 +241,6 @@ function commandProducts(updatedAfter = null) {
           });
         }, 2000);
       }
-
     });
 
   } else {
@@ -259,7 +256,6 @@ function commandProducts(updatedAfter = null) {
         logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       }
-
     };
 
     if (cli.options.skus) {
@@ -279,10 +275,10 @@ function commandFullreindex() {
     new Promise(commandTaxRules), // 1. It indexes the taxRules
     new Promise(commandCategories), //2. It stores categories in redis cache
     new Promise(commandProductCategories) // 3. It stores product/cateogry links in redis cache
-  ]).then(function(results){
+  ]).then((results) => {
     logger.info('Starting full products reindex!');
     commandProducts(); //4. It indexes all the products
-  }).catch(function (err) {
+  }).catch((err) => {
     logger.error(err);
     process.exit(1)
   });
@@ -304,7 +300,7 @@ cli.option({
 });
 
 /**
- * used by "categories" and "products" actions. Means that products and categories that are non existient in specific API feed are removed from Mongo/ElasticSearch
+ * used by "categories" and "products" actions. Means that products and categories that are non existent in specific API feed are removed from Mongo/ElasticSearch
  */
 cli.option({
   name: 'removeNonExistent',
@@ -357,61 +353,61 @@ cli.option({ // check only records modified from the last run - can be executed 
 /**
  * Reindex products, categories and productcategorylinks
  */
-cli.command('fullreindex', function () {
+cli.command('fullreindex', () => {
   cli.options.removeNonExistent = true; // as it's full reindex so we'll remove products and categories non existing in the feed from database
   commandFullreindex();
 })
 
-cli.command('reviews', function() {
-    commandReviews();
+cli.command('reviews', () => {
+  commandReviews();
 });
 
 /**
 * Sync categories
 */
-cli.command('categories', function () {
+cli.command('categories', () => {
   commandCategories();
 });
 
 /**
 * Sync categories
 */
-cli.command('taxrule', function () {
+cli.command('taxrule', () => {
   commandTaxRules();
 });
 
 /**
 * Sync attributes
 */
-cli.command('attributes', function () {
+cli.command('attributes', () => {
   commandAttributes();
 });
 
 /**
 * Sync product-category-links
 */
-cli.command('productcategories', function () {
+cli.command('productcategories', () => {
   commandProductCategories();
 });
 
 /**
 * Sync products worker
 */
-cli.command('productsworker', function () {
+cli.command('productsworker', () => {
   commandProductsworker();
 });
 
 /**
 * Sync products
 */
-cli.command('products', function () {
+cli.command('products', () => {
   commandProducts();
 });
 
 /**
 * Sync delta
 */
-cli.command('productsdelta', function () {
+cli.command('productsdelta', () => {
   let indexMeta = { lastIndexDate: new Date() }
   let updatedAfter = null
   try {
@@ -435,12 +431,12 @@ cli.command('productsdelta', function () {
 /**
 * Cleanup the entity given by parameter "cleanupType" = product|category with parameter "transactionKey"
 */
-cli.command('cleanup', function () {
+cli.command('cleanup', () => {
   commandCleanup();
 });
 
 
-cli.on('notfound', function (action) {
+cli.on('notfound', (action) => {
   logger.error('I don\'t know how to: ' + action)
   process.exit(1)
 });
