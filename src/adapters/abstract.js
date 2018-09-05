@@ -70,7 +70,6 @@ class AbstractAdapter {
     if (!(this.current_context.transaction_key))
       this.current_context.transaction_key = new Date().getTime(); // the key used to filter out records NOT ADDED by this import
 
-
     this.db.connect((function () {
       logger.info("Connected correctly to server");
       logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
@@ -86,6 +85,7 @@ class AbstractAdapter {
     }).bind(this));
 
   }
+
   /**
    * Implement some item related operations - executed BEFORE saving to the database
    * @param {Object} item 
@@ -210,7 +210,6 @@ class AbstractAdapter {
       }).bind(this)).catch(function (reason) {
         logger.error(reason);
         return this.onDone(this);
-        
       });
 
     })

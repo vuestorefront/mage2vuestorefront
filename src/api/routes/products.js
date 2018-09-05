@@ -1,4 +1,5 @@
 'use strict';
+
 let express = require('express');
 let router = express.Router();
 let q2m = require('query-to-mongo');
@@ -20,8 +21,5 @@ router.get('/browse', /*auth.authenticate(),*/ function(req, res) {
 
   });
 });
-
-
-
 
 module.exports = router;

@@ -3,7 +3,6 @@
 let AbstractMagentoAdapter = require('./abstract');
 const util = require('util');
 const CacheKeys = require('./cache_keys');
-const Redis = require('redis');
 const moment = require('moment')
 const _ = require('lodash')
 
@@ -59,11 +58,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
     let query = ''; 
 
-    if (context.skus)// pul individual products
-    {
+    if (context.skus) {// pul individual products
       if (!Array.isArray(context.skus))
         context.skus = new Array(context.skus);
-
 
       query += 'searchCriteria[filter_groups][0][filters][0][field]=sku&' +
         'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(context.skus.join(',')) + '&' +
@@ -90,14 +87,14 @@ class ProductAdapter extends AbstractMagentoAdapter {
           if (products.length === 1) { // single product - download child data
             const childSkus = _.flattenDeep(products.map((p) => { return (p.configurable_children) ? p.configurable_children.map((cc) => { return cc.sku }) : null }))
             skus = _.union(skus, childSkus)
-          }        
+          }
           const query = '&searchCriteria[filter_groups][0][filters][0][field]=sku&' +
           'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(skus.join(',')) + '&' +
-          'searchCriteria[filter_groups][0][filters][0][condition_type]=in';          
+          'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
 
           this.api.products.renderList(query, inst.config.magento.storeId, inst.config.magento.currencyCode).then(renderedProducts => {
             context.renderedProducts = renderedProducts
-            for(let product of result.items) {
+            for (let product of result.items) {
               const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
 
               if (productAdditionalInfo && productAdditionalInfo.price_info) {
@@ -110,16 +107,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   product.special_price = product.final_price
                 }
 
-                if(inst.config.product.renderCatalogRegularPrices) {
+                if (inst.config.product.renderCatalogRegularPrices) {
                   product.price = product.regular_price
                 }
-                
+
               }
             }
             resolve(result)
           })
         })
-
 
       })
     } else {
@@ -154,7 +150,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
       logger.debug('Using specific paging options from adapter context: ' + context.page + ' / ' + context.page_size);
 
-
       return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch(function (err) {
         throw new Error(err);
       });
@@ -170,7 +165,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
         throw new Error(err);
       });
   }
-
 
   getTotalCount(context) {
 
@@ -200,22 +194,22 @@ class ProductAdapter extends AbstractMagentoAdapter {
       let subSyncPromises = []
       const config = inst.config
 
-// TODO: Refactor the following to "Chain of responsibility"
-// STOCK SYNC      
-      if(inst.stock_sync) {
+      // TODO: Refactor the following to "Chain of responsibility"
+      // STOCK SYNC
+      if (inst.stock_sync) {
         logger.info('Product sub-stage 1: Geting stock items for ' + item.sku);
         subSyncPromises.push(() => { return inst.api.stockItems.list(item.sku).then(function(result) { 
           item.stock = result
 
           const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
-          logger.debug(util.format('Storing stock data to cache under: %s', key));
+          logger.debug(`Storing stock data to cache under: ${key}`);
           inst.cache.set(key, JSON.stringify(result));
             
           return item
         })})
       }
-// MEDIA SYNC
-      if(inst.media_sync){
+      // MEDIA SYNC
+      if (inst.media_sync){
         logger.info('Product sub-stage 2: Geting media gallery' + item.sku);
         subSyncPromises.push(() => { return inst.api.productMedia.list(item.sku).then(function(result) { 
           let media_gallery = []
@@ -231,10 +225,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
           }
           item.media_gallery = media_gallery
           return item
-        })})        
+        })})
       }
 
-// CUSTOM OPTIONS SYNC
+      // CUSTOM OPTIONS SYNC
       if(inst.custom_sync){
         logger.info('Product sub-stage 3: Geting product custom options' + item.sku);
         subSyncPromises.push(() => { return inst.api.customOptions.list(item.sku).then(function(result) { 
@@ -243,10 +237,10 @@ class ProductAdapter extends AbstractMagentoAdapter {
             logger.info('Found custom options for', item.sku, result.length)
           }
           return item
-        })})        
-      }      
+        })})
+      }
 
-// BUNDLE OPTIONS SYNC
+      // BUNDLE OPTIONS SYNC
       if(inst.custom_sync && item.type_id == 'bundle'){
         logger.info('Product sub-stage 4: Geting bundle custom options' + item.sku);
         subSyncPromises.push(() => { return inst.api.bundleOptions.list(item.sku).then(function(result) { 
@@ -255,8 +249,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
             logger.info('Found bundle options for', item.sku, result.length)
           }
           return item
-        })})        
-      }          
+        })})
+      }
 
 // PRODUCT LINKS - as it seems magento returns these links anyway in the "product_links"
 /* if(inst.links_sync){
@@ -279,7 +273,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
         }
         Promise.all(subPromises).then(function (res) {
           logger.info('Product links expanded!')
-          opResolve(item)                  
+          opResolve(item)
         }).catch(function(err) {
           logger.error(err)
           opResolve(item)
@@ -290,12 +284,12 @@ class ProductAdapter extends AbstractMagentoAdapter {
       return item
     })
   })})
-} */        
+} */
 
-// CONFIGURABLE AND BUNDLE SYNC
+      // CONFIGURABLE AND BUNDLE SYNC
       if(inst.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')){
         logger.info('Product sub-stage 6: Geting product options for ' + item.sku);
-        
+
         //      q.push(function () {
         subSyncPromises.push(() => { return new Promise (function(opResolve, opReject) { inst.api.configurableChildren.list(item.sku).then(function(result) { 
           
@@ -343,7 +337,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               item.price = prOption.price;
           }
 
-// EXPAND CONFIGURABLE CHILDREN ATTRS          
+          // EXPAND CONFIGURABLE CHILDREN ATTRS
           if (config.product && config.product.expandConfigurableFilters) {
             for (const attrToExpand of config.product.expandConfigurableFilters){
               const expandedSet = new Set()
@@ -385,25 +379,24 @@ class ProductAdapter extends AbstractMagentoAdapter {
   
               Promise.all(subPromises).then(function (res) {
                 logger.info('Configurable options expanded!')
-                opResolve(item)                  
+                opResolve(item)
               })
-                            
+
             }).catch(function (err) {
               logger.error(err);
-              opResolve(item)                  
+              opResolve(item)
             })
 
           }).catch(function (err) {
           logger.error(err);
-          opResolve(item)                  
+          opResolve(item)
         })})
 
       })
 
-        
-      } 
+      }
 
-// CATEGORIES SYNC      
+      // CATEGORIES SYNC
       subSyncPromises.push(() => { return new Promise((resolve, reject) => {
         logger.info('Product sub-stage 6: Geting product categories for ' + item.sku);
         
@@ -472,7 +465,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
       });
     }).bind(this));
 
-
   }
 
   /**
@@ -491,7 +483,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
       });
     }*/
 
-
     let resultItem = Object.assign(item, {
 //      "price": prices, // ES stores prices differently
 // TODO: HOW TO GET product stock from Magento API call for product?
@@ -499,7 +490,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
     return resultItem;
 
   }
-
 
 }
 

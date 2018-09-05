@@ -6,7 +6,6 @@ const util = require('util');
 
 class AttributeAdapter extends AbstractMagentoAdapter {
 
-
   getEntityType() {
     return 'attribute';
   }
@@ -14,7 +13,6 @@ class AttributeAdapter extends AbstractMagentoAdapter {
   getName() {
     return 'adapters/magento/AttributeAdapter';
   }
-
 
   getSourceData(context) {
     return this.api.attributes.list();
@@ -52,11 +50,11 @@ class AttributeAdapter extends AbstractMagentoAdapter {
         item.id = item.attribute_id;
         // store the item into local redis cache
         let key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_code);
-        logger.debug(util.format('Storing attribute data to cache under: %s', key));
+        logger.debug(`Storing attribute data to cache under: ${key}`);
         this.cache.set(key, JSON.stringify(item));
 
         key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, item.attribute_id); // store under attribute id as an second option
-        logger.debug(util.format('Storing attribute data to cache under: %s', key));
+        logger.debug(`Storing attribute data to cache under: ${key}`);
         this.cache.set(key, JSON.stringify(item));
         
       }

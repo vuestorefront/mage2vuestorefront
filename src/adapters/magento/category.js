@@ -106,14 +106,12 @@ class CategoryAdapter extends AbstractMagentoAdapter {
           done(item);
         });
 
-
       } else {
         const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
         logger.debug(util.format('Storing category data to cache under: %s', key));
         this.cache.set(key, JSON.stringify(item));
         return done(item);
       }
-
 
     }).bind(this));
   }

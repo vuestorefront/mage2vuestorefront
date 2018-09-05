@@ -3,7 +3,6 @@
 var CommandRouter = require('command-router');
 let AdapterFactory = require('./adapters/factory');
 
-
 const TIME_TO_EXIT = process.env.TIME_TO_EXIT ? process.env.TIME_TO_EXIT : 30000; // wait 30s before quiting after task is done
 
 let cli = CommandRouter();
@@ -31,7 +30,7 @@ function commandReviews(next, reject) {
         transaction_key: tsk,
         done_callback: () => {
 
-            if(cli.options.removeNonExistient){
+            if(cli.options.removeNonExistent){
                 adapter.cleanUp(tsk);
             }
 
@@ -55,7 +54,7 @@ function commandCategories(next, reject) {
     extendedCategories: cli.options.extendedCategories,
     done_callback: () => {
 
-      if(cli.options.removeNonExistient){
+      if(cli.options.removeNonExistent){
         adapter.cleanUp(tsk);
       }
 
@@ -78,7 +77,7 @@ function commandTaxRules(next, reject) {
     transaction_key: tsk,
     done_callback: () => {
 
-      if(cli.options.removeNonExistient){
+      if(cli.options.removeNonExistent){
         adapter.cleanUp(tsk);
       }
 
@@ -101,7 +100,7 @@ function commandAttributes(next, reject) {
     transaction_key: tsk,
     done_callback: () => {
 
-      if(cli.options.removeNonExistient){
+      if(cli.options.removeNonExistent){
         adapter.cleanUp(tsk);
       }
 
@@ -242,7 +241,7 @@ function commandProducts(updatedAfter = null) {
           queue.inactiveCount(function (err, total) { // others are activeCount, completeCount, failedCount, delayedCount
             if (total == 0) {
 
-              if(cli.options.removeNonExistient){
+              if(cli.options.removeNonExistent){
                 logger.info('CleaningUp products!');
                 let adapter = factory.getAdapter(cli.options.adapter, 'product'); // to avoid multi threading mongo error
                 adapter.cleanUp(transaction_key);
@@ -265,7 +264,7 @@ function commandProducts(updatedAfter = null) {
       transaction_key: tsk,
       done_callback: () => {
 
-              if(cli.options.removeNonExistient){
+              if(cli.options.removeNonExistent){
                 adapter.cleanUp(tsk);
               }
               logger.info('Task done! Exiting in 30s ...');
@@ -323,7 +322,7 @@ cli.option({
  * used by "categories" and "products" actions. Means that products and categories that are non existient in specific API feed are removed from Mongo/ElasticSearch
  */
 cli.option({
-  name: 'removeNonExistient',
+  name: 'removeNonExistent',
   default: false,
   type: Boolean
 });
@@ -377,7 +376,7 @@ cli.option({ // check only records modified from the last run - can be executed 
  * Reindex products, categories and productcategorylinks
  */
 cli.command('fullreindex', function () {
-  cli.options.removeNonExistient = true; // as it's full reindex so we'll remove products and categories non existing in the feed from database
+  cli.options.removeNonExistent = true; // as it's full reindex so we'll remove products and categories non existing in the feed from database
   commandFullreindex();
 })
 

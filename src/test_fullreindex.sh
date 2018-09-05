@@ -8,11 +8,11 @@ export MAGENTO_ACCESS_TOKEN_SECRET=7qunl3p505rubmr7u1ijt7odyialnih9
 echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true --extendedCategories=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true --extendedCategories=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 
 

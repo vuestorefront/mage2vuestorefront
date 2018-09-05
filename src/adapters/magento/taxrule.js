@@ -1,11 +1,8 @@
 'use strict';
 
 let AbstractMagentoAdapter = require('./abstract');
-const CacheKeys = require('./cache_keys');
-const util = require('util');
 
 class TaxruleAdapter extends AbstractMagentoAdapter {
-
 
   getEntityType() {
     return 'taxrule';
@@ -14,7 +11,6 @@ class TaxruleAdapter extends AbstractMagentoAdapter {
   getName() {
     return 'adapters/magento/TaxrulesAdapter';
   }
-
 
   getSourceData(context) {
     return this.api.taxRules.list();

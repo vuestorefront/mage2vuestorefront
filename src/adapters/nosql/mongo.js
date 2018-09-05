@@ -21,9 +21,8 @@ class MongoAdapter extends AbstractNosqlAdapter{
     this.validateConfig(this.config);
 
     logger.debug('Mongo module initialized!');
-    
-  }
 
+  }
 
   /**
    * Close the nosql database connection - abstract to the driver
@@ -48,7 +47,6 @@ class MongoAdapter extends AbstractNosqlAdapter{
               logger.warn(err.message);  // returns error if no matching object found
           }
         });
-
 
   }
 
@@ -83,7 +81,6 @@ class MongoAdapter extends AbstractNosqlAdapter{
       done(db);
     });
   }
-
 
 }
 
