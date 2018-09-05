@@ -18,7 +18,7 @@ class AbstractAdapter {
 
     if (global.cache == null) {
       this.cache = Redis.createClient(this.config.redis); // redis client
-      this.cache.on('error', function (err) { // workaround for https://github.com/NodeRedis/node_redis/issues/713
+      this.cache.on('error', (err) => { // workaround for https://github.com/NodeRedis/node_redis/issues/713
         global.cache = Redis.createClient(this.config.redis); // redis client
       });
       global.cache = this.cache;
@@ -66,8 +66,8 @@ class AbstractAdapter {
       this.current_context.transaction_key = new Date().getTime(); // the key used to filter out records NOT ADDED by this import
 
     this.db.connect(() => {
-      logger.info("Connected correctly to server");
-      logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
+      logger.info('Connected correctly to server');
+      logger.info(`TRANSACTION KEY = ${this.current_context.transaction_key}`);
 
       this.onDone = this.current_context.done_callback ? (
         () => {
@@ -77,10 +77,12 @@ class AbstractAdapter {
       ): this.defaultDoneCallback;
 
       let exitCallback = this.onDone;
-      this.getSourceData(this.current_context).catch( function(err) {
-        logger.error(err);
-        exitCallback();
-      }).then(this.processItems);
+      this.getSourceData(this.current_context)
+        .then(this.processItems.bind(this))
+        .catch((err) => {
+          logger.error(err);
+          exitCallback();
+        });
     });
   }
 
@@ -194,7 +196,7 @@ class AbstractAdapter {
 
                   this.getSourceData(this.getCurrentContext())
                     .then(this.processItems)
-                    .catch(function(err) {
+                    .catch((err) => {
                       logger.error(err);
                     });
                 }
