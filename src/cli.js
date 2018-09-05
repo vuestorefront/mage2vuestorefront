@@ -33,7 +33,7 @@ function commandReviews(next, reject) {
       }
 
       if (!next) {
-        logger.info('Task done! Exiting in 30s ...');
+        logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else next();
     }
@@ -64,7 +64,7 @@ function commandCategories(next, reject) {
 }
 
 /**
- * Re-index tax rulles
+ * Re-index tax rules
  */
 function commandTaxRules(next, reject) {
   let adapter = factory.getAdapter(cli.options.adapter, 'taxrule');
@@ -129,7 +129,7 @@ function commandProductCategories(next, reject) {
     done_callback: () => {
 
       if(!next) {
-        logger.info('Task done! Exiting in 30s ...');
+        logger.info('Task done! Exiting in 30s...');
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       } else {
         logger.debug('Stepping to next action');
