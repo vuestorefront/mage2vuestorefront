@@ -142,7 +142,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       this.page_size = context.page_size
       this.page_count = 1; // process only one page - used for partitioning purposes
 
-      logger.debug('Using specific paging options from adapter context: ' + context.page + ' / ' + context.page_size);
+      logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
       return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch((err) => {
         throw new Error(err);
@@ -150,7 +150,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
     } else if (this.use_paging) {
       this.is_federated = false; // federated execution is not compliant with paging
-      logger.debug('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : ''));
+      logger.debug(`&searchCriteria[currentPage]=${this.page}&searchCriteria[pageSize]=${this.page_size + (query ? '&' + query : '')}`);
       return this.api.products.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : '')).catch((err) => {
         throw new Error(err);
       });
