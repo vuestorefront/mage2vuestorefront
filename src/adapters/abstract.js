@@ -100,7 +100,7 @@ class AbstractAdapter {
    */
   cleanUp(transaction_key) {
     this.db.connect(() => {
-      logger.info('Cleaning up with tsk = ' + transaction_key);
+      logger.info(`Cleaning up with tsk = ${transaction_key}`);
       this.db.cleanupByTransactionkey(this.getCollectionName(), transaction_key);
     });
   }
@@ -147,7 +147,7 @@ class AbstractAdapter {
       throw new Error('No db adapter connection established!');
 
     if (this.total_count)
-      logger.info('Total count is: ' + this.total_count)
+      logger.info(`Total count is: ${this.total_count}`)
 
     items.map((item) => {
 
@@ -171,7 +171,7 @@ class AbstractAdapter {
         }
 
         if (this.tasks_count == 0 && !this.use_paging) { // this is the last item!
-          logger.info(' No tasks to process. All records processed!');
+          logger.info('No tasks to process. All records processed!');
           this.db.close();
 
           return this.onDone(this);
