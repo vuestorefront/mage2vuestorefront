@@ -12,7 +12,7 @@ const _ = require('lodash')
  * @example
  * const urls = ['/url1', '/url2', '/url3']
  * serial(urls.map(url => () => $.ajax(url)))
- *     .then(console.log.bind(console))
+ *     .then(console.log(console))
  */
 const serial = funcs =>
 funcs.reduce((promise, func) =>
