@@ -56,14 +56,14 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     });
   }
 
-  _extendChildrenCategories(arr) {
+  _extendChildrenCategories(arr, result, subpromises) {
     for (let i = 0, length = arr.length; i < length; i++) {
       const value = arr[i];
       if (Array.isArray(value.children_data)) {
-        _extendChildrenCategories(value.children_data, result);
-        subpromises.push(_extendSingleCategory(value));
+        this._extendChildrenCategories(value.children_data, result, subpromises);
+        subpromises.push(this._extendSingleCategory(value));
       } else {
-        subpromises.push(_extendSingleCategory(value));
+        subpromises.push(this._extendSingleCategory(value));
       }
     }
     return result;
@@ -87,7 +87,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
 
           const subpromises = []
           if (item.children_data && item.children_data.length) {
-            _extendChildrenCategories(item.children_data)
+            this._extendChildrenCategories(item.children_data, result, subpromises)
             
             Promise.all(subpromises).then(function (results) {
               done(item)
