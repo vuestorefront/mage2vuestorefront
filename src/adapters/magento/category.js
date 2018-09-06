@@ -17,10 +17,8 @@ const _normalizeExtendedData = function (result) {
 
 class CategoryAdapter extends AbstractMagentoAdapter {
 
-  constructor(config) {
+  constructor (config) {
     super(config);
-    this.preProcessItem = this.preProcessItem.bind(this);
-    this._addSingleCategoryData = this._addSingleCategoryData.bind(this);
     this.extendedCategories = false;
   }
 
@@ -38,7 +36,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   getLabel(source_item) {
-    return '[(' + source_item.id + ') ' + source_item.name + ']';
+    return `[(${source_item.id}) ${source_item.name}]`;
   }
 
   isFederated() {
@@ -49,48 +47,46 @@ class CategoryAdapter extends AbstractMagentoAdapter {
     item = Object.assign(item, _normalizeExtendedData(result));
   }
 
-  preProcessItem(item) {
-    let inst = this;
-    return new Promise((function (done, reject) {
+  _extendSingleCategory(rootId, catToExtend) {
+    return this.api.categories.getSingle(catToExtend.id).then(function(result) { 
+      Object.assign(catToExtend, _normalizeExtendedData(result))
+      logger.info(`Subcategory data extended for ${rootId}, children object ${catToExtend.id}`)
+    }).catch(function(err) {
+      logger.error(err)
+    });
+  }
 
-      if(!item){
+  _extendChildrenCategories(rootId, children, result, subpromises) {
+    for (const child of children) {
+      if (Array.isArray(child.children_data)) {
+        this._extendChildrenCategories(rootId, child.children_data, result, subpromises);
+        subpromises.push(this._extendSingleCategory(rootId, child));
+      } else {
+        subpromises.push(this._extendSingleCategory(rootId, child));
+      }
+    }
+    return result;
+  };
+
+  preProcessItem(item) {
+    return new Promise((done, reject) => {
+
+      if (!item) {
         return done(item);
       }
       
-      if(inst.extendedCategories === true){
+      if (this.extendedCategories === true) {
 
-        inst.api.categories.getSingle(item.id).then(function(result) { 
-          inst._addSingleCategoryData.bind(inst)(item, result); 
+        this.api.categories.getSingle(item.id).then((result) => { 
+          this._addSingleCategoryData(item, result); 
+          
           const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
-          logger.debug(util.format('Storing extended category data to cache under: %s', key));
-          inst.cache.set(key, JSON.stringify(item));
+          logger.debug(`Storing extended category data to cache under: ${key}`);
+          this.cache.set(key, JSON.stringify(item));
 
           const subpromises = []
           if (item.children_data && item.children_data.length) {
-
-            const _extendSingleCategory = function (catToExtend) {
-              return inst.api.categories.getSingle(catToExtend.id).then(function(result) { 
-                Object.assign(catToExtend, _normalizeExtendedData(result))
-                logger.info('Subcategory data extended for children object', catToExtend.id, item.id)
-              }).catch(function(err) {
-                logger.error(err)
-              })              
-            }
-            
-            const _extendChildrenCategories = function(arr) {
-              for (let i = 0, length = arr.length; i < length; i++) {
-                const value = arr[i];
-                if (Array.isArray(value.children_data)) {
-                  _extendChildrenCategories(value.children_data, result);
-                  subpromises.push(_extendSingleCategory(value));      
-                } else {
-                  subpromises.push(_extendSingleCategory(value));      
-                }
-              }
-              return result;
-            };
-
-            _extendChildrenCategories(item.children_data)
+            this._extendChildrenCategories(item.id, item.children_data, result, subpromises)
             
             Promise.all(subpromises).then(function (results) {
               done(item)
@@ -99,23 +95,21 @@ class CategoryAdapter extends AbstractMagentoAdapter {
               done(item)
             })
           } else {
-            done(item); 
+            done(item);
           }
         }).catch(function (err) {
           logger.error(err);
           done(item);
         });
 
-
       } else {
         const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
-        logger.debug(util.format('Storing category data to cache under: %s', key));
+        logger.debug(`Storing category data to cache under: ${key}`);
         this.cache.set(key, JSON.stringify(item));
         return done(item);
       }
 
-
-    }).bind(this));
+    });
   }
 
   /**
@@ -125,7 +119,6 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   normalizeDocumentFormat(item) {
     return item;
   }
-
 }
 
 module.exports = CategoryAdapter;

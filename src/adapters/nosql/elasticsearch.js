@@ -28,14 +28,12 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     this.updateDocument.bind(this);
   }
 
-
   /**
    * Close the nosql database connection - abstract to the driver
    */
   close() { // switched to global singleton
     //this.db.close();
   }
-
 
   /**
    * Update single document in database
@@ -89,7 +87,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     }
   }
 
-
   /**
    * Update multiple documents in database
    * @param {array} items to be updated
@@ -132,8 +129,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       index++;
     }
 
-
-
   }
 
   /**
@@ -167,7 +162,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
     done(this.db);
   }
-
 
 }
 

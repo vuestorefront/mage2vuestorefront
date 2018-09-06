@@ -2,8 +2,7 @@
 
 let AbstractMagentoAdapter = require('./abstract');
 
-let sha1 = require('sha1');
-let queue = require('queue')
+let queue = require('queue');
 let util = require('util');
 let q = queue({ concurrency: 4 });
 
@@ -15,25 +14,20 @@ const ProductCategoriesModes = {
 
 const CacheKeys = require('./cache_keys');
 
-
 /**
  * This adapter retrieves and stores all product / category links from Magento2
  */
 class ProductcategoriesAdapter extends AbstractMagentoAdapter {
 
-
   constructor(config) {
     super(config);
     this.update_document = false; // this adapter works on categories but doesn't update them itself but is focused on category links instead!
-    this.preProcessItem = this.preProcessItem.bind(this);
-    this._storeCatLinks = this._storeCatLinks.bind(this);
     this._productHisto = new Set();
 
     this.mode = ProductCategoriesModes.SEPARATE_REDIS;
 
     this.catLinkQueue = new Array();
   }
-
 
   getEntityType() {
     return 'productcategories';
@@ -43,15 +37,13 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     return 'adapters/magento/ProductcategoryAdapter';
   }
 
-
   getSourceData(context) {
     return this.api.categories.list();
   }
 
   getLabel(source_item) {
-    return '[(' + source_item.id + ') ' + source_item.name + ']';
+    return `[(${source_item.id}) ${source_item.name}]`;
   }
-
 
   /**
    * Process category link product/category
@@ -61,14 +53,10 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     let index = 0;
     let length = result.length;
 
-
-
     switch (this.mode) {
-
       case ProductCategoriesModes.SEPARATE_ELASTICSEARCH: {
         for (let catLink of result) {
-
-          //      logger.debug('(' +index +'/' + length +  ') Storing categoryproduct link for ' + catLink.sku +' - ' + catLink.category_id);
+          // logger.debug('(' +index +'/' + length +  ') Storing categoryproduct link for ' + catLink.sku +' - ' + catLink.category_id);
           catLink.id = catLink.category_id * MAX_PRODUCTS_IN_CAT + index;
 
           index++;
@@ -76,7 +64,7 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
           catLink = this.normalizeDocumentFormat(catLink);
         }
 
-        logger.debug('Performing bulk update ...');
+        logger.debug('Performing bulk update...');
         this.db.updateDocumentBulk('productcategories', result); // TODO: add support for BULK operations and DELETE 
       }
 
@@ -84,26 +72,22 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
         // TODO: update products to set valid category
         item.products = result;
         this.db.updateDocument('category', item);
-        logger.debug('Updating category object for ' + item.id);
-
+        logger.debug(`Updating category object for ${item.id}`);
       }
 
-      default: // update in redis = ProductCategoriesModes.SEPARATE_REDIS
-        {
+      default: { // update in redis = ProductCategoriesModes.SEPARATE_REDIS
+        logger.debug(`Storing category assigments in REDIS cache for ${item.id}`);
 
-          logger.debug('Storing category assigments in REDIS cache for ' + item.id);
+        for (let catLink of result) {
+          const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, catLink.sku); // store under SKU of the product the categories assigned
 
-          for (let catLink of result) {
-            const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, catLink.sku); // store under SKU of the product the categories assigned
-
-            this.cache.sadd(key, catLink.category_id); // add categories to sets
-            this._productHisto.add(catLink.sku);
-          }
+          this.cache.sadd(key, catLink.category_id); // add categories to sets
+          this._productHisto.add(catLink.sku);
         }
+      }
     }
 
-    logger.info('The task count still is = ' + this.tasks_count);
-   
+    logger.info(`The task count still is = ${this.tasks_count}`);
   }
 
   /**
@@ -111,20 +95,17 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
    * @param {Object} item 
    */
   preProcessItem(item) {
-
-    return new Promise((function (done, reject) {
-      let inst = this;
-//      q.push(function () {
-       inst.api.categoryProducts.list(item.id).then(function(result) { inst._storeCatLinks.bind(inst)(item, result); done(item); }).catch(function (err) {
-          logger.error(err);
-          done(item);
-        });
-  //    });
-
-      
-      
-    }).bind(this));
-
+    return new Promise((done, reject) => {
+// q.push(() => {
+      this.api.categoryProducts.list(item.id).then((result) => {
+        this._storeCatLinks(item, result);
+        done(item);
+      }).catch((err) => {
+        logger.error(err);
+        done(item);
+      });
+  // });
+    });
   }
 
   /**
@@ -136,19 +117,18 @@ class ProductcategoriesAdapter extends AbstractMagentoAdapter {
     for(let sku of this._productHisto){
       const origKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES_TEMPORARY, sku); 
       const destKey = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, sku); 
-      //logger.debug(util.format('Moving %s to %s', origKey, destKey));
+      // logger.debug(util.format('Moving %s to %s', origKey, destKey));
 
       this.cache.rename(origKey, destKey);
     }
 
     logger.info('Publishing cache keys to production finished!');
 
-  /*  q.start(function (err) {
+  /*  q.start((err) => {
       if (err) throw err
       logger.info('all done:', results)
     });*/
   }
-
 
   isFederated() {
     return false;

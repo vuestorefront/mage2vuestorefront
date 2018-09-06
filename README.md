@@ -70,16 +70,16 @@ echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 export INDEX_NAME=vue_storefront_catalog
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 node --harmony cli.js reviews
 ```
 
 Please note:
-- `--removeNonExistient` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
+- `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
 
 Please note:
@@ -183,31 +183,31 @@ echo 'German store - de'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/de
 export INDEX_NAME=vue_storefront_catalog_de
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 echo 'Italian store - it'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/it  
 export INDEX_NAME=vue_storefront_catalog_it
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 export INDEX_NAME=vue_storefront_catalog
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 ```
 
 As You may see it's just a **it** or **de** store code which is added to the base Magento2 REST API urls that makes the difference and then the **INDEX_NAME** set to the dedicated index name.

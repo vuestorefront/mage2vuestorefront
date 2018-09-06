@@ -4,11 +4,10 @@ db.createUser({
   user: "system",
   pwd: "password",
   roles: [{
-      role: "dbAdmin",
-      db: "rcom"
-    }, {
-      role: "readWrite",
-      db: "rcom"
-    }
-  ]
+    role: "dbAdmin",
+    db: "rcom"
+  }, {
+    role: "readWrite",
+    db: "rcom"
+  }]
 });

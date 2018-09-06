@@ -21,10 +21,9 @@ module.exports = {
   db: {
 /*    driver: 'mongo',
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom' */
-  
     driver: 'elasticsearch',
     url: process.env.DATABASE_URL || 'http://localhost:9200',
-    indexName:  process.env.INDEX_NAME|| 'vue_storefront_catalog'
+    indexName:  process.env.INDEX_NAME || 'vue_storefront_catalog'
   },
 
   redis: {

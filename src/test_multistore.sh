@@ -10,22 +10,22 @@ echo 'German store - de'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/de
 export INDEX_NAME=vue_storefront_catalog_de
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 
 echo 'Italian store - it'
-export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/it  
+export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/it
 export INDEX_NAME=vue_storefront_catalog_it
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 
 
@@ -33,11 +33,11 @@ echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 export INDEX_NAME=vue_storefront_catalog
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --partitions=1 --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --partitions=1 --removeNonExistent=true
+node --harmony cli.js taxrule --partitions=1 --removeNonExistent=true
+node --harmony cli.js products --partitions=1 --removeNonExistent=true
 
 
 

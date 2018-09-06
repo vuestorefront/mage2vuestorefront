@@ -64,7 +64,6 @@ class AbstractNosqlAdapter{
     throw new Error('connect needs implementation!');
   }
 
-
 }
 
 module.exports = AbstractNosqlAdapter;

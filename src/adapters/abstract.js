@@ -1,16 +1,13 @@
 'use strict';
 
-const MongoClient = require('mongodb').MongoClient;
 const AdapterFactory = require('./factory');
 const Redis = require('redis');
 
 class AbstractAdapter {
 
   validateConfig(config) {
-
     if (!config['db']['url'])
       throw Error('db.url must be set up in config');
-
   }
 
   constructor(app_config) {
@@ -21,7 +18,7 @@ class AbstractAdapter {
 
     if (global.cache == null) {
       this.cache = Redis.createClient(this.config.redis); // redis client
-      this.cache.on('error', function (err) { // workaround for https://github.com/NodeRedis/node_redis/issues/713
+      this.cache.on('error', (err) => { // workaround for https://github.com/NodeRedis/node_redis/issues/713
         global.cache = Redis.createClient(this.config.redis); // redis client
       });
       global.cache = this.cache;
@@ -39,7 +36,6 @@ class AbstractAdapter {
     this.is_federated = false;
 
     this.validateConfig(this.config);
-    this.processItems = this.processItems.bind(this);
 
     this.tasks_count = 0;
   }
@@ -64,34 +60,38 @@ class AbstractAdapter {
    * @param {Object} context import context with parameter such "page", "size" and other search parameters
    */
   run(context) {
-
     this.current_context = context;
 
     if (!(this.current_context.transaction_key))
       this.current_context.transaction_key = new Date().getTime(); // the key used to filter out records NOT ADDED by this import
 
+    this.db.connect(() => {
+      logger.info('Connected correctly to server');
+      logger.info(`TRANSACTION KEY = ${this.current_context.transaction_key}`);
 
-    this.db.connect((function () {
-      logger.info("Connected correctly to server");
-      logger.info("TRANSACTION KEY = " + this.current_context.transaction_key);
-
-      this.onDone = this.current_context.done_callback ? (function () { this.defaultDoneCallback(); this.current_context.done_callback(); }).bind(this) : this.defaultDoneCallback;
+      this.onDone = this.current_context.done_callback ? (
+        () => {
+          this.defaultDoneCallback();
+          this.current_context.done_callback();
+        }
+      ): this.defaultDoneCallback;
 
       let exitCallback = this.onDone;
-      this.getSourceData(this.current_context).catch( function(err) {
-        logger.error(err);
-        exitCallback();
-      }).then(this.processItems);
-
-    }).bind(this));
-
+      this.getSourceData(this.current_context)
+        .then(this.processItems.bind(this))
+        .catch((err) => {
+          logger.error(err);
+          exitCallback();
+        });
+    });
   }
+
   /**
    * Implement some item related operations - executed BEFORE saving to the database
    * @param {Object} item 
    */
   preProcessItem(item) {
-    return new Promise(function (done, reject) { done(); });
+    return new Promise((done, reject) => { done(); });
   }
 
   /**
@@ -99,14 +99,13 @@ class AbstractAdapter {
    * @param {int} transaction_key
    */
   cleanUp(transaction_key) {
-    this.db.connect((function () {
-      logger.info('Cleaning up with tsk = ' + transaction_key);
+    this.db.connect(() => {
+      logger.info(`Cleaning up with tsk = ${transaction_key}`);
       this.db.cleanupByTransactionkey(this.getCollectionName(), transaction_key);
-    }).bind(this));
+    });
   }
 
   prepareItems(items) {
-
     if(!items)
       return items;
 
@@ -129,8 +128,7 @@ class AbstractAdapter {
       level = 0;
     items = this.prepareItems(items);
 
-
-    if(!items){
+    if (!items) {
       logger.error('No items given to processItems call!');
       return;
     }
@@ -149,18 +147,18 @@ class AbstractAdapter {
       throw new Error('No db adapter connection established!');
 
     if (this.total_count)
-      logger.info('Total count is: ' + this.total_count)
+      logger.info(`Total count is: ${this.total_count}`)
 
     items.map((item) => {
 
-      this.preProcessItem(item).then((function (item) {
+      this.preProcessItem(item).then((item) => {
 
         this.tasks_count--;
 
         item.tsk = this.getCurrentContext().transaction_key; // transaction key for items that can be then cleaned up
 
-        logger.info('Importing ' + index + ' of ' + count + ' - ' + this.getLabel(item) + ' with tsk = ' + item.tsk);
-        logger.info('Tasks count = ' + this.tasks_count);
+        logger.info(`Importing ${index} of ${count} - ${this.getLabel(item)} with tsk = ${item.tsk}`);
+        logger.info(`Tasks count = ${this.tasks_count}`);
 
         if (this.update_document)
           this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
@@ -168,20 +166,19 @@ class AbstractAdapter {
           logger.debug('Skiping database update');
 
         if (item.children_data && item.children_data.length > 0) {
-          logger.info('--L:' + level + ' Processing child items ...');
+          logger.info(`--L:${level} Processing child items ...`);
           this.processItems(item.children_data, level + 1);
         }
 
         if (this.tasks_count == 0 && !this.use_paging) { // this is the last item!
-          logger.info(' No tasks to process. All records processed!');
+          logger.info('No tasks to process. All records processed!');
           this.db.close();
 
           return this.onDone(this);
         } else {
 
-          if (index == (count - 1)) // page done!
-          {
-            logger.debug('--L:' + level + ' Level done!');
+          if (index == (count - 1)) { // page done!
+            logger.debug(`--L:${level} Level done!`);
 
             if (level == 0) {
 
@@ -195,28 +192,26 @@ class AbstractAdapter {
                 } else {
 
                   this.page++;
-                  logger.debug('Switching page to ' + this.page);
+                  logger.debug(`Switching page to ${this.page}`);
 
-                  this.getSourceData(this.getCurrentContext()).then(this.processItems).catch(function(err)  { logger.error(err); } );
+                  this.getSourceData(this.getCurrentContext())
+                    .then(this.processItems.bind(this))
+                    .catch((err) => {
+                      logger.error(err);
+                    });
                 }
-
               }
-
             }
           }
         }
 
         index++;
-      }).bind(this)).catch(function (reason) {
+      }).catch((reason) => {
         logger.error(reason);
         return this.onDone(this);
-        
       });
-
     })
-
   }
-
 }
 
 module.exports = AbstractAdapter;
