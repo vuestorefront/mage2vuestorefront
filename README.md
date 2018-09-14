@@ -85,7 +85,7 @@ Please note:
 **Cache invalidation:** Recent version of Vue Storefront do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
 
 ```bash
-export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?tag=
+export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?key=aeSu7aip&tag=
 export VS_INVALIDATE_CACHE=1
 ```
 

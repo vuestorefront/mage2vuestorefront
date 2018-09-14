@@ -12,7 +12,7 @@ module.exports = {
 
   vuestorefront: {
     invalidateCache: process.env.VS_INVALIDATE_CACHE || false,
-    invalidateCacheUrl: process.env.VS_INVALIDATE_CACHE_URL || 'http://localhost:3000/invalidate?tag='
+    invalidateCacheUrl: process.env.VS_INVALIDATE_CACHE_URL || 'http://localhost:3000/invalidate?key=aeSu7aip&tag='
   },
 
   product: {
