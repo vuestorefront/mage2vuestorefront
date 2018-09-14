@@ -1,6 +1,6 @@
 
 export TIME_TO_EXIT=2000
-export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?tag=
+export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?key=aeSu7aip&tag=
 export VS_INVALIDATE_CACHE=1
 export PRODUCTS_SPECIAL_PRICES=true
 export MAGENTO_CONSUMER_KEY=byv3730rhoulpopcq64don8ukb8lf2gq
