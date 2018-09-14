@@ -5,9 +5,8 @@
   "main": "cli.js",
   "dependencies": {
     "agentkeepalive": "^3.3.0",
-    "async": "^2.5.0",
     "body-parser": "^1.17.1",
-    "command-router": "^1.0.1",
+    "commander": "^2.18.0",
     "elasticsearch": "^13.3.x",
     "elasticsearch-deletebyquery": "^1.6.0",
     "express": "^4.15.2",
