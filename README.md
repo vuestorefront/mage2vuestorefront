@@ -82,6 +82,15 @@ Please note:
 - `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
 
+**Cache invalidation:** Recent version of Vue Storefront do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
+
+```bash
+export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?tag=
+export VS_INVALIDATE_CACHE=1
+```
+
+- `VS_INVALIDATE_CACHE_URL` is a cache to the Vue Storefront instance - used as a webhook to clear the output cache.
+
 Please note:
 After data import - especially when You're not sure about the product attributes data types - please **reindex** ElasticSearch to estaplish the correct / current database schema. You may do this using [Database tool](https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Database%20tool.md) in the `vue-storefront-api` folder:
 
@@ -241,7 +250,7 @@ Install:
 - `cd src/`
 - `npm install`
 
-Config -see: config.js or use following ENV variables: 
+Config - see: config.js or use following ENV variables: 
 - `MAGENTO_URL`
 - `MAGENTO_CONSUMER_KEY`
 - `MAGENTO_CONSUMER_SECRET`

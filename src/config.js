@@ -10,6 +10,11 @@ module.exports = {
     currencyCode: process.env.MAGENTO_CURRENCY_CODE || 'USD'
   },
 
+  vuestorefront: {
+    invalidateCache: process.env.VS_INVALIDATE_CACHE || false,
+    invalidateCacheUrl: process.env.VS_INVALIDATE_CACHE_URL || 'http://localhost:3000/invalidate?tag='
+  },
+
   product: {
     expandConfigurableFilters: ['manufacturer'],
     synchronizeCatalogSpecialPrices: process.env.PRODUCTS_SPECIAL_PRICES || false,

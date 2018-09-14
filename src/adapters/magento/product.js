@@ -5,6 +5,7 @@ const util = require('util');
 const CacheKeys = require('./cache_keys');
 const moment = require('moment')
 const _ = require('lodash')
+const request = require('request');
 
 /*
  * serial executes Promises sequentially.
@@ -479,6 +480,13 @@ class ProductAdapter extends AbstractMagentoAdapter {
         "qty": priceTag.qty
       });
     }*/
+
+    if (this.config.vuestorefront && this.config.vuestorefront.invalidateCache) {
+      request(this.config.vuestorefront.invalidateCacheUrl + 'P' + item.id, {}, (err, res, body) => {
+        if (err) { return console.error(err); }
+        console.log(body);
+      });      
+    }
 
     let resultItem = Object.assign(item, {
     // "price": prices, // ES stores prices differently

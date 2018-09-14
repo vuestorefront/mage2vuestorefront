@@ -3,6 +3,7 @@
 let AbstractMagentoAdapter = require('./abstract');
 const CacheKeys = require('./cache_keys');
 const util = require('util');
+const request = require('request');
 
 const _normalizeExtendedData = function (result) {
   if (result.custom_attributes) {
@@ -117,6 +118,12 @@ class CategoryAdapter extends AbstractMagentoAdapter {
    * @param {object} item  document to be updated in elastic search
    */
   normalizeDocumentFormat(item) {
+    if (this.config.vuestorefront && this.config.vuestorefront.invalidateCache) {
+      request(this.config.vuestorefront.invalidateCacheUrl + 'C' + item.id, {}, (err, res, body) => {
+        if (err) { return console.error(err); }
+        console.log(body);
+      });      
+    }    
     return item;
   }
 }
