@@ -14,7 +14,7 @@ export INDEX_NAME=vue_storefront_catalog_de
 
 node --harmony cli.js reviews
 node --harmony cli.js categories --removeNonExistent=true
-node --harmony cli.js productcategories --partitions=1
+node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
 node --harmony cli.js products --removeNonExistent=true --partitions=1
@@ -26,7 +26,7 @@ export INDEX_NAME=vue_storefront_catalog_it
 
 node --harmony cli.js reviews
 node --harmony cli.js categories --removeNonExistent=true
-node --harmony cli.js productcategories --partitions=1
+node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
 node --harmony cli.js products --removeNonExistent=true --partitions=1
@@ -39,7 +39,7 @@ export INDEX_NAME=vue_storefront_catalog
 
 node --harmony cli.js reviews
 node --harmony cli.js categories --removeNonExistent=true
-node --harmony cli.js productcategories --partitions=1
+node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
 node --harmony cli.js products --removeNonExistent=true --partitions=1
