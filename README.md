@@ -247,8 +247,8 @@ Start Elasticsearch and Redis:
 - `docker-compose up`
 
 Install:
-- `cd src/`
 - `npm install`
+- `cd src`
 
 Config - see: config.js or use following ENV variables: 
 - `MAGENTO_URL`
