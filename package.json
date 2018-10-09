@@ -1,6 +1,6 @@
 {
-  "name": "magentosync",
-  "version": "1.0.0",
+  "name": "mage2vuestorefront",
+  "version": "1.4.0",
   "description": "Magento sync for products, categories, users and orders",
   "main": "cli.js",
   "dependencies": {
