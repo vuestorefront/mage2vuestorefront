@@ -23,6 +23,4 @@ router.post('/products/update', function(req, res) { // TODO: add api key middle
   }
 });
 
-
-
 module.exports = router;

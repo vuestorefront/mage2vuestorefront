@@ -2,6 +2,7 @@
 const AbstractNosqlAdapter = require('./abstract');
 const elasticsearch = require('elasticsearch');
 const AgentKeepAlive = require('agentkeepalive');
+const AgentKeepAliveHttps = require('agentkeepalive').HttpsAgent;
 
 
 class ElasticsearchAdapter extends AbstractNosqlAdapter {
@@ -27,14 +28,12 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     this.updateDocument.bind(this);
   }
 
-
   /**
    * Close the nosql database connection - abstract to the driver
    */
   close() { // switched to global singleton
     //this.db.close();
   }
-
 
   /**
    * Update single document in database
@@ -88,7 +87,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     }
   }
 
-
   /**
    * Update multiple documents in database
    * @param {array} items to be updated
@@ -131,8 +129,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       index++;
     }
 
-
-
   }
 
   /**
@@ -151,8 +147,11 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
         maxSockets: 10,
         minSockets: 10,
         requestTimeout: 1800000,
-       
+
         createNodeAgent: function (connection, config) {
+          if (connection.useSsl) {
+            return new AgentKeepAliveHttps(connection.makeAgentConfig(config));
+          }
           return new AgentKeepAlive(connection.makeAgentConfig(config));
         }
 
@@ -163,7 +162,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
     done(this.db);
   }
-
 
 }
 

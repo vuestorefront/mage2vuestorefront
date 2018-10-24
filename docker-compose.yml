@@ -40,8 +40,7 @@ services:
     image: redis
 
     ports:
-      - "6379:6379"      
-
+      - "6379:6379"
 
 volumes:
   esdat1:
@@ -51,5 +50,3 @@ volumes:
 
 networks:
   esnet:
-
-

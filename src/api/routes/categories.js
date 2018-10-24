@@ -22,6 +22,4 @@ router.get('/browse', auth.authenticate(), function(req, res) {
   });
 });
 
-
-
 module.exports = router;

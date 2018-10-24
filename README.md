@@ -14,6 +14,7 @@ At this point synchronization works with following entities:
 - Taxrules
 - Attributes
 - Product-to-categories
+- Reviews (require custom module Divante/ReviewApi to work)
 
 Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this databse to be used in PWA/JS webapps.
 
@@ -69,16 +70,26 @@ echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 export INDEX_NAME=vue_storefront_catalog
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --removeNonExistent=true
+node --harmony cli.js taxrule --removeNonExistent=true
+node --harmony cli.js products --removeNonExistent=true --partitions=1
+node --harmony cli.js reviews
 ```
 
 Please note:
-- `--removeNonExistient` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
+- `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
+
+**Cache invalidation:** Recent version of Vue Storefront do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
+
+```bash
+export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?key=aeSu7aip&tag=
+export VS_INVALIDATE_CACHE=1
+```
+
+- `VS_INVALIDATE_CACHE_URL` is a cache to the Vue Storefront instance - used as a webhook to clear the output cache.
 
 Please note:
 After data import - especially when You're not sure about the product attributes data types - please **reindex** ElasticSearch to estaplish the correct / current database schema. You may do this using [Database tool](https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Database%20tool.md) in the `vue-storefront-api` folder:
@@ -181,31 +192,31 @@ echo 'German store - de'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/de
 export INDEX_NAME=vue_storefront_catalog_de
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --removeNonExistent=true
+node --harmony cli.js taxrule --removeNonExistent=true
+node --harmony cli.js products --removeNonExistent=true --partitions=1
 
 echo 'Italian store - it'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest/it  
 export INDEX_NAME=vue_storefront_catalog_it
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --removeNonExistent=true
+node --harmony cli.js taxrule --removeNonExistent=true
+node --harmony cli.js products --removeNonExistent=true --partitions=1
 
 echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 export INDEX_NAME=vue_storefront_catalog
 
-node --harmony cli.js categories --partitions=1 --removeNonExistient=true
+node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories --partitions=1
-node --harmony cli.js attributes --partitions=1 --removeNonExistient=true
-node --harmony cli.js taxrule --partitions=1 --removeNonExistient=true
-node --harmony cli.js products --partitions=1 --removeNonExistient=true
+node --harmony cli.js attributes --removeNonExistent=true
+node --harmony cli.js taxrule --removeNonExistent=true
+node --harmony cli.js products --removeNonExistent=true --partitions=1
 ```
 
 As You may see it's just a **it** or **de** store code which is added to the base Magento2 REST API urls that makes the difference and then the **INDEX_NAME** set to the dedicated index name.
@@ -236,10 +247,10 @@ Start Elasticsearch and Redis:
 - `docker-compose up`
 
 Install:
-- `cd src/`
 - `npm install`
+- `cd src`
 
-Config -see: config.js or use following ENV variables: 
+Config - see: config.js or use following ENV variables: 
 - `MAGENTO_URL`
 - `MAGENTO_CONSUMER_KEY`
 - `MAGENTO_CONSUMER_SECRET`
@@ -258,8 +269,8 @@ Other commands supported:
 - `node --harmony cli.js products --partitions=10 --delta=true` - check products changed since last run (last run data is stored in mongodb); compared by updated_at field
 - `node --harmony cli.js productcategories` - to synchronize the links between products and categories it *should be run before* products synchronization because it populates Redis cache assigments for product-to-category link
 - `node --harmony cli.js categories`
-- `node --harmony cli.js --adapter=magento --partitions=1 --skus=24-WG082-blue,24-WG082-pink products`  - to pull out only selected SKUs
-- `node --harmony cli.js --adapter=magento --partitions=10 productsworker`  - run queue worker for pulling out individual products (jobs can be assigned by webapi.js microservice triggers; it can be called by webhook for example from within Magento2 plugin)
+- `node --harmony cli.js products --adapter=magento --partitions=1 --skus=24-WG082-blue,24-WG082-pink`  - to pull out only selected SKUs
+- `node --harmony cli.js productsworker --adapter=magento --partitions=10`  - run queue worker for pulling out individual products (jobs can be assigned by webapi.js microservice triggers; it can be called by webhook for example from within Magento2 plugin)
 - `node --harmony webapi.js` - run localhost:3000 service endpoint for adding queue tasks
 
 WebAPI:
