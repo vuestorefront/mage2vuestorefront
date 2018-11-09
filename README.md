@@ -105,6 +105,18 @@ cd vue-storefront-api
 npm run db new -- --indexName=vue_storefront_catalog
 ```
 
+### Checking indexed data
+
+If you want to see how many products were stored into Elastic data store, you can use Kibana to do so. Kibana is part of vue-storefront-api. Once you start docker containers of vue-storefront-api you can access it on http://localhost:5601/.
+
+To see count of indexed products go to DEV tools and run following query:
+
+```
+GET vue_storefront_catalog/product/_count
+```
+
+See https://www.elastic.co/guide/en/kibana/current/console-kibana.html to find out more.
+
 ### Delta indexer
 
 After initial setup and full-reindex You may want to add indexer to the `crontab` to index only modified product records.
