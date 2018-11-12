@@ -56,6 +56,51 @@ const reindexReviews = (adapterName, removeNonExistent) => {
   });
 }
 
+/**
+ * Re-index cms blocks
+ */
+const reindexBlocks = (adapterName, removeNonExistent) => {
+  return new Promise((resolve, reject) => {
+    let adapter = factory.getAdapter(adapterName, 'm2block');
+    let tsk = new Date().getTime();
+
+    adapter.run({
+      transaction_key: tsk,
+      done_callback: () => {
+        if (removeNonExistent) {
+          adapter.cleanUp(tsk);
+        }
+
+        logger.info('Task done! Exiting in 30s...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+        resolve();
+      }
+    })
+  })
+}
+
+/**
+ * Re-index cms pages
+ */
+const reindexPages = (adapterName, removeNonExistent) => {
+  return new Promise((resolve, reject) => {
+    let adapter = factory.getAdapter(adapterName, 'm2page');
+    let tsk = new Date().getTime();
+    adapter.run({
+      transaction_key: tsk,
+      done_callback: () => {
+        if (removeNonExistent) {
+          adapter.cleanUp(tsk);
+        }
+
+        logger.info('Task done! Exiting in 30s...');
+        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
+        resolve();
+      }
+    })
+  })
+}
+
 const reindexCategories = (adapterName, removeNonExistent, extendedCategories) => {
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'category');
@@ -216,50 +261,6 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
   }
 }
 
-/**
- * Re-index cms blocks
- */
-function commandBlock(next, reject) {
-  let adapter = factory.getAdapter(cli.options.adapter, 'block');
-  let tsk = new Date().getTime();
-
-  adapter.run({
-    transaction_key: tsk,
-    done_callback: () => {
-      if (cli.options.removeNonExistient) {
-        adapter.cleanUp(tsk);
-      }
-
-      if(!next){
-        logger.info('Task done! Exiting in 30s ...');
-        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-      } else next();
-    }
-  })
-}
-
-/**
- * Re-index cms pages
- */
-function commandPage(next, reject) {
-  let adapter = factory.getAdapter(cli.options.adapter, 'page');
-  let tsk = new Date().getTime();
-
-  adapter.run({
-    transaction_key: tsk,
-    done_callback: () => {
-      if (cli.options.removeNonExistient) {
-        adapter.cleanUp(tsk);
-      }
-
-      if(!next){
-        logger.info('Task done! Exiting in 30s ...');
-        setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
-      } else next();
-    }
-  })
-}
-
 function fullReindex(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, extendedCategories) {
   // The sequence is important because commands operate on some cache resources - especially for product/category assignments
   Promise.all([
@@ -403,20 +404,7 @@ program
   .action((cmd) => {
     runProductsworker(cmd.adapter, cmd.partitions);
   })
-/**
-* Sync cms blocks
-*/
-cli.command('block', function () {
-  commandBlock();
-});
-
-/**
-* Sync cms blocks
-*/
-cli.command('page', function () {
-  commandPage();
-});
-
+      
 program
   .command('reviews')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
@@ -424,13 +412,32 @@ program
   .action(async (cmd) => {
     await reindexReviews(cmd.adapter, cmd.removeNonExistent);
   })
-
+  
 program
   .command('taxrule')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexTaxRules(cmd.adapter, cmd.removeNonExistent);
+  })
+      
+/**
+* Sync cms blocks
+*/
+program
+  .command('blocks')
+  .option('--adapter <adapter>', 'name of the adapter', 'magento')
+  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .action(async (cmd) => {
+    await reindexBlocks(cmd.adapter, cmd.removeNonExistent);
+  })
+
+program
+  .command('pages')
+  .option('--adapter <adapter>', 'name of the adapter', 'magento')
+  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .action(async (cmd) => {
+    await reindexPages(cmd.adapter, cmd.removeNonExistent);
   })
 
 program

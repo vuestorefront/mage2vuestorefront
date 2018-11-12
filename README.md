@@ -15,6 +15,7 @@ At this point synchronization works with following entities:
 - Attributes
 - Product-to-categories
 - Reviews (require custom module Divante/ReviewApi to work)
+- Cms Blocks & Pages (require custom module [SnowdogApps/magento2-cms-api](https://github.com/SnowdogApps/magento2-cms-api))
 
 Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this databse to be used in PWA/JS webapps.
 
@@ -76,6 +77,8 @@ node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
 node --harmony cli.js products --removeNonExistent=true --partitions=1
 node --harmony cli.js reviews
+node --harmony cli.js blocks
+node --harmony cli.js pages
 ```
 
 Please note:
