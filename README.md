@@ -77,6 +77,10 @@ node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
 node --harmony cli.js products --removeNonExistent=true --partitions=1
 node --harmony cli.js reviews
+```
+
+After installing the 3rd party Magneto module ([SnowdogApps/magento2-cms-api](https://github.com/SnowdogApps/magento2-cms-api)) there are two additional imports available:
+```
 node --harmony cli.js blocks
 node --harmony cli.js pages
 ```
