@@ -10,7 +10,7 @@ class BlockAdapter extends AbstractMagentoAdapter {
     }
 
     getEntityType() {
-        return 'm2block';
+        return 'cms_block';
     }
 
     getName() {
@@ -54,7 +54,7 @@ class BlockAdapter extends AbstractMagentoAdapter {
         return new Promise((done, reject) => {
             if (item) {
                 item.id = `${this.idCounter}`;
-                item.type = 'm2block'
+                item.type = 'cms_block'
                 this.idCounter++;
             }
           

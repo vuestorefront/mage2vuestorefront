@@ -61,7 +61,7 @@ const reindexReviews = (adapterName, removeNonExistent) => {
  */
 const reindexBlocks = (adapterName, removeNonExistent) => {
   return new Promise((resolve, reject) => {
-    let adapter = factory.getAdapter(adapterName, 'm2block');
+    let adapter = factory.getAdapter(adapterName, 'cms_block');
     let tsk = new Date().getTime();
 
     adapter.run({
@@ -84,7 +84,7 @@ const reindexBlocks = (adapterName, removeNonExistent) => {
  */
 const reindexPages = (adapterName, removeNonExistent) => {
   return new Promise((resolve, reject) => {
-    let adapter = factory.getAdapter(adapterName, 'm2page');
+    let adapter = factory.getAdapter(adapterName, 'cms_page');
     let tsk = new Date().getTime();
     adapter.run({
       transaction_key: tsk,

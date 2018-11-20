@@ -10,7 +10,7 @@ class PageAdapter extends AbstractMagentoAdapter {
     }
 
     getEntityType() {
-        return 'm2page';
+        return 'cms_page';
     }
 
     getName() {
@@ -48,7 +48,7 @@ class PageAdapter extends AbstractMagentoAdapter {
         return new Promise((done, reject) => {
             if (item) {
                 item.id = `${this.idCounter}`;
-                item.type = 'm2page'
+                item.type = 'cms_page'
                 this.idCounter++;
             }
           
