@@ -6,7 +6,6 @@ class PageAdapter extends AbstractMagentoAdapter {
     constructor(config) {
         super(config);
         this.use_paging = false;
-        this.idCounter = 0;
     }
 
     getEntityType() {
@@ -47,9 +46,7 @@ class PageAdapter extends AbstractMagentoAdapter {
 
         return new Promise((done, reject) => {
             if (item) {
-                item.id = `${this.idCounter}`;
                 item.type = 'cms_page'
-                this.idCounter++;
             }
           
           return done(item);
