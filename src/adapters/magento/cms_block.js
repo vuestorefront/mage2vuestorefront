@@ -6,7 +6,6 @@ class BlockAdapter extends AbstractMagentoAdapter {
     constructor(config) {
         super(config);
         this.use_paging = false;
-        this.idCounter = 0;
     }
 
     getEntityType() {
@@ -53,9 +52,7 @@ class BlockAdapter extends AbstractMagentoAdapter {
         //
         return new Promise((done, reject) => {
             if (item) {
-                item.id = `${this.idCounter}`;
                 item.type = 'cms_block'
-                this.idCounter++;
             }
           
           return done(item);
