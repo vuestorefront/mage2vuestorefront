@@ -137,6 +137,13 @@ This command will execute full reindex at first call - and then will be storing 
 
 Please note: Magento2 has a bug with altering `updated_at` field. Please install [a fix for that](https://github.com/codepeak/magento2-productfix) before using this method: 
 
+If you have a multistore setup and would like to use the delta indexer for each storeview you can not use the delta timestamp from `.lastIndex.json` for all stores; instead
+you will need to set the `INDEX_META_PATH` to a unique value for each store you are indexing. For instance:
+
+```
+export INDEX_META_PATH=.lastIndex-UK.json && node --harmony cli.js productsdelta --partitions=1
+```
+
 ```bash
 composer require codepeak/magento2-productfix
 php bin/magento cache:flush
