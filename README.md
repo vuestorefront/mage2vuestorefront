@@ -259,6 +259,14 @@ More on <a href="https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Mu
 
 If You like to have Category filter working with configurable products - You need to expand the `product.configurable_children.attrName` to `product.attrName_options` array. This is automatically done by [mage2vuestorefront](https://github.com/DivanteLtd/mage2vuestorefront) for all attributes set as `product.configurable_options` (by default: color, size). If You like to add additional fields like `manufacturer` to the filters You need to expand `product.manufacturer_options` field. The easiest way to do so is to set `config.product.expandConfigurableFilters` to `['manufacturer']` and re-run the `mage2vuestorefront` indexer.
 
+## FAQ
+
+Here You can find some frequently asked questions answered:
+
+### I've been playing with VSF for quite a while now and now I see that my catalog rule (-20% on all products) is not applied in one shop.
+
+Please make sure that You've got the `config.synchronizeCatalogSpecialPrices` (env: `PRODUCTS_SPECIAL_PRICES`) and `config.renderCatalogRegularPrices` (env: `PRODUCTS_RENDER_PRICES`) set to `true` (default is `false`). Otherwise only the catalog prices will be synced (without dynamic pricing rules applied). You can also use the Vue Storefront [dynamic-pricing option](https://divanteltd.github.io/vue-storefront/guide/integrations/direct-prices-sync.html) for the same purpose.
+
 
 ## Advanced usage
 
