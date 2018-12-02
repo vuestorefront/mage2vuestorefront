@@ -9,7 +9,7 @@ let config = require('./config');
 let logger = require('./log');
 let factory = new AdapterFactory(config);
 const jsonFile = require('jsonfile')
-const INDEX_META_PATH = process.env.INDEX_META_PATH ? process.env.INDEX_META_PATH : '.lastIndex.json'
+const INDEX_META_PATH = process.env.INDEX_META_PATH ? './tmp/' + process.env.INDEX_META_PATH : './tmp/.lastIndex.json'
 
 let kue = require('kue');
 let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
