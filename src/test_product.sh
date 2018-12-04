@@ -12,8 +12,3 @@ echo 'Default store - in our case United States / en'
 export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 
 node --harmony cli.js products --removeNonExistent=true --partitions=1
-
-
-
-
-

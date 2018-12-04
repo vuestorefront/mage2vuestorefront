@@ -15,6 +15,8 @@ let kue = require('kue');
 let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
 
 const reindexAttributes = (adapterName, removeNonExistent) => {
+  removeNonExistent = (removeNonExistent == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'attribute');
     let tsk = new Date().getTime();
@@ -35,6 +37,8 @@ const reindexAttributes = (adapterName, removeNonExistent) => {
 }
 
 const reindexReviews = (adapterName, removeNonExistent) => {
+  removeNonExistent = (removeNonExistent == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'review');
     let tsk = new Date().getTime();
@@ -60,6 +64,8 @@ const reindexReviews = (adapterName, removeNonExistent) => {
  * Re-index cms blocks
  */
 const reindexBlocks = (adapterName, removeNonExistent) => {
+  removeNonExistent = (removeNonExistent == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'cms_block');
     let tsk = new Date().getTime();
@@ -83,6 +89,8 @@ const reindexBlocks = (adapterName, removeNonExistent) => {
  * Re-index cms pages
  */
 const reindexPages = (adapterName, removeNonExistent) => {
+  removeNonExistent = (removeNonExistent == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'cms_page');
     let tsk = new Date().getTime();
@@ -102,6 +110,9 @@ const reindexPages = (adapterName, removeNonExistent) => {
 }
 
 const reindexCategories = (adapterName, removeNonExistent, extendedCategories) => {
+  removeNonExistent = (removeNonExistent == 'true')
+  extendedCategories = (extendedCategories == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'category');
     let tsk = new Date().getTime();
@@ -123,6 +134,8 @@ const reindexCategories = (adapterName, removeNonExistent, extendedCategories) =
 }
 
 const reindexTaxRules = (adapterName, removeNonExistent) => {
+  removeNonExistent = (removeNonExistent == 'true')
+
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'taxrule');
     let tsk = new Date().getTime();
@@ -169,6 +182,9 @@ function cleanup(adapterName, cleanupType, transactionKey) {
 }
 
 function reindexProducts(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, updatedAfter = null) {
+  removeNonExistent = (removeNonExistent == 'true')
+  initQueue = (initQueue == true || initQueue == 'true')
+
   let adapter = factory.getAdapter(adapterName, 'product');
 
   if (updatedAfter) {
@@ -318,7 +334,7 @@ program
   .command('categories')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
-  .option('--extendedCategories <extendedCategories>', '', true)
+  .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
   .action(async (cmd) => {
     await reindexCategories(cmd.adapter, cmd.removeNonExistent, cmd.extendedCategories);
   });
@@ -339,7 +355,7 @@ program
   .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
-  .option('--extendedCategories <extendedCategories>', '', true)
+  .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
   .action((cmd) => {
     fullReindex(cmd.adapter, true, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, cmd.extendedCategories);
   });
