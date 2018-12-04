@@ -14,12 +14,8 @@ export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
 node --harmony cli.js blocks
 node --harmony cli.js pages 
 node --harmony cli.js reviews
-node --harmony cli.js categories --removeNonExistent=true --extendedCategories=true
+node --harmony cli.js categories --removeNonExistent --extendedCategories
 node --harmony cli.js productcategories
-node --harmony cli.js attributes --removeNonExistent=true
-node --harmony cli.js taxrule --removeNonExistent=true
-node --harmony cli.js products --removeNonExistent=true --partitions=1
-
-
-
-
+node --harmony cli.js attributes --removeNonExistent
+node --harmony cli.js taxrule --removeNonExistent
+node --harmony cli.js products --initQueue --removeNonExistent --partitions=1

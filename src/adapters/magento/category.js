@@ -76,7 +76,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
         return done(item);
       }
       
-      if (this.extendedCategories === true) {
+      if (this.extendedCategories) {
 
         this.api.categories.getSingle(item.id).then((result) => { 
           this._addSingleCategoryData(item, result); 

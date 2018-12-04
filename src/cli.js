@@ -104,7 +104,7 @@ const reindexPages = (adapterName, removeNonExistent) => {
 const reindexCategories = (adapterName, removeNonExistent, extendedCategories) => {
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'category');
-    let tsk = new Date().getTime();
+    let tsk = new Date().getTime();    
 
     adapter.run({
       transaction_key: tsk,
@@ -309,7 +309,7 @@ function runProductsworker(adapterName, partitions) {
 program
   .command('attributes')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexAttributes(cmd.adapter, cmd.removeNonExistent);
   });
@@ -317,8 +317,8 @@ program
 program
   .command('categories')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
-  .option('--extendedCategories <extendedCategories>', '', true)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
+  .option('--extendedCategories [extendedCategories]', 'extended categories import', false)
   .action(async (cmd) => {
     await reindexCategories(cmd.adapter, cmd.removeNonExistent, cmd.extendedCategories);
   });
@@ -337,9 +337,9 @@ program
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
   .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
-  .option('--initQueue <initQueue>', 'use the queue', true)
+  .option('--initQueue [initQueue]', 'use the queue', false)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
-  .option('--extendedCategories <extendedCategories>', '', true)
+  .option('--extendedCategories [extendedCategories]', 'extended categories import', false)
   .action((cmd) => {
     fullReindex(cmd.adapter, true, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, cmd.extendedCategories);
   });
@@ -356,9 +356,9 @@ program
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
   .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
-  .option('--initQueue <initQueue>', 'use the queue', true)
+  .option('--initQueue [initQueue]', 'use the queue', false)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .option('--updatedAfter <updatedAfter>', 'timestamp to start the synchronization from', '')
   .action((cmd) => {
     if (cmd.updatedAfter) {
@@ -373,9 +373,9 @@ program
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
   .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
-  .option('--initQueue <initQueue>', 'use the queue', true)
+  .option('--initQueue [initQueue]', 'use the queue', false)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action((cmd) => {
     let indexMeta = { lastIndexDate: new Date() }
     let updatedAfter = null
@@ -408,7 +408,7 @@ program
 program
   .command('reviews')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexReviews(cmd.adapter, cmd.removeNonExistent);
   })
@@ -416,7 +416,7 @@ program
 program
   .command('taxrule')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexTaxRules(cmd.adapter, cmd.removeNonExistent);
   })
@@ -427,7 +427,7 @@ program
 program
   .command('blocks')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexBlocks(cmd.adapter, cmd.removeNonExistent);
   })
@@ -435,7 +435,7 @@ program
 program
   .command('pages')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
-  .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
+  .option('--removeNonExistent [removeNonExistent]', 'remove non existent products', false)
   .action(async (cmd) => {
     await reindexPages(cmd.adapter, cmd.removeNonExistent);
   })
