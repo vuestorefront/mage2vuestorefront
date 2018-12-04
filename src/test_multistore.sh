@@ -19,7 +19,7 @@ node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
-node --harmony cli.js products --initQueue=true --removeNonExistent=true --partitions=1
+node --harmony cli.js products --removeNonExistent=true --partitions=1
 
 
 echo 'Italian store - it'
@@ -33,7 +33,7 @@ node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
-node --harmony cli.js products --initQueue=true --removeNonExistent=true --partitions=1
+node --harmony cli.js products --removeNonExistent=true --partitions=1
 
 
 
@@ -48,4 +48,4 @@ node --harmony cli.js categories --removeNonExistent=true
 node --harmony cli.js productcategories
 node --harmony cli.js attributes --removeNonExistent=true
 node --harmony cli.js taxrule --removeNonExistent=true
-node --harmony cli.js products --initQueue=true --removeNonExistent=true --partitions=1
+node --harmony cli.js products --removeNonExistent=true --partitions=1
