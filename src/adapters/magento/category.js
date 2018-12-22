@@ -5,6 +5,15 @@ const CacheKeys = require('./cache_keys');
 const util = require('util');
 const request = require('request');
 
+const _slugify = function (text) {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/&/g, '-and-') // Replace & with 'and'
+    .replace(/[^\w-]+/g, '') // Remove all non-word chars
+    .replace(/--+/g, '-') // Replace multiple - with single -
+}
+
+
 const _normalizeExtendedData = function (result) {
   if (result.custom_attributes) {
     for (let customAttribute of result.custom_attributes) { // map custom attributes directly to document root scope
@@ -76,11 +85,15 @@ class CategoryAdapter extends AbstractMagentoAdapter {
         return done(item);
       }
       
+      if (!item.url_key) {
+        item.url_key = _slugify(item.name) + '-' + item.id
+      }
+
       if (this.extendedCategories === true) {
 
         this.api.categories.getSingle(item.id).then((result) => { 
           this._addSingleCategoryData(item, result); 
-          
+
           const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
           logger.debug(`Storing extended category data to cache under: ${key}`);
           this.cache.set(key, JSON.stringify(item));
