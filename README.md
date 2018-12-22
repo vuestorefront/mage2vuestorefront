@@ -15,6 +15,7 @@ At this point synchronization works with following entities:
 - Attributes
 - Product-to-categories
 - Reviews (require custom module Divante/ReviewApi to work)
+- Cms Blocks & Pages (require custom module [SnowdogApps/magento2-cms-api](https://github.com/SnowdogApps/magento2-cms-api))
 
 Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this databse to be used in PWA/JS webapps.
 
@@ -78,6 +79,12 @@ node --harmony cli.js products --removeNonExistent=true --partitions=1
 node --harmony cli.js reviews
 ```
 
+After installing the 3rd party Magneto module ([SnowdogApps/magento2-cms-api](https://github.com/SnowdogApps/magento2-cms-api)) there are two additional imports available:
+```
+node --harmony cli.js blocks
+node --harmony cli.js pages
+```
+
 Please note:
 - `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
@@ -105,6 +112,18 @@ cd vue-storefront-api
 npm run db new -- --indexName=vue_storefront_catalog
 ```
 
+### Checking indexed data
+
+If you want to see how many products were stored into Elastic data store, you can use Kibana to do so. Kibana is part of vue-storefront-api. Once you start docker containers of vue-storefront-api you can access it on http://localhost:5601/.
+
+To see count of indexed products go to DEV tools and run following query:
+
+```
+GET vue_storefront_catalog/product/_count
+```
+
+See https://www.elastic.co/guide/en/kibana/current/console-kibana.html to find out more.
+
 ### Delta indexer
 
 After initial setup and full-reindex You may want to add indexer to the `crontab` to index only modified product records.
@@ -117,6 +136,13 @@ node --harmony cli.js productsdelta --partitions=1
 This command will execute full reindex at first call - and then will be storing the last index date in the `.lastIndex.json` and downloading only these products which have `updated_at` > last index date.
 
 Please note: Magento2 has a bug with altering `updated_at` field. Please install [a fix for that](https://github.com/codepeak/magento2-productfix) before using this method: 
+
+If you have a multistore setup and would like to use the delta indexer for each storeview you can not use the delta timestamp from `.lastIndex.json` for all stores; instead
+you will need to set the `INDEX_META_PATH` to a unique value for each store you are indexing. For instance:
+
+```
+export INDEX_META_PATH=.lastIndex-UK.json && node --harmony cli.js productsdelta --partitions=1
+```
 
 ```bash
 composer require codepeak/magento2-productfix
@@ -239,6 +265,14 @@ More on <a href="https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Mu
 ### Indexing configurable products attributes for filters
 
 If You like to have Category filter working with configurable products - You need to expand the `product.configurable_children.attrName` to `product.attrName_options` array. This is automatically done by [mage2vuestorefront](https://github.com/DivanteLtd/mage2vuestorefront) for all attributes set as `product.configurable_options` (by default: color, size). If You like to add additional fields like `manufacturer` to the filters You need to expand `product.manufacturer_options` field. The easiest way to do so is to set `config.product.expandConfigurableFilters` to `['manufacturer']` and re-run the `mage2vuestorefront` indexer.
+
+## FAQ
+
+Here You can find some frequently asked questions answered:
+
+### I've been playing with VSF for quite a while now and now I see that my catalog rule (-20% on all products) is not applied in one shop.
+
+Please make sure that You've got the `config.synchronizeCatalogSpecialPrices` (env: `PRODUCTS_SPECIAL_PRICES`) and `config.renderCatalogRegularPrices` (env: `PRODUCTS_RENDER_PRICES`) set to `true` (default is `false`). Otherwise only the catalog prices will be synced (without dynamic pricing rules applied). You can also use the Vue Storefront [dynamic-pricing option](https://divanteltd.github.io/vue-storefront/guide/integrations/direct-prices-sync.html) for the same purpose.
 
 
 ## Advanced usage

@@ -291,7 +291,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       } */
 
       // CONFIGURABLE AND BUNDLE SYNC
-      if (this.configurable_sync && (item.type_id == 'configurable' || item.type_id == 'bundle')) {
+      if (this.configurable_sync && (item.type_id == 'configurable')) {
         logger.info(`Product sub-stage 6: Geting product options for ${item.sku}`);
 
         // q.push(() => {

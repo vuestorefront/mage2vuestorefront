@@ -89,7 +89,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
 
-      if (this.extendedCategories === true) {
+      if (this.extendedCategories) {
 
         this.api.categories.getSingle(item.id).then((result) => { 
           this._addSingleCategoryData(item, result); 
