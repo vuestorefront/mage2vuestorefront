@@ -11,7 +11,7 @@ module.exports = {
   },
 
   vuestorefront: {
-    invalidateCache: JSON.parse(process.env.VS_INVALIDATE_CACHE) || false,
+    invalidateCache: JSON.parse(typeof process.env.VS_INVALIDATE_CACHE === 'undefined' ? false : process.env.VS_INVALIDATE_CACHE),
     invalidateCacheUrl: process.env.VS_INVALIDATE_CACHE_URL || 'http://localhost:3000/invalidate?key=aeSu7aip&tag='
   },
 
