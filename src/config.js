@@ -1,7 +1,7 @@
 module.exports = {
 
   magento: {
-    url:  process.env.MAGENTO_URL || 'http://magento2.demo-1.divante.pl/rest/',
+    url: process.env.MAGENTO_URL || 'http://magento2.demo-1.divante.pl/rest/',
     consumerKey: process.env.MAGENTO_CONSUMER_KEY || 'alva6h6hku9qxrpfe02c2jalopx7od1q',
     consumerSecret: process.env.MAGENTO_CONSUMER_SECRET || '9tgfpgoojlx9tfy21b8kw7ssfu2aynpm',
     accessToken: process.env.MAGENTO_ACCESS_TOKEN || 'rw5w0si9imbu45h3m9hkyrfr4gjina8q',
@@ -11,7 +11,7 @@ module.exports = {
   },
 
   vuestorefront: {
-    invalidateCache: process.env.VS_INVALIDATE_CACHE || false,
+    invalidateCache: JSON.parse(typeof process.env.VS_INVALIDATE_CACHE === 'undefined' ? false : process.env.VS_INVALIDATE_CACHE),
     invalidateCacheUrl: process.env.VS_INVALIDATE_CACHE_URL || 'http://localhost:3000/invalidate?key=aeSu7aip&tag='
   },
 
@@ -24,11 +24,11 @@ module.exports = {
   kue: {}, // default KUE config works on local redis instance. See KUE docs for non standard redis connections
 
   db: {
-/*    driver: 'mongo',
+    /* driver: 'mongo',
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom' */
     driver: 'elasticsearch',
     url: process.env.DATABASE_URL || 'http://localhost:9200',
-    indexName:  process.env.INDEX_NAME || 'vue_storefront_catalog'
+    indexName: process.env.INDEX_NAME || 'vue_storefront_catalog'
   },
 
   redis: {
@@ -39,8 +39,8 @@ module.exports = {
   passport: {
     jwtSecret: "MyS3cr3tK3Y",
     jwtSession: {
-        session: false
-      }
+      session: false
+    }
   }
 
 }
