@@ -1,6 +1,7 @@
 'use strict';
 
 const program = require('commander');
+const fs = require('fs');
 let AdapterFactory = require('./adapters/factory');
 
 const TIME_TO_EXIT = process.env.TIME_TO_EXIT ? process.env.TIME_TO_EXIT : 30000; // wait 30s before quiting after task is done
@@ -380,6 +381,10 @@ program
     let indexMeta = { lastIndexDate: new Date() }
     let updatedAfter = null
     try {
+      // Make sure so the temporary folder exists.
+      if (!fs.existsSync('./tmp')) {
+        fs.mkdirSync('./tmp')
+      }
       indexMeta = jsonFile.readFileSync(INDEX_META_PATH)
       updatedAfter = new Date(indexMeta.lastIndexDate)
     } catch (err) {
