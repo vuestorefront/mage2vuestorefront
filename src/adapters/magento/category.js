@@ -84,7 +84,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
       if (!item) {
         return done(item);
       }
-      
+
       if (!item.url_key) {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
