@@ -14,14 +14,16 @@ const _slugify = function (text) {
 }
 
 
-const _normalizeExtendedData = function (result) {
+const _normalizeExtendedData = function (result, generateUrlKey = true) {
   if (result.custom_attributes) {
     for (let customAttribute of result.custom_attributes) { // map custom attributes directly to document root scope
       result[customAttribute.attribute_code] = customAttribute.value;
     }
     delete result.custom_attributes;
   }
-  
+  if (generateUrlKey) {
+    result.url_key = _slugify(result.name) + '-' + result.id
+  }  
   return result
 }
 
@@ -30,6 +32,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   constructor (config) {
     super(config);
     this.extendedCategories = false;
+    this.generateUniqueUrlKeys = true;
   }
 
   getEntityType() {
@@ -41,6 +44,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   getSourceData(context) {
+    this.generateUniqueUrlKeys = context.generateUniqueUrlKeys;
     this.extendedCategories = context.extendedCategories;
     return this.api.categories.list();
   }
@@ -54,12 +58,12 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   _addSingleCategoryData(item, result) {
-    item = Object.assign(item, _normalizeExtendedData(result));
+    item = Object.assign(item, _normalizeExtendedData(result, this.generateUniqueUrlKeys));
   }
 
   _extendSingleCategory(rootId, catToExtend) {
     return this.api.categories.getSingle(catToExtend.id).then(function(result) { 
-      Object.assign(catToExtend, _normalizeExtendedData(result))
+      Object.assign(catToExtend, _normalizeExtendedData(result, this.generateUniqueUrlKeys))
       logger.info(`Subcategory data extended for ${rootId}, children object ${catToExtend.id}`)
     }).catch(function(err) {
       logger.error(err)
@@ -85,7 +89,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
         return done(item);
       }
 
-      if (!item.url_key) {
+      if (!item.url_key || this.generateUniqueUrlKeys) {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
 

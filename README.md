@@ -85,9 +85,10 @@ node --harmony cli.js blocks
 node --harmony cli.js pages
 ```
 
-Please note:
+**Please note:**
 - `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
+- The `categories` importer option `--generateUniqueUrlKeys` is by default set to true. This is due the fact that in Magento2, the `category.url_key` field is not mandatory unique and from v. 1.7 Vue Storefront uses the `category.url_key` to display the category details without any client's side modification.
 
 **Cache invalidation:** Recent version of Vue Storefront do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
 

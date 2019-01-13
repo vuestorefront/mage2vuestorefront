@@ -14,8 +14,12 @@ const INDEX_META_PATH = process.env.INDEX_META_PATH ? process.env.INDEX_META_PAT
 let kue = require('kue');
 let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
 
+const _handleBoolParam = (value) => {
+  return JSON.parse(value) // simple way to handle all the '0', '1', 'true', true, false ...
+}
+
 const reindexAttributes = (adapterName, removeNonExistent) => {
-  removeNonExistent = (removeNonExistent == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'attribute');
@@ -37,7 +41,7 @@ const reindexAttributes = (adapterName, removeNonExistent) => {
 }
 
 const reindexReviews = (adapterName, removeNonExistent) => {
-  removeNonExistent = (removeNonExistent == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'review');
@@ -64,7 +68,7 @@ const reindexReviews = (adapterName, removeNonExistent) => {
  * Re-index cms blocks
  */
 const reindexBlocks = (adapterName, removeNonExistent) => {
-  removeNonExistent = (removeNonExistent == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'cms_block');
@@ -89,7 +93,7 @@ const reindexBlocks = (adapterName, removeNonExistent) => {
  * Re-index cms pages
  */
 const reindexPages = (adapterName, removeNonExistent) => {
-  removeNonExistent = (removeNonExistent == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'cms_page');
@@ -109,9 +113,10 @@ const reindexPages = (adapterName, removeNonExistent) => {
   })
 }
 
-const reindexCategories = (adapterName, removeNonExistent, extendedCategories) => {
-  removeNonExistent = (removeNonExistent == 'true')
-  extendedCategories = (extendedCategories == 'true')
+const reindexCategories = (adapterName, removeNonExistent, extendedCategories, generateUniqueUrlKeys) => {
+  removeNonExistent = _handleBoolParam(removeNonExistent)
+  extendedCategories = _handleBoolParam(extendedCategories)
+  generateUniqueUrlKeys = (_handleBoolParam(generateUniqueUrlKeys))
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'category');
@@ -120,6 +125,7 @@ const reindexCategories = (adapterName, removeNonExistent, extendedCategories) =
     adapter.run({
       transaction_key: tsk,
       extendedCategories: extendedCategories,
+      generateUniqueUrlKeys: generateUniqueUrlKeys,
       done_callback: () => {
         if (removeNonExistent) {
           adapter.cleanUp(tsk);
@@ -134,7 +140,7 @@ const reindexCategories = (adapterName, removeNonExistent, extendedCategories) =
 }
 
 const reindexTaxRules = (adapterName, removeNonExistent) => {
-  removeNonExistent = (removeNonExistent == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
 
   return new Promise((resolve, reject) => {
     let adapter = factory.getAdapter(adapterName, 'taxrule');
@@ -182,8 +188,8 @@ function cleanup(adapterName, cleanupType, transactionKey) {
 }
 
 function reindexProducts(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, updatedAfter = null) {
-  removeNonExistent = (removeNonExistent == 'true')
-  initQueue = (initQueue == true || initQueue == 'true')
+  removeNonExistent = _handleBoolParam(removeNonExistent)
+  initQueue = _handleBoolParam(initQueue)
 
   let adapter = factory.getAdapter(adapterName, 'product');
 
@@ -277,12 +283,12 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
   }
 }
 
-function fullReindex(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, extendedCategories) {
+function fullReindex(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, extendedCategories, generateUniqueUrlKeys) {
   // The sequence is important because commands operate on some cache resources - especially for product/category assignments
   Promise.all([
     reindexAttributes(adapterName, removeNonExistent), // 0. It stores attributes in redis cache
     reindexTaxRules(adapterName, removeNonExistent), // 1. It indexes the taxRules
-    reindexCategories(adapterName, removeNonExistent, extendedCategories), //2. It stores categories in redis cache
+    reindexCategories(adapterName, removeNonExistent, extendedCategories, generateUniqueUrlKeys), //2. It stores categories in redis cache
     reindexProductCategories(adapterName) // 3. It stores product/cateogry links in redis cache
   ]).then((results) => {
     logger.info('Starting full products reindex!');
@@ -335,8 +341,9 @@ program
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
   .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
+  .option('--generateUniqueUrlKeys <generateUniqueUrlKeys>', 'make sure that category url keys are uniqe', true)
   .action(async (cmd) => {
-    await reindexCategories(cmd.adapter, cmd.removeNonExistent, cmd.extendedCategories);
+    await reindexCategories(cmd.adapter, cmd.removeNonExistent, cmd.extendedCategories, cmd.generateUniqueUrlKeys);
   });
 
 program
@@ -356,8 +363,9 @@ program
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
   .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
+  .option('--generateUniqueUrlKeys <generateUniqueUrlKeys>', 'generate unique url_keys', true)
   .action((cmd) => {
-    fullReindex(cmd.adapter, true, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, cmd.extendedCategories);
+    fullReindex(cmd.adapter, true, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, cmd.extendedCategories, cmd.generateUniqueUrlKeys);
   });
 
 program
