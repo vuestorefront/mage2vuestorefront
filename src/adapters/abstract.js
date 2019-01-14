@@ -178,9 +178,8 @@ class AbstractAdapter {
         } else {
 
           if (index == (count - 1)) { // page done!
-            logger.debug(`--L:${level} Level done!`);
-
-            if (level == 0) {
+            logger.debug(`--L:${level} Level done! Current page: ${this.page} of ${this.page_count}`);
+            if (parseInt(level) == 0) {
 
               if (this.use_paging && !this.isFederated()) { //TODO: paging should be refactored using queueing
 
@@ -189,7 +188,7 @@ class AbstractAdapter {
                   this.db.close();
 
                   this.onDone(this);
-                } else {
+                } else {  
 
                   this.page++;
                   logger.debug(`Switching page to ${this.page}`);

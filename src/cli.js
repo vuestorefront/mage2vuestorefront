@@ -265,6 +265,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
     let context = {
       page: page !== null ? parseInt(page) : null,
       page_size: partitionSize,
+      use_paging: true,
       updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
@@ -360,7 +361,7 @@ program
   .command('fullreindex')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
-  .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
+  .option('--partitionSize <partitionSize>', 'size of the partitions', 50)
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
   .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
@@ -380,7 +381,7 @@ program
   .command('products')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
-  .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
+  .option('--partitionSize <partitionSize>', 'size of the partitions', 50)
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
@@ -398,7 +399,7 @@ program
   .command('productsdelta')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--partitions <partitions>', 'number of partitions', 1)
-  .option('--partitionSize <partitionSize>', 'size of the partitions', 200)
+  .option('--partitionSize <partitionSize>', 'size of the partitions', 50)
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)

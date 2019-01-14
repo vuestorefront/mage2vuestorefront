@@ -48,7 +48,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.total_count = items.total_count;
 
     if (this.use_paging) {
-      this.page_count = this.total_count / this.page_size;
+      this.page_count = Math.round(this.total_count / this.page_size);
+      logger.info('Page count', this.page_count)
     }
 
     return items.items;
@@ -137,11 +138,11 @@ class ProductAdapter extends AbstractMagentoAdapter {
       });
     } else if (context.page && context.page_size) {
 
-      this.use_paging = false;
-      this.is_federated = true;
+      this.use_paging = context.use_paging || false
+      this.is_federated = context.use_paging ? false : true;
       this.page = context.page;
       this.page_size = context.page_size
-      this.page_count = 1; // process only one page - used for partitioning purposes
+      if (!context.use_paging) this.page_count = 1; // process only one page - used for partitioning purposes
 
       logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
