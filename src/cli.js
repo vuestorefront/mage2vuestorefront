@@ -187,7 +187,7 @@ function cleanup(adapterName, cleanupType, transactionKey) {
   }
 }
 
-function reindexProducts(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, updatedAfter = null) {
+function reindexProducts(adapterName, removeNonExistent, partitions, partitionSize, initQueue, skus, updatedAfter = null, page = null) {
   removeNonExistent = _handleBoolParam(removeNonExistent)
   initQueue = _handleBoolParam(initQueue)
 
@@ -262,8 +262,9 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
 
   } else {
     logger.info('Running in SPM (Single Process Mode)');
-
     let context = {
+      page: page !== null ? parseInt(page) : null,
+      page_size: partitionSize,
       updated_after: updatedAfter,
       transaction_key: tsk,
       done_callback: () => {
@@ -274,7 +275,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
         setTimeout(process.exit, TIME_TO_EXIT); // let ES commit all changes made
       }
     };
-
+    if (page!== null) logger.info('Current page is: ', page, partitionSize)
     if (skus) {
       context.skus = skus.split(','); // update individual producs
     }
@@ -384,11 +385,12 @@ program
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
   .option('--updatedAfter <updatedAfter>', 'timestamp to start the synchronization from', '')
+  .option('--page <page>', 'start from specific page', null)
   .action((cmd) => {
     if (cmd.updatedAfter) {
-      reindexProducts(cmd.adapter, cmd.removeNonExistent, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, new Date(cmd.updatedAfter));
+      reindexProducts(cmd.adapter, cmd.removeNonExistent, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, new Date(cmd.updatedAfter), cmd.page);
     } else {
-      reindexProducts(cmd.adapter, cmd.removeNonExistent, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus);
+      reindexProducts(cmd.adapter, cmd.removeNonExistent, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, null, cmd.page);
     }
   });
 

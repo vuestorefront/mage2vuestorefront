@@ -62,8 +62,9 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   _extendSingleCategory(rootId, catToExtend) {
+    const generateUniqueUrlKeys = this.generateUniqueUrlKeys
     return this.api.categories.getSingle(catToExtend.id).then(function(result) { 
-      Object.assign(catToExtend, _normalizeExtendedData(result, this.generateUniqueUrlKeys))
+      Object.assign(catToExtend, _normalizeExtendedData(result, generateUniqueUrlKeys))
       logger.info(`Subcategory data extended for ${rootId}, children object ${catToExtend.id}`)
     }).catch(function(err) {
       logger.error(err)
