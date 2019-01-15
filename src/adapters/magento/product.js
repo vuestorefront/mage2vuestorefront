@@ -113,7 +113,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
             }
             resolve(result)
           })
-        })
+        }).catch(err => reject(err))
       })
     } else {
       return this.getProductSourceData(context)
@@ -147,7 +147,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
       return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch((err) => {
-        throw new Error(err);
+        throw new Error(err); 
       });
 
     } else if (this.use_paging) {

@@ -189,14 +189,18 @@ class AbstractAdapter {
 
                   this.onDone(this);
                 } else {  
-
-                  this.page++;
+                  const context = this.getCurrentContext()
+                  if (context.page) { 
+                    context.page++
+                    this.page++;
+                  }
                   logger.debug(`Switching page to ${this.page}`);
-
-                  this.getSourceData(this.getCurrentContext())
+                  let exitCallback = this.onDone;
+                  this.getSourceData(context)
                     .then(this.processItems.bind(this))
                     .catch((err) => {
                       logger.error(err);
+                      exitCallback()
                     });
                 }
               }
