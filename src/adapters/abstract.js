@@ -193,6 +193,8 @@ class AbstractAdapter {
                   if (context.page) { 
                     context.page++
                     this.page++;
+                  } else {
+                    context.page = ++this.page;
                   }
                   logger.debug(`Switching page to ${this.page}`);
                   let exitCallback = this.onDone;
