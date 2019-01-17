@@ -342,7 +342,7 @@ program
   .command('categories')
   .option('--adapter <adapter>', 'name of the adapter', 'magento')
   .option('--removeNonExistent <removeNonExistent>', 'remove non existent products', false)
-  .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
+  .option('--extendedCategories <extendedCategories>', 'extended categories import', true)
   .option('--generateUniqueUrlKeys <generateUniqueUrlKeys>', 'make sure that category url keys are uniqe', true)
   .action(async (cmd) => {
     await reindexCategories(cmd.adapter, cmd.removeNonExistent, cmd.extendedCategories, cmd.generateUniqueUrlKeys);
@@ -364,7 +364,7 @@ program
   .option('--partitionSize <partitionSize>', 'size of the partitions', 50)
   .option('--initQueue <initQueue>', 'use the queue', true)
   .option('--skus <skus>', 'comma delimited list of SKUs to fetch fresh informations from', '')
-  .option('--extendedCategories <extendedCategories>', 'extended categories import', false)
+  .option('--extendedCategories <extendedCategories>', 'extended categories import', true)
   .option('--generateUniqueUrlKeys <generateUniqueUrlKeys>', 'generate unique url_keys', true)
   .action((cmd) => {
     fullReindex(cmd.adapter, true, cmd.partitions, cmd.partitionSize, cmd.initQueue, cmd.skus, cmd.extendedCategories, cmd.generateUniqueUrlKeys);
