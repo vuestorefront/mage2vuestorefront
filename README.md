@@ -107,7 +107,7 @@ cd vue-storefront-api
 npm run db rebuild -- --indexName=vue_storefront_catalog
 ```
 
-If You like to create a new, emtpy index please run:
+If You like to create a new, empty index please run:
 ```bash
 cd vue-storefront-api
 npm run db new -- --indexName=vue_storefront_catalog
