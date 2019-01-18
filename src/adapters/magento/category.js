@@ -24,7 +24,7 @@ const _normalizeExtendedData = function (result, generateUrlKey = true) {
   if (generateUrlKey) {
     result.url_key = _slugify(result.name) + '-' + result.id;
   }
-  if (!result.slug) result.slug = result.url_key;
+  result.slug = result.url_key;
   return result
 }
 
@@ -94,7 +94,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
       if (!item.url_key || this.generateUniqueUrlKeys) {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
-      if (!item.slug) item.slug = item.url_key;  
+      item.slug = item.url_key;  
 
 
       if (this.extendedCategories) {
