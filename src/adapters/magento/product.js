@@ -6,6 +6,7 @@ const CacheKeys = require('./cache_keys');
 const moment = require('moment')
 const _ = require('lodash')
 const request = require('request');
+const HTTP_RETRIES = 3
 
 /*
  * serial executes Promises sequentially.
@@ -75,49 +76,71 @@ class ProductAdapter extends AbstractMagentoAdapter {
   }
 
   getSourceData(context) {
-    if (this.config.product && this.config.product.synchronizeCatalogSpecialPrices) {
-      return new Promise((resolve, reject) => {
-        
-        this.getProductSourceData(context).then((result) => {
-          // download rendered list items
-          const products = result.items
-          let skus = products.map((p) => { return p.sku })
-
-          if (products.length === 1) { // single product - download child data
-            const childSkus = _.flattenDeep(products.map((p) => { return (p.configurable_children) ? p.configurable_children.map((cc) => { return cc.sku }) : null }))
-            skus = _.union(skus, childSkus)
-          }
-          const query = '&searchCriteria[filter_groups][0][filters][0][field]=sku&' +
-          'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(skus.join(',')) + '&' +
-          'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
-
-          this.api.products.renderList(query, this.config.magento.storeId, this.config.magento.currencyCode).then(renderedProducts => {
-            context.renderedProducts = renderedProducts
-            for (let product of result.items) {
-              const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
-
-              if (productAdditionalInfo && productAdditionalInfo.price_info) {
-                delete productAdditionalInfo.price_info.formatted_prices
-                delete productAdditionalInfo.price_info.extension_attributes
-                // delete productAdditionalInfo.price_info.special_price
-                product = Object.assign(product, productAdditionalInfo.price_info)
-
-                if (product.final_price < product.price) {
-                  product.special_price = product.final_price
-                }
-
-                if (this.config.product.renderCatalogRegularPrices) {
-                  product.price = product.regular_price
-                }
+    const that = this
+    const retryHandler = (context, err, reject) => {
+      context.retry_count = context.retry_count ? context.retry_count + 1 : 1;
+      if (err == null || context.retry_count < HTTP_RETRIES ) {
+        if (err) {
+          logger.error(err);
+          logger.info('Retrying getSourceData() request ' + context.retry_count);
+        }
+        if (this.config.product && this.config.product.synchronizeCatalogSpecialPrices) {
+          return new Promise((resolve, reject) => {
+            this.getProductSourceData(context).then((result) => {
+              // download rendered list items
+              const products = result.items
+              let skus = products.map((p) => { return p.sku })
+    
+              if (products.length === 1) { // single product - download child data
+                const childSkus = _.flattenDeep(products.map((p) => { return (p.configurable_children) ? p.configurable_children.map((cc) => { return cc.sku }) : null }))
+                skus = _.union(skus, childSkus)
               }
-            }
-            resolve(result)
+              const query = '&searchCriteria[filter_groups][0][filters][0][field]=sku&' +
+              'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(skus.join(',')) + '&' +
+              'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
+    
+              this.api.products.renderList(query, this.config.magento.storeId, this.config.magento.currencyCode).then(renderedProducts => {
+                context.renderedProducts = renderedProducts
+                for (let product of result.items) {
+                  const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
+    
+                  if (productAdditionalInfo && productAdditionalInfo.price_info) {
+                    delete productAdditionalInfo.price_info.formatted_prices
+                    delete productAdditionalInfo.price_info.extension_attributes
+                    // delete productAdditionalInfo.price_info.special_price
+                    product = Object.assign(product, productAdditionalInfo.price_info)
+    
+                    if (product.final_price < product.price) {
+                      product.special_price = product.final_price
+                    }
+    
+                    if (this.config.product.renderCatalogRegularPrices) {
+                      product.price = product.regular_price
+                    }
+                  }
+                }
+                resolve(result)
+              })
+            }).catch(err => {
+              retryHandler(context, err, reject)
+            })
           })
-        }).catch(err => reject(err))
-      })
-    } else {
-      return this.getProductSourceData(context)
-    }
+        } else {
+          return this.getProductSourceData(context).catch(err => {
+              retryHandler(context, err, null)
+            })
+        }
+      } else {
+        if (reject) {
+          reject(err)
+        } else {
+          throw err
+        }
+      }
+    }  
+    
+    // run the import logick
+    return retryHandler(context, null, null)
   }
 
   getProductSourceData(context) {
@@ -146,8 +169,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
       logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
+
       return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch((err) => {
-        throw new Error(err); 
+        throw new Error(err);
       });
 
     } else if (this.use_paging) {
