@@ -145,6 +145,12 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
   getProductSourceData(context) {
     let query = this.getFilterQuery(context);
+    let searchCriteria = '&searchCriteria[currentPage]=%d&searchCriteria[pageSize]=%d';
+
+    if(this.config.product && JSON.parse(this.config.product.excludeDisabledProducts)) {
+      searchCriteria += '&searchCriteria[filterGroups][0][filters][0][field]=status'+
+                        '&searchCriteria[filterGroups][0][filters][0][value]=1';
+    }
 
     if(typeof context.stock_sync !== 'undefined')
       this.stock_sync = context.stock_sync;
@@ -156,7 +162,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       this.configurable_sync = context.configurable_sync;
 
     if (context.for_total_count) { // get total counts
-      return this.api.products.list('&searchCriteria[currentPage]=1&searchCriteria[pageSize]=1').catch((err) => {
+      return this.api.products.list(util.format(searchCriteria, 1, 1)).catch((err) => {
         throw new Error(err);
       });
     } else if (context.page && context.page_size) {
@@ -169,15 +175,14 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
       logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
-
-      return this.api.products.list('&searchCriteria[currentPage]=' + context.page + '&searchCriteria[pageSize]=' + context.page_size + (query ? '&' + query : '')).catch((err) => {
-        throw new Error(err);
+      return this.api.products.list(util.format(searchCriteria, context.page, context.page_size) + (query ? '&' + query : '')).catch((err) => {
+        throw new Error(err); 
       });
 
     } else if (this.use_paging) {
       this.is_federated = false; // federated execution is not compliant with paging
-      logger.debug(`&searchCriteria[currentPage]=${this.page}&searchCriteria[pageSize]=${this.page_size + (query ? '&' + query : '')}`);
-      return this.api.products.list('&searchCriteria[currentPage]=' + this.page + '&searchCriteria[pageSize]=' + this.page_size + (query ? '&' + query : '')).catch((err) => {
+      logger.debug(util.format(searchCriteria, this.page, this.page_size) + (query ? '&' + query : ''));
+      return this.api.products.list(util.format(searchCriteria, this.page, this.page_size) + (query ? '&' + query : '')).catch((err) => {
         throw new Error(err);
       });
     } else {
