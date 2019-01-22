@@ -18,7 +18,8 @@ module.exports = {
   product: {
     expandConfigurableFilters: ['manufacturer'],
     synchronizeCatalogSpecialPrices: process.env.PRODUCTS_SPECIAL_PRICES || false,
-    renderCatalogRegularPrices: process.env.PRODUCTS_RENDER_PRICES || false
+    renderCatalogRegularPrices: process.env.PRODUCTS_RENDER_PRICES || false,
+    excludeDisabledProducts: process.env.PRODUCTS_EXCLUDE_DISABLED || false
   },
 
   kue: {}, // default KUE config works on local redis instance. See KUE docs for non standard redis connections
