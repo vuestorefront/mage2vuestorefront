@@ -1,6 +1,8 @@
 'use strict';
 
 const program = require('commander');
+const fs = require('fs');
+const path = require('path');
 let AdapterFactory = require('./adapters/factory');
 
 const TIME_TO_EXIT = process.env.TIME_TO_EXIT ? process.env.TIME_TO_EXIT : 30000; // wait 30s before quiting after task is done
@@ -9,7 +11,7 @@ let config = require('./config');
 let logger = require('./log');
 let factory = new AdapterFactory(config);
 const jsonFile = require('jsonfile')
-const INDEX_META_PATH = process.env.INDEX_META_PATH ? process.env.INDEX_META_PATH : '.lastIndex.json'
+const INDEX_META_PATH = process.env.INDEX_META_PATH ? path.join('tmp', process.env.INDEX_META_PATH) : path.join('tmp', '.lastIndex.json')
 
 let kue = require('kue');
 let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
@@ -407,6 +409,10 @@ program
     let indexMeta = { lastIndexDate: new Date() }
     let updatedAfter = null
     try {
+      // Make sure so the temporary folder exists.
+      if (!fs.existsSync('tmp')) {
+        fs.mkdirSync('tmp')
+      }
       indexMeta = jsonFile.readFileSync(INDEX_META_PATH)
       updatedAfter = new Date(indexMeta.lastIndexDate)
     } catch (err) {
