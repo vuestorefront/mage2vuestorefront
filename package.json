@@ -1,8 +1,14 @@
 {
   "name": "mage2vuestorefront",
-  "version": "1.4.0",
+  "private": true,
+  "version": "1.7.1",
   "description": "Magento sync for products, categories, users and orders",
-  "main": "cli.js",
+  "author": "Piotr Karwatka",
+  "license": "MIT",
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "agentkeepalive": "^3.3.0",
     "body-parser": "^1.17.1",
@@ -28,10 +34,5 @@
     "request": "^2.88.0",
     "sha1": "^1.1.1"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Piotr Karwatka",
-  "license": "MIT"
+  "devDependencies": {}
 }
