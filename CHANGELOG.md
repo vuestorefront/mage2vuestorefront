@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Removed
-- old `package.json` and `yarn.lock` from `src` directory
+### Added
+ - Configurable parent refresh sync - enabled in the `productsdelta` and `productsworker` modes and in `products --sku=<singleSku>`. This mode is refreshing the configurable parent product for the simple child which requires update. Its' required to start the `clis.js productsworker` (example call: `test_product_worker.sh`) for processing these parent updates,
+ - Example calls added: `test_product_delta.sh` - for delta indexer, `test_product_worker.sh` for products worker, `test_fullreindex_multiprocess.sh` for multi process/parallel updates, `test_by_sky.sh` - for single SKU updates.
+
+ ### Removed
+ -  Mongodb support has been removed
+ - old `package.json` and `yarn.lock` from `src` directory
 
 ## [1.7.1] - 2019-01-29
 ### Added
