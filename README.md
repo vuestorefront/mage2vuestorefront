@@ -6,7 +6,7 @@ Some details about the rationale and our goals [here](https://www.linkedin.com/p
 
 It synchronizes all the products, attributes, taxrules, categories and links between products and categories.
 
-This is multi-process data synchronizer between Magento (and in further versions Shopify / other platforms) to local MongoDB AND ElasticSearch databases.
+This is multi-process data synchronizer between Magento to Vue Storefront ElasticSearch database.
 
 At this point synchronization works with following entities:
 - Products
@@ -21,7 +21,7 @@ Categories and Product-to-categories links are additionaly stored in Redis cache
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
-MongoDB OR ElasticSearch is used for NoSQL database
+ElasticSearch is used for NoSQL database
 Redis is used for KUE queue backend
 
 By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
@@ -151,6 +151,25 @@ Please note: Magento2 has a bug with altering `updated_at` field. Please install
 composer require codepeak/magento2-productfix
 php bin/magento cache:flush
 ```
+
+### Parent products updates 
+
+Please note if there is a `simple` product update request coming from Delta Indexer or On Demand indexer `mage2vuestorefront` will - by default - check and update the `configurable`/parent product as well. The parent product update is scheduled in the `productsworker` mode - using KUE queue. Please make sure You're runinng at least one worker instance to process these on-demand request:
+
+```bash
+cd mage2vuestorefront/src
+export TIME_TO_EXIT=2000
+export MAGENTO_CONSUMER_KEY=byv3730rhoulpopcq64don8ukb8lf2gq
+export MAGENTO_CONSUMER_SECRET=u9q4fcobv7vfx9td80oupa6uhexc27rb
+export MAGENTO_ACCESS_TOKEN=040xx3qy7s0j28o3q0exrfop579cy20m
+export MAGENTO_ACCESS_TOKEN_SECRET=7qunl3p505rubmr7u1ijt7odyialnih9
+export PORT=6060
+export MAGENTO_URL=http://demo-magento2.vuestorefront.io/rest
+
+node --harmony cli.js productsworker
+```
+
+This second process will take care of indexing the parent products updates whetever any of it's  `configurable_children` simple products has been changed.
 
 ### On-demand indexer (experimental!)
 
@@ -293,7 +312,7 @@ Config - see: config.js or use following ENV variables:
 - `MAGENTO_CONSUMER_SECRET`
 - `MAGENTO_ACCESS_TOKEN`
 - `MAGENTO_ACCESS_TOKEN_SECRET`
-- `DATABASE_URL` (default: 'mongodb://localhost:27017/rcom')
+- `DATABASE_URL` (default: 'elasticsearch://localhost:9200/vue_storefront_catalog')
 
 
 Run:
@@ -303,7 +322,7 @@ Run:
 Other commands supported:
 - `node --harmony cli.js products --partitions=10`
 - `node --harmony cli.js products --partitions=10 --initQueue=false` - run the products sync worker (product sync jobs should be populated eslewhere - it's used to run multi-tenant environment of workers)
-- `node --harmony cli.js products --partitions=10 --delta=true` - check products changed since last run (last run data is stored in mongodb); compared by updated_at field
+- `node --harmony cli.js products --partitions=10 --delta=true` - check products changed since last run; compared by updated_at field
 - `node --harmony cli.js productcategories` - to synchronize the links between products and categories it *should be run before* products synchronization because it populates Redis cache assigments for product-to-category link
 - `node --harmony cli.js categories`
 - `node --harmony cli.js products --adapter=magento --partitions=1 --skus=24-WG082-blue,24-WG082-pink`  - to pull out only selected SKUs
@@ -319,6 +338,6 @@ Available options:
 - `partitions=10` - number of concurent processes, by default number of CPUs core given
 - `adapter=magento` - for now only Magento is supported
 - `delta` - sync products changed from last run
-- command names: `products` / `attributes` / `taxrule` / `categories` / `productsworker` / `productcategories`
+- command names: `products` / `attributes` / `taxrule` / `categories` / `productsworker` / `productcategories` / `productsdelta`
 
 
