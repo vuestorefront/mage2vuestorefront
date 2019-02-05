@@ -7,6 +7,7 @@ const moment = require('moment')
 const _ = require('lodash')
 const request = require('request');
 const HTTP_RETRIES = 3
+let kue = require('kue');
 
 /*
  * serial executes Promises sequentially.
@@ -27,6 +28,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.use_paging = true;
     this.stock_sync = true;
     this.custom_sync = true;
+    this.parent_sync = true;
     this.media_sync = true;
     this.category_sync = true;
     this.links_sync = true;
@@ -154,6 +156,12 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
     if(typeof context.stock_sync !== 'undefined')
       this.stock_sync = context.stock_sync;
+
+    if(typeof context.parent_sync !== 'undefined')
+    {
+      logger.info('Configurable parent sync is ', context.parent_sync)
+      this.parent_sync = context.parent_sync;
+    }
 
     if(typeof context.category_sync !== 'undefined')
       this.category_sync = context.category_sync;
@@ -318,6 +326,29 @@ class ProductAdapter extends AbstractMagentoAdapter {
             return item
           })
         })})
+      }
+
+      if (this.parent_sync && (item.type_id == 'simple')) {
+        subSyncPromises.push(() => {
+          return new Promise ((opResolve, opReject) => {        
+            // Find the parent product and schedule a sync after subsequent configurable_children got modified
+            this.db.getDocuments('product', { query: { match: {'configurable_children.sku': item.sku } }}).then((docs) => {
+              if (docs && docs.length > 0) {
+                let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
+                docs.map(parentProduct => { // schedule for update
+                  queue.createJob('product', { skus: [parentProduct.sku], adapter: 'magento' }).save();
+                  logger.info('Parent product update scheduled (make sure `cli.js productsworker` queue is running)', parentProduct.sku)
+                })
+                opResolve(item)
+              } else {
+                opResolve(item)
+              }
+            }).catch(err => {
+              logger.error(err)
+              opResolve(item)
+            })
+          })
+        })
       }
 
       // CONFIGURABLE AND BUNDLE SYNC
@@ -514,7 +545,11 @@ class ProductAdapter extends AbstractMagentoAdapter {
     if (this.config.vuestorefront && this.config.vuestorefront.invalidateCache) {
       request(this.config.vuestorefront.invalidateCacheUrl + 'P' + item.id, {}, (err, res, body) => {
         if (err) { return console.error(err); }
-        console.log(body);
+        try { 
+          if (body && JSON.parse(body).code !== 200) console.log(body);
+        } catch (e) {
+          return console.error('Invalid Cache Invalidation response format', e)
+        }
       });      
     }
 

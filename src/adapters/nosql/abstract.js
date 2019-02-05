@@ -41,9 +41,17 @@ class AbstractNosqlAdapter{
   }
 
   /**
- * Update multiple documents in database
- * @param {array} items to be updated
- */
+   * Get documents
+   * @param collectionName collection name
+   * @param query query object
+   */  
+  getDocuments(collectionName, query) {
+    throw new Error('getDocum ent needs implementation!');
+  }
+  /**
+   * Update multiple documents in database
+   * @param {array} items to be updated
+   */
   updateDocumentBulk(collectionName, items){
     throw new Error('updateDocumentBulk needs implementation!');
   }
