@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  ### Removed
  -  Mongodb support has been removed
+ - old `package.json` and `yarn.lock` from `src` directory
 
 ## [1.7.1] - 2019-01-29
 ### Added
