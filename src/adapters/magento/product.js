@@ -21,6 +21,19 @@ const serial = funcs =>
 funcs.reduce((promise, func) =>
     promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([]))
 
+ const optionLabel = (attr, optionId) => {
+  if (attr) {
+    let opt = attr.options.find((op) => { // TODO: cache it in memory
+      if (_.toString(op.value) === _.toString(optionId)) {
+        return op
+      }
+    }) // TODO: i18n support with multi website attribute names
+    return opt ? opt.label : optionId
+  } else {
+    return optionId
+  }
+}
+
 class ProductAdapter extends AbstractMagentoAdapter {
 
   constructor(config) {
@@ -434,6 +447,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
                       let atr = JSON.parse(serializedAtr); // category object
                       if (atr != null) {
                         option.attribute_code = atr.attribute_code;
+                        option.values.map((el) => {
+                          el.label = optionLabel(atr, el.value_index)
+                        } )                        
                         logger.info(`Product options for ${atr.attribute_code} for ${item.sku} set`);
                         item[atr.attribute_code + '_options'] = option.values.map((el) => { return el.value_index } )
                       }
