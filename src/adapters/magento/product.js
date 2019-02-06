@@ -214,17 +214,25 @@ class ProductAdapter extends AbstractMagentoAdapter {
    * @param {Object} item 
    */
   preProcessItem(item) {
+    const config = this.config
+
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
-      item[customAttribute.attribute_code] = customAttribute.value;
+      let attributeValue = customAttribute.value;
+      let attributeCode = customAttribute.attribute_code;
+      if(config.product.multiSelectAttributes.indexOf(attributeCode) != "-1"){
+        if(attributeValue.indexOf(",") != "-1"){
+          attributeValue = attributeValue.split(",").map(Number)
+        }
+      }
+      item[attributeCode] = attributeValue;
     }
-    item.custom_attributes = null;
+    delete item.custom_attributes;
     
     return new Promise((done, reject) => {
       // TODO: add denormalization of productcategories into product categories
       // DO NOT use "productcategories" type but rather do search categories with assigned products
 
       let subSyncPromises = []
-      const config = this.config
 
       // TODO: Refactor the following to "Chain of responsibility"
       // STOCK SYNC
