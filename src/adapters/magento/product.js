@@ -497,11 +497,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
                     if (cat != null) {
                       resolve({
                         category_id: cat.id,
-                        name: cat.name
+                        name: cat.name,
+                        slug: cat.slug,
+                        path: cat.url_path
                       })
                     } else {
                       resolve({
-                        category_id: catId
+                        category_id: catId,
+                        slug: cat.slug,
+                        path: cat.url_path
                       });
                     }
                   });
@@ -512,6 +516,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
             Promise.all(catPromises).then((values) => {
               if(this.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
                 item.category = values; // here we get configurable options
+                if (this.config.seo.useUrlDispatcher) {
+                  item.slug = this.config.seo.productSlugMapper(item)
+                }                
                 resolve(item)
             });
           }

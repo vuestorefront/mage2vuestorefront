@@ -1,4 +1,27 @@
+const _slugify = require('./helpers/slugify')
+
 module.exports = {
+
+  seo: {
+    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER) || false,
+    productSlugMapper: (product) => {
+      let destSlug = ''
+      if (product.category && product.category.length > 0) {
+        const firstCat = product.category[0]
+        destSlug = (firstCat.path ? (firstCat.path) : _slugify(firstCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+      } else {
+        destSlug = (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+      }
+      destSlug += '.html'
+      console.log('Dest. product slug = ', destSlug)
+      return destSlug
+    },
+    categorySlugMapper: (category) => {
+      const destSlug = (category.url_path ? category.url_path + '/': '') + category.url_key
+      console.log('Dest. cat slug = ', destSlug)
+      return destSlug
+    },    
+  },
 
   magento: {
     url: process.env.MAGENTO_URL || 'http://magento2.demo-1.divante.pl/rest/',
