@@ -264,12 +264,24 @@ class ProductAdapter extends AbstractMagentoAdapter {
             let media_gallery = []
             for (let mediaItem of result){
               if (!mediaItem.disabled) {
-                media_gallery.push({
+                let newMediaObj = {
                   image: mediaItem.file,
                   pos: mediaItem.position,
                   typ: mediaItem.media_type,
                   lab: mediaItem.label
-                })
+                };
+                // Separation of ifs for future extendability
+                if (mediaItem.extension_attributes) {
+                  if (mediaItem.extension_attributes.video_content) {
+                    newMediaObj.vid = {
+                      url: mediaItem.extension_attributes.video_content.video_url,
+                      title: mediaItem.extension_attributes.video_content.video_title,
+                      desc: mediaItem.extension_attributes.video_content.video_description,
+                      meta: mediaItem.extension_attributes.video_content.video_metadata
+                    }
+                  }
+                }
+                media_gallery.push(newMediaObj)
               }
             }
             item.media_gallery = media_gallery
