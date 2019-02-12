@@ -4,21 +4,21 @@ module.exports = {
 
   seo: {
     useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER) || false,
-    productSlugMapper: (product) => {
-      let destSlug = ''
+    productUrlPathMapper: (product) => {
+      let destPath = ''
       if (product.category && product.category.length > 0) {
         const firstCat = product.category[0]
-        destSlug = (firstCat.path ? (firstCat.path) : _slugify(firstCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+        destPath = (firstCat.path ? (firstCat.path) : _slugify(firstCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
       } else {
-        destSlug = (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+        destPath = (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
       }
-      destSlug += '.html'
-      console.log('Dest. product slug = ', destSlug)
-      return destSlug
+      destPath += '.html'
+      console.log('Dest. product path = ', destPath)
+      return destPath
     },
-    categorySlugMapper: (category) => {
+    categoryUrlPathMapper: (category) => {
       const destSlug = (category.url_path ? category.url_path + '/': '') + category.url_key
-      console.log('Dest. cat slug = ', destSlug)
+      console.log('Dest. cat path = ', destSlug)
       return destSlug
     },    
   },

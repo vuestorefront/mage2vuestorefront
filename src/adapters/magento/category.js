@@ -16,10 +16,11 @@ const _normalizeExtendedData = function (result, generateUrlKey = true, config =
   if (generateUrlKey) {
     result.url_key = _slugify(result.name) + '-' + result.id;
   }
+  result.slug = result.url_key
   if (config.seo.useUrlDispatcher) {
-    result.slug = config.seo.categorySlugMapper(result)
-  } else {               
-    result.slug = result.url_key;
+    result.url_path = config.seo.categoryUrlPathMapper(result)
+  } else {
+    result.url_path = result.url_key;
   }
   return result
 }
@@ -91,10 +92,11 @@ class CategoryAdapter extends AbstractMagentoAdapter {
       if (!item.url_key || this.generateUniqueUrlKeys) {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
+      item.slug = item.url_key;
       if (this.config.seo.useUrlDispatcher) {
-        item.slug = this.config.seo.categorySlugMapper(item)
+        item.url_path = this.config.seo.categoryUrlPathMapper(item)
       } else {               
-        item.slug = item.url_key;
+        item.url_path = item.url_key;
       }
 
       if (this.extendedCategories) {

@@ -8,6 +8,7 @@ const _ = require('lodash')
 const request = require('request');
 const HTTP_RETRIES = 3
 let kue = require('kue');
+const _slugify = require('../../helpers/slugify')
 
 /*
  * serial executes Promises sequentially.
@@ -230,6 +231,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
       item[customAttribute.attribute_code] = customAttribute.value;
     }
+    item.slug = _slugify(item.name + '-' + item.id)
     item.custom_attributes = null;
     
     return new Promise((done, reject) => {
@@ -503,9 +505,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                       })
                     } else {
                       resolve({
-                        category_id: catId,
-                        slug: cat.slug,
-                        path: cat.url_path
+                        category_id: catId
                       });
                     }
                   });
@@ -517,8 +517,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
               if(this.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
                 item.category = values; // here we get configurable options
                 if (this.config.seo.useUrlDispatcher) {
-                  item.slug = this.config.seo.productSlugMapper(item)
-                }                
+                  item.url_path = this.config.seo.productUrlPathMapper(item)
+                }       
                 resolve(item)
             });
           }
