@@ -163,7 +163,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       this.db = new elasticsearch.Client({
         host: this.config.db.url,
         log: 'error',
-        apiVersion: '5.5',
+        apiVersion: this.config.elasticsearch.apiVersion,
 
         maxRetries: 10,
         keepAlive: true,
