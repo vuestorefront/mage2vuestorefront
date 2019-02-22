@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Video data mapper @rain2go [#75](https://github.com/DivanteLtd/mage2vuestorefront/pull/75)
+
+## [1.8.0]
+### Added
  - Setting `configurable_options.label` from the attribute meta descriptor. **Note:** When You modify any configurable attribute label in Magento You should reindex all products now
  - Configurable parent refresh sync - enabled in the `productsdelta` and `productsworker` modes and in `products --sku=<singleSku>`. This mode is refreshing the configurable parent product for the simple child which requires update. Its' required to start the `clis.js productsworker` (example call: `test_product_worker.sh`) for processing these parent updates,
  - Example calls added: `test_product_delta.sh` - for delta indexer, `test_product_worker.sh` for products worker, `test_fullreindex_multiprocess.sh` for multi process/parallel updates, `test_by_sky.sh` - for single SKU updates.
