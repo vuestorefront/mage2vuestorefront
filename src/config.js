@@ -3,7 +3,7 @@ const _slugify = require('./helpers/slugify')
 module.exports = {
 
   seo: {
-    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER) || false,
+    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER || false),
     productUrlPathMapper: (product) => {
       let destPath = ''
       if (product.category && product.category.length > 0) {
