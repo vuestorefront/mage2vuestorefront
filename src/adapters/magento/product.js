@@ -270,7 +270,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   image: mediaItem.file,
                   pos: mediaItem.position,
                   typ: mediaItem.media_type,
-                  lab: mediaItem.label
+                  lab: mediaItem.label,
+                  vid: this.computeVideoData(mediaItem)
                 })
               }
             }
@@ -547,6 +548,45 @@ class ProductAdapter extends AbstractMagentoAdapter {
         return done(item)
       });
     });
+  }
+
+  /**
+   * Process video data to provide the proper 
+   * provider and attributes.
+   * Currently supports YouTube and Vimeo
+   * 
+   * @param {Object} mediaItem
+   */
+  computeVideoData(mediaItem) {
+    let videoData = null;
+
+    if (mediaItem.extension_attributes && mediaItem.extension_attributes.video_content) {
+      let videoId = null,
+          type = null,
+          youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/,
+          vimeoRegex = new RegExp(['https?:\\/\\/(?:www\\.|player\\.)?vimeo.com\\/(?:channels\\/(?:\\w+\\/)',
+            '?|groups\\/([^\\/]*)\\/videos\\/|album\\/(\\d+)\\/video\\/|video\\/|)(\\d+)(?:$|\\/|\\?)'
+          ].join(''));
+      
+      if (mediaItem.extension_attributes.video_content.video_url.match(youtubeRegex)) {
+        videoId = RegExp.$1
+        type = 'youtube'
+      } else if (mediaItem.extension_attributes.video_content.video_url.match(vimeoRegex)) {
+        videoId = RegExp.$3
+        type = 'vimeo'
+      }
+      
+      videoData = {
+        url: mediaItem.extension_attributes.video_content.video_url,
+        title: mediaItem.extension_attributes.video_content.video_title,
+        desc: mediaItem.extension_attributes.video_content.video_description,
+        meta: mediaItem.extension_attributes.video_content.video_metadata,
+        id: videoId,
+        type: type
+      }
+    }
+
+    return videoData;
   }
 
   /**
