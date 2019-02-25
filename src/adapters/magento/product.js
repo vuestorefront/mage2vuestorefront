@@ -7,6 +7,7 @@ const moment = require('moment')
 const _ = require('lodash')
 const request = require('request');
 const HTTP_RETRIES = 3
+let kue = require('kue');
 
 /*
  * serial executes Promises sequentially.
@@ -20,6 +21,19 @@ const serial = funcs =>
 funcs.reduce((promise, func) =>
     promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([]))
 
+ const optionLabel = (attr, optionId) => {
+  if (attr) {
+    let opt = attr.options.find((op) => { // TODO: cache it in memory
+      if (_.toString(op.value) === _.toString(optionId)) {
+        return op
+      }
+    }) // TODO: i18n support with multi website attribute names
+    return opt ? opt.label : optionId
+  } else {
+    return optionId
+  }
+}
+
 class ProductAdapter extends AbstractMagentoAdapter {
 
   constructor(config) {
@@ -27,6 +41,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.use_paging = true;
     this.stock_sync = true;
     this.custom_sync = true;
+    this.parent_sync = true;
     this.media_sync = true;
     this.category_sync = true;
     this.links_sync = true;
@@ -90,7 +105,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               // download rendered list items
               const products = result.items
               let skus = products.map((p) => { return p.sku })
-
+    
               if (products.length === 1) { // single product - download child data
                 const childSkus = _.flattenDeep(products.map((p) => { return (p.configurable_children) ? p.configurable_children.map((cc) => { return cc.sku }) : null }))
                 skus = _.union(skus, childSkus)
@@ -98,22 +113,22 @@ class ProductAdapter extends AbstractMagentoAdapter {
               const query = '&searchCriteria[filter_groups][0][filters][0][field]=sku&' +
               'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(skus.join(',')) + '&' +
               'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
-
+    
               this.api.products.renderList(query, this.config.magento.storeId, this.config.magento.currencyCode).then(renderedProducts => {
                 context.renderedProducts = renderedProducts
                 for (let product of result.items) {
                   const productAdditionalInfo = renderedProducts.items.find(p => p.id === product.id)
-
+    
                   if (productAdditionalInfo && productAdditionalInfo.price_info) {
                     delete productAdditionalInfo.price_info.formatted_prices
                     delete productAdditionalInfo.price_info.extension_attributes
                     // delete productAdditionalInfo.price_info.special_price
                     product = Object.assign(product, productAdditionalInfo.price_info)
-
+    
                     if (product.final_price < product.price) {
                       product.special_price = product.final_price
                     }
-
+    
                     if (this.config.product.renderCatalogRegularPrices) {
                       product.price = product.regular_price
                     }
@@ -137,8 +152,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
           throw err
         }
       }
-    }
-
+    }  
+    
     // run the import logick
     return retryHandler(context, null, null)
   }
@@ -155,9 +170,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
     if(typeof context.stock_sync !== 'undefined')
       this.stock_sync = context.stock_sync;
 
+    if(typeof context.parent_sync !== 'undefined')
+    {
+      logger.info('Configurable parent sync is ', context.parent_sync)
+      this.parent_sync = context.parent_sync;
+    }
+
     if(typeof context.category_sync !== 'undefined')
       this.category_sync = context.category_sync;
-
+      
     if(typeof context.configurable_sync !== 'undefined')
       this.configurable_sync = context.configurable_sync;
 
@@ -176,7 +197,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       logger.debug(`Using specific paging options from adapter context: ${context.page} / ${context.page_size}`);
 
       return this.api.products.list(util.format(searchCriteria, context.page, context.page_size) + (query ? '&' + query : '')).catch((err) => {
-        throw new Error(err);
+        throw new Error(err); 
       });
 
     } else if (this.use_paging) {
@@ -205,8 +226,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
     return /^\d+$/.test(value);
   }
   /**
-   *
-   * @param {Object} item
+   * 
+   * @param {Object} item 
    */
   preProcessItem(item) {
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
@@ -225,7 +246,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       item[customAttribute.attribute_code] = attrValue;
     }
     item.custom_attributes = null;
-
+    
     return new Promise((done, reject) => {
       // TODO: add denormalization of productcategories into product categories
       // DO NOT use "productcategories" type but rather do search categories with assigned products
@@ -254,7 +275,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       if (this.media_sync) {
         logger.info(`Product sub-stage 2: Getting media gallery ${item.sku}`);
         subSyncPromises.push(() => {
-          return this.api.productMedia.list(item.sku).then((result) => {
+          return this.api.productMedia.list(item.sku).then((result) => { 
             let media_gallery = []
             for (let mediaItem of result){
               if (!mediaItem.disabled) {
@@ -290,7 +311,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       if (this.custom_sync && item.type_id == 'bundle') {
         logger.info(`Product sub-stage 4: Getting bundle custom options ${item.sku}`);
         subSyncPromises.push(() => {
-          return this.api.bundleOptions.list(item.sku).then((result) => {
+          return this.api.bundleOptions.list(item.sku).then((result) => { 
             if(result && result.length > 0) {
               item.bundle_options = result
               logger.info(`Found bundle options for ${item.sku}: ${result.length}`)
@@ -304,7 +325,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       if (this.links_sync) {
         logger.info(`Product sub-stage 5: Geting product links ${item.sku}`);
         item.links = {}
-
+        
         subSyncPromises.push(() => {
           return new Promise ((opResolve, opReject) => {
             return this.api.productLinks.types().then((result) => {
@@ -312,7 +333,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
               let subPromises = []
               for (const linkType of result) {
                 logger.info(`Getting the product links ${item.sku}: ${linkType.name}`)
-                subPromises.push(this.api.productLinks.list(item.sku, linkType.name).then((links) => {
+                subPromises.push(this.api.productLinks.list(item.sku, linkType.name).then((links) => { 
                   if(links && links.length > 0) {
                     item.links[linkType.name] = links.map((r) => { return { sku: r.linked_product_sku, pos: r.position } })
                     logger.info(`Found related products for ${item.sku}: ${item.links[linkType.name]}`)
@@ -333,6 +354,29 @@ class ProductAdapter extends AbstractMagentoAdapter {
             return item
           })
         })})
+      }
+
+      if (this.parent_sync && (item.type_id == 'simple')) {
+        subSyncPromises.push(() => {
+          return new Promise ((opResolve, opReject) => {        
+            // Find the parent product and schedule a sync after subsequent configurable_children got modified
+            this.db.getDocuments('product', { query: { match: {'configurable_children.sku': item.sku } }}).then((docs) => {
+              if (docs && docs.length > 0) {
+                let queue = kue.createQueue(Object.assign(config.kue, { redis: config.redis }));
+                docs.map(parentProduct => { // schedule for update
+                  queue.createJob('product', { skus: [parentProduct.sku], adapter: 'magento' }).save();
+                  logger.info('Parent product update scheduled (make sure `cli.js productsworker` queue is running)', parentProduct.sku)
+                })
+                opResolve(item)
+              } else {
+                opResolve(item)
+              }
+            }).catch(err => {
+              logger.error(err)
+              opResolve(item)
+            })
+          })
+        })
       }
 
       // CONFIGURABLE AND BUNDLE SYNC
@@ -378,7 +422,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                     if(config.product.renderCatalogRegularPrices) {
                       confChild.price = confChild.regular_price
                     }
-
+                    
                   }
                 }
 
@@ -411,21 +455,24 @@ class ProductAdapter extends AbstractMagentoAdapter {
                 let subPromises = []
                 for (let option of item.configurable_options) {
                   let atrKey = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, option.attribute_id);
-
+    
                   subPromises.push(new Promise ((resolve, reject) => {
                     logger.info(`Configurable options for ${atrKey}`)
                     this.cache.get(atrKey, (err, serializedAtr) => {
                       let atr = JSON.parse(serializedAtr); // category object
                       if (atr != null) {
                         option.attribute_code = atr.attribute_code;
+                        option.values.map((el) => {
+                          el.label = optionLabel(atr, el.value_index)
+                        } )                        
                         logger.info(`Product options for ${atr.attribute_code} for ${item.sku} set`);
                         item[atr.attribute_code + '_options'] = option.values.map((el) => { return el.value_index } )
                       }
-                      resolve(item)
+                      resolve(item)  
                     })
                   }))
                 }
-
+    
                 Promise.all(subPromises).then((res) => {
                   logger.info('Configurable options expanded!')
                   opResolve(item)
@@ -448,7 +495,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
       subSyncPromises.push(() => {
         return new Promise((resolve, reject) => {
         logger.info(`Product sub-stage 6: Geting product categories for ${item.sku}`);
-
+        
         const key = util.format(CacheKeys.CACHE_KEY_PRODUCT_CATEGORIES, item.sku); // store under SKU of the product the categories assigned
 
         if(this.category_sync) {
@@ -529,8 +576,12 @@ class ProductAdapter extends AbstractMagentoAdapter {
     if (this.config.vuestorefront && this.config.vuestorefront.invalidateCache) {
       request(this.config.vuestorefront.invalidateCacheUrl + 'P' + item.id, {}, (err, res, body) => {
         if (err) { return console.error(err); }
-        console.log(body);
-      });
+        try { 
+          if (body && JSON.parse(body).code !== 200) console.log(body);
+        } catch (e) {
+          return console.error('Invalid Cache Invalidation response format', e)
+        }
+      });      
     }
 
     let resultItem = Object.assign(item, {
