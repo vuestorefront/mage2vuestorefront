@@ -8,6 +8,7 @@ const _ = require('lodash')
 const request = require('request');
 const HTTP_RETRIES = 3
 let kue = require('kue');
+const _slugify = require('../../helpers/slugify')
 
 /*
  * serial executes Promises sequentially.
@@ -230,6 +231,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
       item[customAttribute.attribute_code] = customAttribute.value;
     }
+    item.slug = _slugify(item.name + '-' + item.id)
     item.custom_attributes = null;
     
     return new Promise((done, reject) => {
@@ -268,7 +270,8 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   image: mediaItem.file,
                   pos: mediaItem.position,
                   typ: mediaItem.media_type,
-                  lab: mediaItem.label
+                  lab: mediaItem.label,
+                  vid: this.computeVideoData(mediaItem)
                 })
               }
             }
@@ -497,7 +500,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
                     if (cat != null) {
                       resolve({
                         category_id: cat.id,
-                        name: cat.name
+                        name: cat.name,
+                        slug: cat.slug,
+                        path: cat.url_path
                       })
                     } else {
                       resolve({
@@ -512,6 +517,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
             Promise.all(catPromises).then((values) => {
               if(this.category_sync) // TODO: refactor the code above to not get cache categorylinks when no category_sync required
                 item.category = values; // here we get configurable options
+                if (this.config.seo.useUrlDispatcher) {
+                  item.url_path = this.config.seo.productUrlPathMapper(item)
+                }       
                 resolve(item)
             });
           }
@@ -540,6 +548,45 @@ class ProductAdapter extends AbstractMagentoAdapter {
         return done(item)
       });
     });
+  }
+
+  /**
+   * Process video data to provide the proper 
+   * provider and attributes.
+   * Currently supports YouTube and Vimeo
+   * 
+   * @param {Object} mediaItem
+   */
+  computeVideoData(mediaItem) {
+    let videoData = null;
+
+    if (mediaItem.extension_attributes && mediaItem.extension_attributes.video_content) {
+      let videoId = null,
+          type = null,
+          youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/,
+          vimeoRegex = new RegExp(['https?:\\/\\/(?:www\\.|player\\.)?vimeo.com\\/(?:channels\\/(?:\\w+\\/)',
+            '?|groups\\/([^\\/]*)\\/videos\\/|album\\/(\\d+)\\/video\\/|video\\/|)(\\d+)(?:$|\\/|\\?)'
+          ].join(''));
+      
+      if (mediaItem.extension_attributes.video_content.video_url.match(youtubeRegex)) {
+        videoId = RegExp.$1
+        type = 'youtube'
+      } else if (mediaItem.extension_attributes.video_content.video_url.match(vimeoRegex)) {
+        videoId = RegExp.$3
+        type = 'vimeo'
+      }
+      
+      videoData = {
+        url: mediaItem.extension_attributes.video_content.video_url,
+        title: mediaItem.extension_attributes.video_content.video_title,
+        desc: mediaItem.extension_attributes.video_content.video_description,
+        meta: mediaItem.extension_attributes.video_content.video_metadata,
+        id: videoId,
+        type: type
+      }
+    }
+
+    return videoData;
   }
 
   /**
