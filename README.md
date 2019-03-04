@@ -101,7 +101,7 @@ export VS_INVALIDATE_CACHE=1
 - `VS_INVALIDATE_CACHE_URL` is a cache to the Vue Storefront instance - used as a webhook to clear the output cache.
 
 Please note:
-After data import - especially when You're not sure about the product attributes data types - please **reindex** ElasticSearch to estaplish the correct / current database schema. You may do this using [Database tool](https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Database%20tool.md) in the `vue-storefront-api` folder:
+After data import - especially when You're not sure about the product attributes data types - please **reindex** ElasticSearch to establish the correct / current database schema. You may do this using [Database tool](https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Database%20tool.md) in the `vue-storefront-api` folder:
 
 ```bash
 cd vue-storefront-api

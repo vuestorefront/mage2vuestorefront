@@ -53,6 +53,10 @@ module.exports = {
     indexName: process.env.INDEX_NAME || 'vue_storefront_catalog'
   },
 
+  elasticsearch: {
+    apiVersion: process.env.ELASTICSEARCH_API_VERSION || '5.6'
+  },
+
   redis: {
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: process.env.REDIS_PORT || 6379
