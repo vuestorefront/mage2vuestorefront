@@ -581,7 +581,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
         title: mediaItem.extension_attributes.video_content.video_title,
         desc: mediaItem.extension_attributes.video_content.video_description,
         meta: mediaItem.extension_attributes.video_content.video_metadata,
-        id: videoId,
+        video_id: videoId,
         type: type
       }
     }
