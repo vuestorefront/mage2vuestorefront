@@ -56,7 +56,7 @@ class AbstractAdapter {
   }
 
   /**
-   * Run products/categories/ ... import 
+   * Run products/categories/ ... import
    * @param {Object} context import context with parameter such "page", "size" and other search parameters
    */
   run(context) {
@@ -88,7 +88,7 @@ class AbstractAdapter {
 
   /**
    * Implement some item related operations - executed BEFORE saving to the database
-   * @param {Object} item 
+   * @param {Object} item
    */
   preProcessItem(item) {
     return new Promise((done, reject) => { done(); });
@@ -163,7 +163,7 @@ class AbstractAdapter {
         if (this.update_document)
           this.db.updateDocument(this.getCollectionName(), this.normalizeDocumentFormat(item))
         else
-          logger.debug('Skiping database update');
+          logger.debug('Skipping database update');
 
         if (item.children_data && item.children_data.length > 0) {
           logger.info(`--L:${level} Processing child items ...`);
@@ -188,9 +188,9 @@ class AbstractAdapter {
                   this.db.close();
 
                   this.onDone(this);
-                } else {  
+                } else {
                   const context = this.getCurrentContext()
-                  if (context.page) { 
+                  if (context.page) {
                     context.page++
                     this.page++;
                   } else {
