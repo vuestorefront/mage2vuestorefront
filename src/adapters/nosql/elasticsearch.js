@@ -36,6 +36,28 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   }
 
   /**
+   * Get documents
+   * @param collectionName collection name
+   * @param query query object
+  */  
+  getDocuments(collectionName, queryBody) {
+    return new Promise((resolve, reject) => {
+      this.db.search({ // requires ES 5.5
+        index: this.config.db.indexName,
+        type: collectionName,
+          body: queryBody
+      }, function (error, response) {
+        if (error) reject(error);
+        if (response.hits && response.hits.hits) {
+          resolve(response.hits.hits.map(h => h._source))
+        } else {
+          reject(new Error('Invalid Elastic response'))
+        }
+      });
+    })
+  }
+
+  /**
    * Update single document in database
    * @param {object} item document to be updated in database
    */
@@ -141,7 +163,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       this.db = new elasticsearch.Client({
         host: this.config.db.url,
         log: 'error',
-        apiVersion: '5.5',
+        apiVersion: this.config.elasticsearch.apiVersion,
 
         maxRetries: 10,
         keepAlive: true,

@@ -1,8 +1,14 @@
 {
   "name": "mage2vuestorefront",
-  "version": "1.4.0",
+  "private": true,
+  "version": "1.7.1",
   "description": "Magento sync for products, categories, users and orders",
-  "main": "cli.js",
+  "author": "Piotr Karwatka",
+  "license": "MIT",
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "agentkeepalive": "^3.3.0",
     "body-parser": "^1.17.1",
@@ -16,21 +22,15 @@
     "lodash": "^4.17.10",
     "magento2-rest-client": "0.0.2",
     "moment": "^2.22.2",
-    "mongodb": "^2.2.26",
     "node-sync": "^0.2.1",
     "passport": "^0.3.2",
     "passport-jwt": "^4.0.0",
     "promise-queue": "^2.2.3",
-    "query-to-mongo": "^0.6.2",
     "queue": "^4.4.0",
     "redis-jsonify": "^1.0.1",
+    "remove-accents": "^0.4.2",
     "request": "^2.88.0",
     "sha1": "^1.1.1"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Piotr Karwatka",
-  "license": "MIT"
+  "devDependencies": {}
 }

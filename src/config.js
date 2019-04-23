@@ -1,4 +1,27 @@
+const _slugify = require('./helpers/slugify')
+
 module.exports = {
+
+  seo: {
+    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER || true),
+    productUrlPathMapper: (product) => {
+      let destPath = ''
+      if (product.category && product.category.length > 0) {
+        const firstCat = product.category[0]
+        destPath = (firstCat.path ? (firstCat.path) : _slugify(firstCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+      } else {
+        destPath = (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+      }
+      destPath += '.html'
+      console.log('Dest. product path = ', destPath)
+      return destPath
+    },
+    categoryUrlPathMapper: (category) => {
+      const destSlug = (category.url_path ? category.url_path + '/': '') + category.url_key
+      console.log('Dest. cat path = ', destSlug)
+      return destSlug
+    },
+  },
 
   magento: {
     url: process.env.MAGENTO_URL || 'http://magento2.demo-1.divante.pl/rest/',
@@ -25,16 +48,19 @@ module.exports = {
   kue: {}, // default KUE config works on local redis instance. See KUE docs for non standard redis connections
 
   db: {
-    /* driver: 'mongo',
-    url: process.env.DATABASE_URL || 'mongodb://localhost:27017/rcom' */
     driver: 'elasticsearch',
     url: process.env.DATABASE_URL || 'http://localhost:9200',
     indexName: process.env.INDEX_NAME || 'vue_storefront_catalog'
   },
 
+  elasticsearch: {
+    apiVersion: process.env.ELASTICSEARCH_API_VERSION || '5.6'
+  },
+
   redis: {
     host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || 6379
+    port: process.env.REDIS_PORT || 6379,
+    db: process.env.REDIS_DB || 0
   },
 
   passport: {

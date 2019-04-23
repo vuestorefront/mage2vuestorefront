@@ -209,7 +209,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
 
       let total_count = result.total_count;
       let page_size = partitionSize;
-      let page_count = parseInt(total_count / page_size);
+      let page_count = Math.ceil(total_count / page_size);
 
       let transaction_key = new Date().getTime();
 
@@ -226,7 +226,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
 
       // TODO: separte the execution part to run in multi-tenant env
       queue.process('products', partition_count, (job, done) => {
-        let adapter = factory.getAdapter(adapterName, 'product'); // to avoid multi threading mongo error
+        let adapter = factory.getAdapter(adapterName, 'product');
         if (job && job.data.page && job.data.page_size) {
           logger.info(`Processing job: ${job.data.page}`);
 
@@ -234,6 +234,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
             transaction_key: transaction_key,
             page_size: job.data.page_size,
             page: job.data.page,
+            parent_sync: job.data.updatedAfter !== null,
             updated_after: job.data.updatedAfter,
             done_callback: () => {
               logger.info('Task done!');
@@ -250,7 +251,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
 
               if (removeNonExistent) {
                 logger.info('CleaningUp products!');
-                let adapter = factory.getAdapter(adapterName, 'product'); // to avoid multi threading mongo error
+                let adapter = factory.getAdapter(adapterName, 'product');
                 adapter.cleanUp(transaction_key);
               }
 
@@ -270,6 +271,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
       use_paging: true,
       updated_after: updatedAfter,
       transaction_key: tsk,
+      parent_sync: updatedAfter !== null,
       done_callback: () => {
         if (removeNonExistent) {
           adapter.cleanUp(tsk);
@@ -281,6 +283,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
     if (page!== null) logger.info('Current page is: ', page, partitionSize)
     if (skus) {
       context.skus = skus.split(','); // update individual producs
+      context.parent_sync = true
     }
 
     adapter.run(context);
@@ -314,14 +317,15 @@ function runProductsworker(adapterName, partitions) {
   // TODO: separte the execution part to run in multi-tenant env
   queue.process('product', partition_count, (job, done) => {
 
-    if (job && job.data.skus) {
+    if (job && job.data.skus && Array.isArray(job.data.skus)) {
 
       logger.info('Starting product pull job for ' + job.data.skus.join(','));
 
-      let adapter = factory.getAdapter(job.data.adapter ? job.data.adapter : adapterName, 'product'); // to avoid multi threading mongo error
+      let adapter = factory.getAdapter(job.data.adapter ? job.data.adapter : adapterName, 'product');
 
       adapter.run({
         skus: job.data.skus,
+        parent_sync: true,
         done_callback: () => {
           logger.info('Task done!');
           return done();

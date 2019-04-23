@@ -4,17 +4,9 @@ let AbstractMagentoAdapter = require('./abstract');
 const CacheKeys = require('./cache_keys');
 const util = require('util');
 const request = require('request');
+const _slugify = require('../../helpers/slugify')
 
-const _slugify = function (text) {
-  return text.toString().toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w-]+/g, '') // Remove all non-word chars
-    .replace(/--+/g, '-') // Replace multiple - with single -
-}
-
-
-const _normalizeExtendedData = function (result, generateUrlKey = true) {
+const _normalizeExtendedData = function (result, generateUrlKey = true, config = null) {
   if (result.custom_attributes) {
     for (let customAttribute of result.custom_attributes) { // map custom attributes directly to document root scope
       result[customAttribute.attribute_code] = customAttribute.value;
@@ -24,7 +16,12 @@ const _normalizeExtendedData = function (result, generateUrlKey = true) {
   if (generateUrlKey) {
     result.url_key = _slugify(result.name) + '-' + result.id;
   }
-  result.slug = result.url_key;
+  result.slug = result.url_key
+  if (config.seo.useUrlDispatcher) {
+    result.url_path = config.seo.categoryUrlPathMapper(result)
+  } else {
+    result.url_path = result.url_key;
+  }
   return result
 }
 
@@ -59,13 +56,14 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   _addSingleCategoryData(item, result) {
-    item = Object.assign(item, _normalizeExtendedData(result, this.generateUniqueUrlKeys));
+    item = Object.assign(item, _normalizeExtendedData(result, this.generateUniqueUrlKeys, this.config));
   }
 
   _extendSingleCategory(rootId, catToExtend) {
     const generateUniqueUrlKeys = this.generateUniqueUrlKeys
-    return this.api.categories.getSingle(catToExtend.id).then(function(result) { 
-      Object.assign(catToExtend, _normalizeExtendedData(result, generateUniqueUrlKeys))
+    const config = this.config
+    return this.api.categories.getSingle(catToExtend.id).then(function(result) {
+      Object.assign(catToExtend, _normalizeExtendedData(result, generateUniqueUrlKeys, config))
       logger.info(`Subcategory data extended for ${rootId}, children object ${catToExtend.id}`)
     }).catch(function(err) {
       logger.error(err)
@@ -94,13 +92,17 @@ class CategoryAdapter extends AbstractMagentoAdapter {
       if (!item.url_key || this.generateUniqueUrlKeys) {
         item.url_key = _slugify(item.name) + '-' + item.id
       }
-      item.slug = item.url_key;  
-
+      item.slug = item.url_key;
+      if (this.config.seo.useUrlDispatcher) {
+        item.url_path = this.config.seo.categoryUrlPathMapper(item)
+      } else {               
+        item.url_path = item.url_key;
+      }
 
       if (this.extendedCategories) {
 
-        this.api.categories.getSingle(item.id).then((result) => { 
-          this._addSingleCategoryData(item, result); 
+        this.api.categories.getSingle(item.id).then((result) => {
+          this._addSingleCategoryData(item, result);
 
           const key = util.format(CacheKeys.CACHE_KEY_CATEGORY, item.id);
           logger.debug(`Storing extended category data to cache under: ${key}`);
@@ -109,7 +111,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
           const subpromises = []
           if (item.children_data && item.children_data.length) {
             this._extendChildrenCategories(item.id, item.children_data, result, subpromises)
-            
+
             Promise.all(subpromises).then(function (results) {
               done(item)
             }).catch(function (err) {
@@ -143,8 +145,8 @@ class CategoryAdapter extends AbstractMagentoAdapter {
       request(this.config.vuestorefront.invalidateCacheUrl + 'C' + item.id, {}, (err, res, body) => {
         if (err) { return console.error(err); }
         console.log(body);
-      });      
-    }    
+      });
+    }
     return item;
   }
 }
