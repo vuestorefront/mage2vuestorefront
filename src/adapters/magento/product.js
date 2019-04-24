@@ -232,7 +232,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
    */
   preProcessItem(item) {
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
-      let valueArray = (customAttribute['value']+'').split(',');
+      let valueArray = String(customAttribute['value']).split(',');
       let attrValue = valueArray.map(Number);
       if (valueArray.length > 1){
         for (let element of valueArray){
