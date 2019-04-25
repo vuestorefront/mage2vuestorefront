@@ -223,13 +223,28 @@ class ProductAdapter extends AbstractMagentoAdapter {
     return `[(${source_item.id} - ${source_item.sku}) ${source_item.name}]`;
   }
 
+  isNumeric(value) {
+    return /^\d+$/.test(value);
+  }
   /**
    *
    * @param {Object} item
    */
   preProcessItem(item) {
     for (let customAttribute of item.custom_attributes) { // map custom attributes directly to document root scope
-      item[customAttribute.attribute_code] = customAttribute.value;
+      let valueArray = String(customAttribute['value']).split(',');
+      let attrValue = valueArray.map(Number);
+      if (valueArray.length > 1){
+        for (let element of valueArray){
+          if (!this.isNumeric(element)) {
+            attrValue = customAttribute.value;
+            break;
+          }
+        }
+      } else {
+        attrValue = customAttribute.value;
+      }
+      item[customAttribute.attribute_code] = attrValue;
     }
     item.slug = _slugify(item.name + '-' + item.id)
     item.custom_attributes = null;
