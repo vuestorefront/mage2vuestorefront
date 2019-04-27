@@ -3,7 +3,7 @@ const _slugify = require('./helpers/slugify')
 module.exports = {
 
   seo: {
-    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER || false),
+    useUrlDispatcher: JSON.parse(process.env.SEO_USE_URL_DISPATCHER || true),
     productUrlPathMapper: (product) => {
       let destPath = ''
       if (product.category && product.category.length > 0) {
@@ -20,7 +20,7 @@ module.exports = {
       const destSlug = (category.url_path ? category.url_path + '/': '') + category.url_key
       console.log('Dest. cat path = ', destSlug)
       return destSlug
-    },    
+    },
   },
 
   magento: {
@@ -59,7 +59,8 @@ module.exports = {
 
   redis: {
     host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || 6379
+    port: process.env.REDIS_PORT || 6379,
+    db: process.env.REDIS_DB || 0
   },
 
   passport: {

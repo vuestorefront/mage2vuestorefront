@@ -209,7 +209,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
 
       let total_count = result.total_count;
       let page_size = partitionSize;
-      let page_count = parseInt(total_count / page_size);
+      let page_count = Math.ceil(total_count / page_size);
 
       let transaction_key = new Date().getTime();
 

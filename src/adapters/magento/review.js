@@ -42,7 +42,7 @@ class ReviewAdapter extends AbstractMagentoAdapter {
     }
 
     if (this.use_paging) {
-      this.page_count = this.total_count / this.page_size;
+      this.page_count = Math.ceil(this.total_count / this.page_size);
     }
 
     if (items.items) {
