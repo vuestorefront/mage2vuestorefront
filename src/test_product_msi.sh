@@ -4,7 +4,7 @@ export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?key=aeSu7aip&tag
 export VS_INVALIDATE_CACHE=1
 export PRODUCTS_SPECIAL_PRICES=true
 export MAGENTO_MSI_ENABLED=true
-export MAGENTO_STOCK_ID=1
+export MAGENTO_MSI_STOCK_ID=1
 export MAGENTO_CONSUMER_KEY=byv3730rhoulpopcq64don8ukb8lf2gq
 export MAGENTO_CONSUMER_SECRET=u9q4fcobv7vfx9td80oupa6uhexc27rb
 export MAGENTO_ACCESS_TOKEN=040xx3qy7s0j28o3q0exrfop579cy20m
