@@ -274,7 +274,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
                   const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
                   logger.debug(`Storing stock data to cache under: ${key}`);
-                  this.cache.set(key, JSON.stringify(item));
+                  this.cache.set(key, JSON.stringify(item.stock));
 
                   return item;
                 })
