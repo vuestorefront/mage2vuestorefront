@@ -8,6 +8,25 @@ module.exports = function (restClient) {
         return restClient.get(endpointUrl);
     }
 
+    // MSI
+    module.getSalableQty = function (sku, stockId) {
+        var endpointUrl = util.format(
+            '/inventory/get-product-salable-quantity/%s/%d',
+            encodeURIComponent(sku),
+            encodeURIComponent(stockId)
+        );
+        return restClient.get(endpointUrl);
+    }
+
+    // MSI
+    module.isSalable = function (sku, stockId) {
+        var endpointUrl = util.format(
+            '/inventory/is-product-salable/%s/%d',
+            encodeURIComponent(sku),
+            encodeURIComponent(stockId)
+        );
+        return restClient.get(endpointUrl);
+    }
 
     return module;
 }
