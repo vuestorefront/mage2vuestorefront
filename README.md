@@ -220,7 +220,8 @@ node --harmony cli.js productsworker
 ```
 
 **Please note:** We're using [kue based on Redis queue](https://github.com/Automattic/kue) which may be configured via `src/config.js` - `kue` + `redis` section.
-**Please note:** There is no authorization mechanism in place for the webapi calls. Please keep it local / private networked or add some kind of authorization as a PR to this project please :-)
+
+ **Please note:** Redis now supports auth. In order to use Redis with auth simply pass the password to the `REDIS_AUTH` env variable.
 
 
 ### Multistore setup
