@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<<<<<<< HEAD
+# [Unreleased]
+### Added
+ - Added optional Redis Auth functionality. @rain2o (#42)
+ 
 ## [1.9]
 ### Added
 - New ENV variable `SEO_USE_URL_DISPATCHER` (default = true) added. When set, then the `product.url_path` and `category.url_path` are automatically populated for the UrlDispatche featu$
