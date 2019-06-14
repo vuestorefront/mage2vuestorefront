@@ -7,9 +7,15 @@ module.exports = {
     productUrlPathMapper: (product) => {
       let destPath = ''
       if (product.category && product.category.length > 0) {
-        const firstCat = product.category[0]
-        destPath = (firstCat.path ? (firstCat.path) : _slugify(firstCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
-      } else {
+        for (let i = 0; i < product.category.length; i++) {
+          if (typeof product.category[i].name !== 'undefined') {
+            const firstValidCat = product.category[i]
+            destPath = (firstValidCat.path ? (firstValidCat.path) : _slugify(firstValidCat.name)) + '/' + (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
+            break
+          }
+        }
+      }
+      if (destPath === '') {
         destPath = (product.slug ? product.slug : _slugify(product.name + '-' + product.id))
       }
       destPath += '.html'
