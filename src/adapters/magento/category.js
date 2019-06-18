@@ -137,7 +137,7 @@ class CategoryAdapter extends AbstractMagentoAdapter {
   }
 
   /**
-   * We're transorming the data structure of item to be compliant with Smile.fr Elastic Search Suite
+   * We're transforming the data structure of item to be compliant with Smile.fr Elastic Search Suite
    * @param {object} item  document to be updated in elastic search
    */
   normalizeDocumentFormat(item) {
