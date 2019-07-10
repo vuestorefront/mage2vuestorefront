@@ -19,8 +19,12 @@ class AbstractAdapter {
     if (global.cache == null) {
       this.cache = Redis.createClient(this.config.redis); // redis client
       this.cache.on('error', (err) => { // workaround for https://github.com/NodeRedis/node_redis/issues/713
-        global.cache = Redis.createClient(this.config.redis); // redis client
+        this.cache = Redis.createClient(this.config.redis); // redis client
       });
+      // redis auth if provided
+      if (this.config.redis.auth) {
+        this.cache.auth(this.config.redis.auth);
+      }
       global.cache = this.cache;
     } else this.cache = global.cache;
 
