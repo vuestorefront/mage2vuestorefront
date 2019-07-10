@@ -246,15 +246,15 @@ class ProductAdapter extends AbstractMagentoAdapter {
       }
       item[customAttribute.attribute_code] = attrValue;
     }
-    item.slug = _slugify(item.name + '-' + item.id)
+    item.slug = _slugify(item.name + '-' + item.id);
     item.custom_attributes = null;
 
     return new Promise((done, reject) => {
       // TODO: add denormalization of productcategories into product categories
       // DO NOT use "productcategories" type but rather do search categories with assigned products
 
-      let subSyncPromises = []
-      const config = this.config
+      let subSyncPromises = [];
+      const config = this.config;
 
       // TODO: Refactor the following to "Chain of responsibility"
       // STOCK SYNC
@@ -262,13 +262,30 @@ class ProductAdapter extends AbstractMagentoAdapter {
         logger.info(`Product sub-stage 1: Getting stock items for ${item.sku}`);
         subSyncPromises.push(() => {
           return this.api.stockItems.list(item.sku).then((result) => {
-            item.stock = result
+            item.stock = result;
 
-            const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
-            logger.debug(`Storing stock data to cache under: ${key}`);
-            this.cache.set(key, JSON.stringify(result));
+            if (this.config.magento.msi.enabled) {
+              return this.api.stockItems.getSalableQty(item.sku, this.config.magento.msi.stockId).then((salableQty) => {
+                item.stock.qty = salableQty;
+                return item;
+              }).then((item) => {
+                return this.api.stockItems.isSalable(item.sku, this.config.magento.msi.stockId).then((isSalable) => {
+                  item.stock.is_in_stock = isSalable;
 
-            return item
+                  const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
+                  logger.debug(`Storing stock data to cache under: ${key}`);
+                  this.cache.set(key, JSON.stringify(item.stock));
+
+                  return item;
+                })
+              })
+            } else {
+              const key = util.format(CacheKeys.CACHE_KEY_STOCKITEM, item.id);
+              logger.debug(`Storing stock data to cache under: ${key}`);
+              this.cache.set(key, JSON.stringify(result));
+
+              return item;
+            }
           })
         })
       }
