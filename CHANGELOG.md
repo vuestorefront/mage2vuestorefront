@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [Unreleased]
+# [1.10] - 2019.07.10
 ### Added
  - Added optional Redis Auth functionality. - @rain2o (#42)
  - MSI support - @dimasch (#86)
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Import throwing an error when product's first category name was empty - @Loac-fr (#92)
  - Typos in documentation - @kkdg, @adityasharma7 (#90, #91)
  
-## [1.9]
+## [1.9] - 2019.03.14
 ### Added
 - New ENV variable `SEO_USE_URL_DISPATCHER` (default = true) added. When set, then the `product.url_path` and `category.url_path` are automatically populated for the UrlDispatche featu$
 
