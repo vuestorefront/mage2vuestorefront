@@ -84,7 +84,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   /**
   * Remove records other than <record>.tsk = "transactionKey"
   * @param {String} collectionName
-  * @param {int} transactionKey transaction key - which is usualy a timestamp
+  * @param {int} transactionKey transaction key - which is usually a timestamp
   */
   cleanupByTransactionkey(collectionName, transactionKey) {
 
