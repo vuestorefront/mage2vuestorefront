@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Unreleased]
 ### Added
- - Added optional Redis Auth functionality. @rain2o (#42)
+ - Added optional Redis Auth functionality. - @rain2o (#42)
+ - MSI support - @dimasch (#86)
+ 
+### Fixed
+ - Import throwing an error when product's first category name was empty - @Loac-fr (#92)
+ - Typos in documentation - @kkdg, @adityasharma7 (#90, #91)
  
 ## [1.9]
 ### Added
