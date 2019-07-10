@@ -224,7 +224,7 @@ function reindexProducts(adapterName, removeNonExistent, partitions, partitionSi
         logger.info('Not propagating queue - only worker mode!');
       }
 
-      // TODO: separte the execution part to run in multi-tenant env
+      // TODO: separate the execution part to run in multi-tenant env
       queue.process('products', partition_count, (job, done) => {
         let adapter = factory.getAdapter(adapterName, 'product');
         if (job && job.data.page && job.data.page_size) {
