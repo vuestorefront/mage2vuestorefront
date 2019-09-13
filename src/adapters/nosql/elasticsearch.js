@@ -76,7 +76,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       if (parseInt(this.config.elasticsearch.apiVersion) < 6)
        searchQueryBody.type  = this.getPhysicalTypeName(collectionName, this.config)
 
-      this.db.search(searchQueryBody, function (error, response) {
+      this.db.search(searchQueryBody, function (error, { body: response }) {
         if (error) reject(error);
         if (response.hits && response.hits.hits) {
           resolve(response.hits.hits.map(h => h._source))
