@@ -29,6 +29,19 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   }
 
   /**
+   * Get physical Elastic index name; since 7.x we're adding an entity name to get real index: vue_storefront_catalog_product, vue_storefront_catalog_category and so on
+   * @param {*} baseIndexName 
+   * @param {*} config 
+   */
+  getPhysicalIndexName(collectionName, config) {
+    if (parseInt(config.elasticsearch.apiVersion) >= 6) {
+      return `${config.db.indexName}_${collectionName}`
+    } else {
+      return config.db.indexName
+    }
+  }
+
+  /**
    * Close the nosql database connection - abstract to the driver
    */
   close() { // switched to global singleton
@@ -43,7 +56,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   getDocuments(collectionName, queryBody) {
     return new Promise((resolve, reject) => {
       this.db.search({ // requires ES 5.5
-        index: this.config.db.indexName,
+        index: this.getPhysicalIndexName(collectionName, this.config),
         type: collectionName,
           body: queryBody
       }, function (error, response) {
@@ -66,7 +79,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     const itemtbu = item;
 
     this.db.update({
-      index: this.config.db.indexName,
+      index: this.getPhysicalIndexName(collectionName, this.config),
       id: item.id,
       type: collectionName,
       body: {
@@ -90,7 +103,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
     if (transactionKey) {
       this.db.deleteByQuery({ // requires ES 5.5
-        index: this.config.db.indexName,
+        index: this.getPhysicalIndexName(collectionName, this.config),
         conflicts: 'proceed',
         type: collectionName,
          body: {
@@ -122,7 +135,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     for (let doc of items) {
       requests.push({
         update: {
-          _index: this.config.db.indexName,
+          _index: this.getPhysicalIndexName(collectionName, this.config),
           _id: doc.id,
           _type: collectionName,
         }

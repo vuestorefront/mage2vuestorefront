@@ -1,7 +1,7 @@
 version: '2'
 services:
   esm1:
-    image: elasticsearch:2.4.6
+    image: elasticsearch:7.3.2
     container_name: esm1
     environment:
       - cluster.name=docker-cluster
@@ -19,7 +19,7 @@ services:
     networks:
       - esnet
   esm2:
-    image: elasticsearch:5.5
+    image: elasticsearch:7.3.2
     container_name: esm2
     environment:
       - cluster.name=docker-cluster
