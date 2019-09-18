@@ -61,7 +61,7 @@ module.exports = {
   },
 
   elasticsearch: {
-    apiVersion: process.env.ELASTICSEARCH_API_VERSION || '7.x'
+    apiVersion: process.env.ELASTICSEARCH_API_VERSION || '5.6'
   },
 
   redis: {
