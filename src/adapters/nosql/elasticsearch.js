@@ -137,7 +137,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
       this.db.deleteByQuery(query, function (error, response) {
         if (error) throw new Error(error);
-        logger.info(response);
       });
     }
   }
