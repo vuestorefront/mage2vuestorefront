@@ -47,7 +47,6 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
    * @param {*} config 
    */
   getPhysicalTypeName(collectionName, config) {
-    console.log(parseInt(config.elasticsearch.apiVersion) );
     if (parseInt(config.elasticsearch.apiVersion) >= 6) {
       return `_doc`
     } else {
@@ -104,7 +103,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
       }
     }
     if (parseInt(this.config.elasticsearch.apiVersion) < 6)
-      updateRequestBody.type = this.getPhysicalTypeName(collectionName, this.config),
+      updateRequestBody.type = this.getPhysicalTypeName(collectionName, this.config)
 
     this.db.update(updateRequestBody, function (error, response) {
       if (error)
@@ -134,7 +133,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
         }
       };
       if (parseInt(this.config.elasticsearch.apiVersion) < 6)
-        query.type = this.getPhysicalTypeName(collectionName, this.config),
+        query.type = this.getPhysicalTypeName(collectionName, this.config)
 
       this.db.deleteByQuery(query, function (error, response) {
         if (error) throw new Error(error);
@@ -159,7 +158,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
         _id: doc.id,
       };
       if (parseInt(this.config.elasticsearch.apiVersion) < 6)
-        query.type = this.getPhysicalTypeName(collectionName, this.config),
+        query.type = this.getPhysicalTypeName(collectionName, this.config)
 
       requests.push({
         update: query
@@ -199,7 +198,7 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     if (!global.es) {
       this.db = new elasticsearch.Client({
         node: this.config.db.url,
-        log: 'error',
+        log: 'debug',
         apiVersion: this.config.elasticsearch.apiVersion,
 
         maxRetries: 10,
