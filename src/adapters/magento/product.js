@@ -180,8 +180,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
     let searchCriteria = '&searchCriteria[currentPage]=%d&searchCriteria[pageSize]=%d';
 
     if(this.config.product && JSON.parse(this.config.product.excludeDisabledProducts)) {
-      searchCriteria += '&searchCriteria[filterGroups][0][filters][0][field]=status'+
-                        '&searchCriteria[filterGroups][0][filters][0][value]=1';
+      searchCriteria += '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][field]=status'+
+                        '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][value]=1';
+      this.search_criteria_group_index++;
     }
 
     if(typeof context.stock_sync !== 'undefined')
