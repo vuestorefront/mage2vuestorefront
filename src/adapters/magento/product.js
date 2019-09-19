@@ -96,7 +96,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
     
 
-    if(this.config.magento.storeId) {
+    if(this.config.magento.storeId !== 0) {
       query += '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][field]=store_id&'+
                'searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][value]=' + this.config.magento.storeId + '&' +
                'searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][condition_type]=in';
