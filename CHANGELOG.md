@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.11] - UNRELEASED
+### Fixed
+- Import based on specific storeId
+
+### Changed
+- Auto increment searchCriteria filter group for better modularity
 
 ## [1.10] - 2019.07.10
 ### Added
