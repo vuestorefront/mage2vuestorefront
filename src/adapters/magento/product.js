@@ -75,6 +75,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
   getFilterQuery(context) {
     let query = '';
+    this.search_criteria_group_index = 0;
 
     if (context.skus) { // pul individual products
       if (!Array.isArray(context.skus))
