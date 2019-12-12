@@ -47,7 +47,7 @@ module.exports = {
 
   product: {
     expandConfigurableFilters: ['manufacturer'],
-    synchronizeCatalogSpecialPrices: process.env.PRODUCTS_SPECIAL_PRICES || false,
+    synchronizeCatalogSpecialPrices: process.env.PRODUCTS_SPECIAL_PRICES || true,
     renderCatalogRegularPrices: process.env.PRODUCTS_RENDER_PRICES || false,
     excludeDisabledProducts: process.env.PRODUCTS_EXCLUDE_DISABLED || false
   },
