@@ -35,7 +35,7 @@ module.exports = {
     consumerSecret: process.env.MAGENTO_CONSUMER_SECRET || '9tgfpgoojlx9tfy21b8kw7ssfu2aynpm',
     accessToken: process.env.MAGENTO_ACCESS_TOKEN || 'rw5w0si9imbu45h3m9hkyrfr4gjina8q',
     accessTokenSecret: process.env.MAGENTO_ACCESS_TOKEN_SECRET || '00y9dl4vpxgcef3gn5mntbxtylowjcc9',
-    storeId: process.env.MAGENTO_STORE_ID || 1,
+    storeId: process.env.MAGENTO_STORE_ID || 0,
     currencyCode: process.env.MAGENTO_CURRENCY_CODE || 'USD',
     msi: { enabled: process.env.MAGENTO_MSI_ENABLED || false, stockId: process.env.MAGENTO_MSI_STOCK_ID || 1 }
   },

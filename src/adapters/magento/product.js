@@ -48,6 +48,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.links_sync = true;
     this.configurable_sync = true;
     this.is_federated = true; // by default use federated behaviour
+    this.search_criteria_group_index = 0;
   }
 
   getEntityType() {
@@ -74,20 +75,36 @@ class ProductAdapter extends AbstractMagentoAdapter {
 
   getFilterQuery(context) {
     let query = '';
+    this.search_criteria_group_index = 0;
 
     if (context.skus) { // pul individual products
       if (!Array.isArray(context.skus))
         context.skus = new Array(context.skus);
 
-      query += 'searchCriteria[filter_groups][0][filters][0][field]=sku&' +
-        'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(context.skus.join(',')) + '&' +
-        'searchCriteria[filter_groups][0][filters][0][condition_type]=in';
+      query += 'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][field]=sku&' +
+        'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][value]=' + encodeURIComponent(context.skus.join(',')) + '&' +
+        'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][condition_type]=in';
+
+      this.search_criteria_group_index++;
 
     } else if (context.updated_after && typeof context.updated_after == 'object') {
-      query += 'searchCriteria[filter_groups][0][filters][0][field]=updated_at&' +
-        'searchCriteria[filter_groups][0][filters][0][value]=' + encodeURIComponent(moment(context.updated_after).utc().format()) + '&' +
-        'searchCriteria[filter_groups][0][filters][0][condition_type]=gt';
+      query += 'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][field]=updated_at&' +
+        'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][value]=' + encodeURIComponent(moment(context.updated_after).utc().format()) + '&' +
+        'searchCriteria[filter_groups]['+this.search_criteria_group_index+'][filters][0][condition_type]=gt';
+
+      this.search_criteria_group_index++;
     }
+
+    
+
+    if(this.config.magento.storeId !== 0) {
+      query += '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][field]=store_id&'+
+               'searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][value]=' + this.config.magento.storeId + '&' +
+               'searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][condition_type]=in';
+
+      this.search_criteria_group_index++;
+    }
+
     return query;
   }
 
@@ -164,8 +181,9 @@ class ProductAdapter extends AbstractMagentoAdapter {
     let searchCriteria = '&searchCriteria[currentPage]=%d&searchCriteria[pageSize]=%d';
 
     if(this.config.product && JSON.parse(this.config.product.excludeDisabledProducts)) {
-      searchCriteria += '&searchCriteria[filterGroups][0][filters][0][field]=status'+
-                        '&searchCriteria[filterGroups][0][filters][0][value]=1';
+      searchCriteria += '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][field]=status'+
+                        '&searchCriteria[filterGroups]['+this.search_criteria_group_index+'][filters][0][value]=1';
+      this.search_criteria_group_index++;
     }
 
     if(typeof context.stock_sync !== 'undefined')
