@@ -48,6 +48,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
     this.links_sync = true;
     this.configurable_sync = true;
     this.is_federated = true; // by default use federated behaviour
+
   }
 
   getEntityType() {
@@ -226,6 +227,44 @@ class ProductAdapter extends AbstractMagentoAdapter {
   isNumeric(value) {
     return /^\d+$/.test(value);
   }
+
+  processAttributes(customAttributes, configurableOptions) {
+    const loadFromCache = (key) => new Promise((resolve) =>
+      this.cache.get(key, (err, serializedAtr) => resolve(JSON.parse(serializedAtr)))
+    )
+
+    const selectFields = (res) => res.map(o => ({
+      is_visible_on_front: o.is_visible_on_front,
+      is_visible: o.is_visible,
+      default_frontend_label: o.default_frontend_label,
+      attribute_id: o.attribute_id,
+      options: o.options,
+      entity_type_id: o.entity_type_id,
+      id: o.id,
+      frontend_input: o.frontend_input,
+      is_user_defined: o.is_user_defined,
+      is_comparable: o.is_comparable,
+      attribute_code: o.attribute_code,
+      slug: o.slug,
+    }))
+
+    const attributeCodes = customAttributes.map(obj => new Promise((resolve) => {
+      const key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, obj.attribute_code);
+      loadFromCache(key).then(resolve)
+    }))
+
+    const attributeIds = configurableOptions.map(obj => new Promise((resolve) => {
+      const key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, obj.attribute_id);
+      loadFromCache(key).then(resolve)
+    }))
+
+    return Promise.all([
+      ...attributeCodes,
+      ...attributeIds
+    ])
+      .then(selectFields)
+  }
+
   /**
    *
    * @param {Object} item
@@ -247,7 +286,6 @@ class ProductAdapter extends AbstractMagentoAdapter {
       item[customAttribute.attribute_code] = attrValue;
     }
     item.slug = _slugify(item.name + '-' + item.id);
-    item.custom_attributes = null;
 
     return new Promise((done, reject) => {
       // TODO: add denormalization of productcategories into product categories
@@ -417,8 +455,7 @@ class ProductAdapter extends AbstractMagentoAdapter {
                   visibility: prOption.visibility,
                   name: prOption.name,
                   price: prOption.price,
-                  tier_prices: prOption.tier_prices
-                  // custom_attributes: prOption.custom_attributes
+                  tier_prices: prOption.tier_prices,
                 };
 
                 if (prOption.custom_attributes) {
@@ -510,6 +547,16 @@ class ProductAdapter extends AbstractMagentoAdapter {
           })
         })
       }
+
+      subSyncPromises.push(() => {
+        return new Promise((resolve) => {
+          this.processAttributes(item.custom_attributes, item.configurable_options || []).then(res => {
+            item.attributes_metadata = res
+            item.custom_attributes = null
+            resolve(item)
+          })
+        })
+      });
 
       // CATEGORIES SYNC
       subSyncPromises.push(() => {
