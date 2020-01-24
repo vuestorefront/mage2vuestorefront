@@ -232,21 +232,50 @@ class ProductAdapter extends AbstractMagentoAdapter {
     const loadFromCache = (key) => new Promise((resolve) =>
       this.cache.get(key, (err, serializedAtr) => resolve(JSON.parse(serializedAtr)))
     )
+    const findConfigurableOptionsValues = attributeId => {
+      const attribute = configurableOptions.find(
+        opt => parseInt(opt.attribute_id) === parseInt(attributeId)
+      )
 
-    const selectFields = (res) => res.map(o => ({
-      is_visible_on_front: o.is_visible_on_front,
-      is_visible: o.is_visible,
-      default_frontend_label: o.default_frontend_label,
-      attribute_id: o.attribute_id,
-      options: o.options,
-      entity_type_id: o.entity_type_id,
-      id: o.id,
-      frontend_input: o.frontend_input,
-      is_user_defined: o.is_user_defined,
-      is_comparable: o.is_comparable,
-      attribute_code: o.attribute_code,
-      slug: o.slug,
-    }))
+      if (attribute) {
+        return attribute.values.map(val => parseInt(val.value_index))
+      }
+
+      return []
+    }
+
+    const findCustomAttributesValues = (attributeCode) => {
+      const attribute = customAttributes.find(
+        opt => opt.attribute_code === attributeCode
+      )
+
+      return attribute ? [parseInt(attribute.value)] : []
+    }
+
+    const findOptionValues = option => ([
+      ...findConfigurableOptionsValues(option.attribute_id),
+      ...findCustomAttributesValues(option.attribute_code)
+    ])
+
+    const selectFields = (res) => res.map(o => {
+      const attributeOptionValues = findOptionValues(o)
+      const options = o.options.filter(opt => attributeOptionValues.includes(parseInt(opt.value)))
+
+      return {
+        is_visible_on_front: o.is_visible_on_front,
+        is_visible: o.is_visible,
+        default_frontend_label: o.default_frontend_label,
+        attribute_id: o.attribute_id,
+        entity_type_id: o.entity_type_id,
+        id: o.id,
+        frontend_input: o.frontend_input,
+        is_user_defined: o.is_user_defined,
+        is_comparable: o.is_comparable,
+        attribute_code: o.attribute_code,
+        slug: o.slug,
+        options
+      }
+    })
 
     const attributeCodes = customAttributes.map(obj => new Promise((resolve) => {
       const key = util.format(CacheKeys.CACHE_KEY_ATTRIBUTE, obj.attribute_code);
