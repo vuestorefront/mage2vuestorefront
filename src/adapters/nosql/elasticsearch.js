@@ -1,6 +1,6 @@
 'use strict';
 const AbstractNosqlAdapter = require('./abstract');
-const elasticsearch = require('elasticsearch');
+const elasticsearch = require('@elastic/elasticsearch');
 const AgentKeepAlive = require('agentkeepalive');
 const AgentKeepAliveHttps = require('agentkeepalive').HttpsAgent;
 
@@ -29,6 +29,32 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   }
 
   /**
+   * Get physical Elastic index name; since 7.x we're adding an entity name to get real index: vue_storefront_catalog_product, vue_storefront_catalog_category and so on
+   * @param {*} baseIndexName 
+   * @param {*} config 
+   */
+  getPhysicalIndexName(collectionName, config) {
+    if (parseInt(config.elasticsearch.apiVersion) >= 6) {
+      return `${config.db.indexName}_${collectionName}`
+    } else {
+      return config.db.indexName
+    }
+  }
+
+  /**
+   * Get physical Elastic type name; since 7.x index can have one type _doc
+   * @param {*} baseIndexName 
+   * @param {*} config 
+   */
+  getPhysicalTypeName(collectionName, config) {
+    if (parseInt(config.elasticsearch.apiVersion) >= 6) {
+      return `_doc`
+    } else {
+      return collectionName
+    }
+  }  
+
+  /**
    * Close the nosql database connection - abstract to the driver
    */
   close() { // switched to global singleton
@@ -42,11 +68,14 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   */  
   getDocuments(collectionName, queryBody) {
     return new Promise((resolve, reject) => {
-      this.db.search({ // requires ES 5.5
-        index: this.config.db.indexName,
-        type: collectionName,
-          body: queryBody
-      }, function (error, response) {
+      const searchQueryBody = {
+        index: this.getPhysicalIndexName(collectionName, this.config),
+        body: queryBody
+      }
+      if (parseInt(this.config.elasticsearch.apiVersion) < 6)
+       searchQueryBody.type  = this.getPhysicalTypeName(collectionName, this.config)
+
+      this.db.search(searchQueryBody, function (error, { body: response }) {
         if (error) reject(error);
         if (response.hits && response.hits.hits) {
           resolve(response.hits.hits.map(h => h._source))
@@ -62,20 +91,21 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
    * @param {object} item document to be updated in database
    */
   updateDocument(collectionName, item) {
-
     const itemtbu = item;
-
-    this.db.update({
-      index: this.config.db.indexName,
+    const updateRequestBody = {
+      index: this.getPhysicalIndexName(collectionName, this.config),
       id: item.id,
-      type: collectionName,
       body: {
         // put the partial document under the `doc` key
         upsert: itemtbu,
         doc: itemtbu
 
       }
-    }, function (error, response) {
+    }
+    if (parseInt(this.config.elasticsearch.apiVersion) < 6)
+      updateRequestBody.type = this.getPhysicalTypeName(collectionName, this.config)
+
+    this.db.update(updateRequestBody, function (error, response) {
       if (error)
         throw new Error(error);
     });
@@ -89,11 +119,10 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
   cleanupByTransactionkey(collectionName, transactionKey) {
 
     if (transactionKey) {
-      this.db.deleteByQuery({ // requires ES 5.5
-        index: this.config.db.indexName,
+      const query = {
+        index: this.getPhysicalIndexName(collectionName, this.config),
         conflicts: 'proceed',
-        type: collectionName,
-         body: {
+        body: {
           query: {
             bool: {
               must_not: {
@@ -102,9 +131,12 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
             }
           }
         }
-      }, function (error, response) {
+      };
+      if (parseInt(this.config.elasticsearch.apiVersion) < 6)
+        query.type = this.getPhysicalTypeName(collectionName, this.config)
+
+      this.db.deleteByQuery(query, function (error, response) {
         if (error) throw new Error(error);
-        logger.info(response);
       });
     }
   }
@@ -120,12 +152,15 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
     let bulkSize = 500;
 
     for (let doc of items) {
+      const query = {
+        _index: this.getPhysicalIndexName(collectionName, this.config),
+        _id: doc.id,
+      };
+      if (parseInt(this.config.elasticsearch.apiVersion) < 6)
+        query.type = this.getPhysicalTypeName(collectionName, this.config)
+
       requests.push({
-        update: {
-          _index: this.config.db.indexName,
-          _id: doc.id,
-          _type: collectionName,
-        }
+        update: query
       });
 
       requests.push({
@@ -161,15 +196,15 @@ class ElasticsearchAdapter extends AbstractNosqlAdapter {
 
     if (!global.es) {
       this.db = new elasticsearch.Client({
-        host: this.config.db.url,
-        log: 'error',
+        node: this.config.db.url,
+        log: 'debug',
         apiVersion: this.config.elasticsearch.apiVersion,
 
         maxRetries: 10,
         keepAlive: true,
         maxSockets: 10,
         minSockets: 10,
-        requestTimeout: 1800000,
+        requestTimeout: 1800000,        
 
         createNodeAgent: function (connection, config) {
           if (connection.useSsl) {
