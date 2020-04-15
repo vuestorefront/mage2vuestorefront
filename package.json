@@ -1,7 +1,7 @@
 {
   "name": "mage2vuestorefront",
   "private": true,
-  "version": "1.7.1",
+  "version": "1.11.0",
   "description": "Magento sync for products, categories, users and orders",
   "author": "Piotr Karwatka",
   "license": "MIT",
@@ -10,10 +10,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^7.3.0",
     "agentkeepalive": "^3.3.0",
     "body-parser": "^1.17.1",
     "commander": "^2.18.0",
-    "elasticsearch": "^15.2.0",
     "elasticsearch-deletebyquery": "^1.6.0",
     "express": "^4.15.2",
     "jsonfile": "^4.0.0",

@@ -54,6 +54,28 @@ npm run dev
 
 The key command is `docker-compose up -d` which runs the ElasticSearch and Redis instances - both required by `mage2vuestorefront`
 
+### Elastic 7 Support
+
+By default, Vue Storefront API docker files and config are based on Elastic 5.6. We plan to change the default Elastic version to 7 with the 1.11 stable release. As for now, the [Elastic 7 support](https://github.com/DivanteLtd/vue-storefront-api/pull/342) is marked as **experimental**. 
+
+In order to index data to Elastic 7 please make sure you set the proper `apiVersion` in the `config.js`:
+
+```js
+  elasticsearch: {
+    apiVersion: process.env.ELASTICSEARCH_API_VERSION || '7.1'
+  },
+```
+
+or just use the env variable:
+
+```bash
+export ELASTICSEARCH_API_VERSION=7.1
+```
+
+Starting from [Elasitc 6 and 7](https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html) we can have **just single** document type per single index. Vue Storefront used to have `product`, `category` ... types defined in the `vue_storefront_catalog`.
+
+From now on, we're using the separate indexes per each entity type. The convention is: `${indexName}_${entityType}`. If your' **logical index name** is `vue_storefront_catalog` then it will be mapped to the **physical indexes** of: `vue_storefront_catalog_product`, `vue_storefront_catalog_category` ...
+
 ### Initial Vue Storefront import
 
 Now, You're ready to run the importer. Please check the [config file](https://github.com/DivanteLtd/mage2vuestorefront/blob/master/src/config.js). You may setup the Magento access data and URLs by config values or ENV variables.
