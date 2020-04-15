@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.11] - 2020.04.15
 ### Added
  - Elastic7 support - @pkarw (#96) 
+ - Add product attributes_metadata - @andrzejewsky (#99)
 
 ## [1.10] - 2019.07.10
 ### Added
