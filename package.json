@@ -1,7 +1,7 @@
 {
   "name": "mage2vuestorefront",
   "private": true,
-  "version": "1.7.1",
+  "version": "1.11.0",
   "description": "Magento sync for products, categories, users and orders",
   "author": "Piotr Karwatka",
   "license": "MIT",
