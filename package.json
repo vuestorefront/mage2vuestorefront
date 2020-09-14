@@ -20,7 +20,7 @@
     "jwt-simple": "^0.5.1",
     "kue": "^0.11.5",
     "lodash": "^4.17.13",
-    "magento2-rest-client": "0.0.2",
+    "magento2-rest-client": "https://github.com/DivanteLtd/magento2-rest-client",
     "moment": "^2.22.2",
     "node-sync": "^0.2.1",
     "passport": "^0.3.2",
