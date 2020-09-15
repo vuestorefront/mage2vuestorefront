@@ -857,9 +857,9 @@ lru-cache@^2.5.0:
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.7.3.tgz#6d4524e8b955f95d4f5b58851ce21dd72fb4e952"
 
-magento2-rest-client@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/magento2-rest-client/-/magento2-rest-client-0.0.2.tgz#2a6ef230c88129a8680b63ead3793ea7e99bf6a4"
+"magento2-rest-client@https://github.com/DivanteLtd/magento2-rest-client":
+  version "0.0.12"
+  resolved "https://github.com/DivanteLtd/magento2-rest-client#f8257e33bbaa86a91a522aab843770fb873ddebd"
   dependencies:
     humps "^1.1.0"
     oauth-1.0a "^1.0.1"
