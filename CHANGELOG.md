@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2020.09.15
+### Added
+ - Updates magento2-rest-client dependecy from version 0.0.2 to 0.0.12 (#106) 
+ - Bump lodash from 4.17.13 to 4.17.19 (#103)
+
 ## [1.11] - 2020.04.15
 ### Added
  - Elastic7 support - @pkarw (#96) 
