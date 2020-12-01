@@ -64,7 +64,6 @@ class ReviewAdapter extends AbstractMagentoAdapter {
         item.product_id = item.entity_pk_value;
 
         delete item.entity_pk_value;
-        delete item.ratings;
 
         logger.debug(`Review ${item.id}`);
       }
