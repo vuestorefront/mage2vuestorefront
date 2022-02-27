@@ -2,8 +2,6 @@
 
 ---------
 
-  ---------
-
 ### Stay connected
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/vuestorefront/vue-storefront?style=social)
