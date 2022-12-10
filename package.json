@@ -15,7 +15,7 @@
     "body-parser": "^1.17.1",
     "commander": "^2.18.0",
     "elasticsearch-deletebyquery": "^1.6.0",
-    "express": "^4.15.2",
+    "express": "^4.17.3",
     "jsonfile": "^4.0.0",
     "jwt-simple": "^0.5.1",
     "kue": "^0.11.5",
