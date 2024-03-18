@@ -1,4 +1,4 @@
-# mage2vuestorefront
+# mage2alokai
 
 ### Stay connected
 
@@ -10,12 +10,12 @@
 
 For those who would love to work with Magento on backend but use NoSQL power on the frontend. Two way / real time data synchronizer.
 
-It's part of [vue-storefront project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
+It's part of [alokai project - first Progressive Web App for eCommerce](https://github.com/DivanteLtd/vue-storefront) with Magento2 support.
 Some details about the rationale and our goals [here](https://www.linkedin.com/pulse/magento2-nosql-database-pwa-support-piotr-karwatka)
 
 It synchronizes all the products, attributes, taxrules, categories and links between products and categories.
 
-This is multi-process data synchronizer between Magento to Vue Storefront ElasticSearch database.
+This is multi-process data synchronizer between Magento to Alokai ElasticSearch database.
 
 At this point synchronization works with following entities:
 - Products
@@ -26,7 +26,7 @@ At this point synchronization works with following entities:
 - Reviews (require custom module Divante/ReviewApi to work)
 - Cms Blocks & Pages (require custom module [SnowdogApps/magento2-cms-api](https://github.com/SnowdogApps/magento2-cms-api))
 
-Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [vue-storefront-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this database to be used in PWA/JS webapps.
+Categories and Product-to-categories links are additionaly stored in Redis cache for rapid-requests (for example from your WebAPI). Our other project [alokai-api](https://github.com/DivanteLtd/vue-storefront-api) exposes this database to be used in PWA/JS webapps.
 
 Datasync uses oauth + magento2 rest API to get the data.
 KUE is used for job queueing and multi-process/multi-tenant processing is enabled by default
@@ -36,21 +36,21 @@ Redis is used for KUE queue backend
 By default all services are used without authorization and on default ports (check out config.js or ENV variables for change of this behavior). 
 
 
-**Tutorial on installation / integration [manual for Vue Storefront connectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
+**Tutorial on installation / integration [manual for Alokai connectivity](https://medium.com/@piotrkarwatka/vue-storefront-how-to-install-and-integrate-with-magento2-227767dd65b2)**
 
 
-## How to perform full / initial import for Vue Storefront
+## How to perform full / initial import for Alokai
 
 To get started with VS we must start with some very basics about the architecture; the project is backed by three separate Node.js applications
 
-### Vue Storefront Architecture
-[vue-storefront (Github)](https://github.com/DivanteLtd/vue-storefront) — is the main project where you can also find most of the documentation, issues mapped to further releases and other resources to start with — Vue.js on webpack.
+### Alokai Architecture
+[alokai (Github)](https://github.com/DivanteLtd/vue-storefront) — is the main project where you can also find most of the documentation, issues mapped to further releases and other resources to start with — Vue.js on webpack.
 
-[vue-storefront-api (Github)](https://github.com/DivanteLtd/vue-storefront-api) — is the API layer which provides the data to vue-storefront app — Node.js, Express; This project consist of docker instances for Redis and ElasticSearch required by mage2vuestorefront and pimcore2vuestorefront
+[alokai-api (Github)](https://github.com/DivanteLtd/vue-storefront-api) — is the API layer which provides the data to vue-storefront app — Node.js, Express; This project consist of docker instances for Redis and ElasticSearch required by mage2vuestorefront and pimcore2vuestorefront
 
-mage2vuestorefront — THIS project -data bridges which are in charge of moving data back from Magento2 to Vue Storefront data store.
+mage2alokai — THIS project -data bridges which are in charge of moving data back from Magento2 to Alokai data store.
 
-You must install `vue-storefront-api` locally. You may install it using the Vue Storefront installer - see details. Or manually by executing the sequence of commands:
+You must install `alokai-api` locally. You may install it using the Alokai installer - see details. Or manually by executing the sequence of commands:
 
 ```bash
 git clone https://github.com/DivanteLtd/vue-storefront-api
@@ -65,7 +65,7 @@ The key command is `docker-compose up -d` which runs the ElasticSearch and Redis
 
 ### Elastic 7 Support
 
-By default, Vue Storefront API docker files and config are based on Elastic 5.6. We plan to change the default Elastic version to 7 with the 1.11 stable release. As for now, the [Elastic 7 support](https://github.com/DivanteLtd/vue-storefront-api/pull/342) is marked as **experimental**. 
+By default, Alokai API docker files and config are based on Elastic 5.6. We plan to change the default Elastic version to 7 with the 1.11 stable release. As for now, the [Elastic 7 support](https://github.com/DivanteLtd/vue-storefront-api/pull/342) is marked as **experimental**. 
 
 In order to index data to Elastic 7 please make sure you set the proper `apiVersion` in the `config.js`:
 
@@ -81,11 +81,11 @@ or just use the env variable:
 export ELASTICSEARCH_API_VERSION=7.1
 ```
 
-Starting from [Elasitc 6 and 7](https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html) we can have **just single** document type per single index. Vue Storefront used to have `product`, `category` ... types defined in the `vue_storefront_catalog`.
+Starting from [Elasitc 6 and 7](https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html) we can have **just single** document type per single index. Alokai used to have `product`, `category` ... types defined in the `vue_storefront_catalog`.
 
 From now on, we're using the separate indexes per each entity type. The convention is: `${indexName}_${entityType}`. If your' **logical index name** is `vue_storefront_catalog` then it will be mapped to the **physical indexes** of: `vue_storefront_catalog_product`, `vue_storefront_catalog_category` ...
 
-### Initial Vue Storefront import
+### Initial Alokai import
 
 Now, You're ready to run the importer. Please check the [config file](https://github.com/DivanteLtd/mage2vuestorefront/blob/master/src/config.js). You may setup the Magento access data and URLs by config values or ENV variables.
 
@@ -119,17 +119,17 @@ node --harmony cli.js pages
 **Please note:**
 - `--removeNonExistent` option means - all records that were found in the index but currently don't exist in the API feed - will be removed. Please use this option ONLY for the full reindex!
 - `INDEX_NAME` by default is set to the `vue_storefront_catalog` but You may set it to any other elastic search index name.
-- The `categories` importer option `--generateUniqueUrlKeys` is by default set to true. This is due the fact that in Magento2, the `category.url_key` field is not mandatory unique and from v. 1.7 Vue Storefront uses the `category.url_key` to display the category details without any client's side modification.
+- The `categories` importer option `--generateUniqueUrlKeys` is by default set to true. This is due the fact that in Magento2, the `category.url_key` field is not mandatory unique and from v. 1.7 Alokai uses the `category.url_key` to display the category details without any client's side modification.
 - `PRODUCTS_EXCLUDE_DISABLED` by default is set to `false`. To only import enabled products set this to `true`.
 
-**Cache invalidation:** Recent version of Vue Storefront do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
+**Cache invalidation:** Recent version of Alokai do support output caching. Output cache is being tagged with the product and categories id (products and categories used on specific page). Mage2vuestorefront can invalidate cache of product and category pages if You set the following ENV variables:
 
 ```bash
 export VS_INVALIDATE_CACHE_URL=http://localhost:3000/invalidate?key=aeSu7aip&tag=
 export VS_INVALIDATE_CACHE=1
 ```
 
-- `VS_INVALIDATE_CACHE_URL` is a cache to the Vue Storefront instance - used as a webhook to clear the output cache.
+- `VS_INVALIDATE_CACHE_URL` is a cache to the Alokai instance - used as a webhook to clear the output cache.
 
 Please note:
 After data import - especially when You're not sure about the product attributes data types - please **reindex** ElasticSearch to establish the correct / current database schema. You may do this using [Database tool](https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Database%20tool.md) in the `vue-storefront-api` folder:
@@ -147,7 +147,7 @@ npm run db new -- --indexName=vue_storefront_catalog
 
 ### Checking indexed data
 
-If you want to see how many products were stored into Elastic data store, you can use Kibana to do so. Kibana is part of vue-storefront-api. Once you start docker containers of vue-storefront-api you can access it on http://localhost:5601/.
+If you want to see how many products were stored into Elastic data store, you can use Kibana to do so. Kibana is part of alokai-api. Once you start docker containers of alokai-api you can access it on http://localhost:5601/.
 
 To see count of indexed products go to DEV tools and run following query:
 
@@ -306,7 +306,7 @@ In the result You should get:
 - *vue_storefront_catalog_de* - populated with the "it" store data
 - *vue_storefront_catalog* - populated with the "default" store data
 
-Then, to use these indexes in the Vue Storefront You should index the database schema using the `vue-storefront-api` db tool:
+Then, to use these indexes in the Alokai You should index the database schema using the `alokai-api` db tool:
 
 ```bash
 npm run db rebuild -- --indexName=vue_storefront_catalog_it
@@ -314,7 +314,7 @@ npm run db rebuild -- --indexName=vue_storefront_catalog_de
 npm run db rebuild -- --indexName=vue_storefront_catalog
 ```
 
-More on <a href="https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Multistore%20setup.md">how to setup Vue Storefront in the Multistore mode</a>.
+More on <a href="https://github.com/DivanteLtd/vue-storefront/blob/master/doc/Multistore%20setup.md">how to setup Alokai in the Multistore mode</a>.
 
 ### Indexing configurable products attributes for filters
 
@@ -324,9 +324,9 @@ If You like to have Category filter working with configurable products - You nee
 
 Here You can find some frequently asked questions answered:
 
-### I've been playing with VSF for quite a while now and now I see that my catalog rule (-20% on all products) is not applied in one shop.
+### I've been playing with Alokai for quite a while now and now I see that my catalog rule (-20% on all products) is not applied in one shop.
 
-Please make sure that You've got the `config.synchronizeCatalogSpecialPrices` (env: `PRODUCTS_SPECIAL_PRICES`) and `config.renderCatalogRegularPrices` (env: `PRODUCTS_RENDER_PRICES`) set to `true` (default is `false`). Otherwise only the catalog prices will be synced (without dynamic pricing rules applied). You can also use the Vue Storefront [dynamic-pricing option](https://divanteltd.github.io/vue-storefront/guide/integrations/direct-prices-sync.html) for the same purpose.
+Please make sure that You've got the `config.synchronizeCatalogSpecialPrices` (env: `PRODUCTS_SPECIAL_PRICES`) and `config.renderCatalogRegularPrices` (env: `PRODUCTS_RENDER_PRICES`) set to `true` (default is `false`). Otherwise only the catalog prices will be synced (without dynamic pricing rules applied). You can also use the Alokai [dynamic-pricing option](https://divanteltd.github.io/vue-storefront/guide/integrations/direct-prices-sync.html) for the same purpose.
 
 
 ## Advanced usage
